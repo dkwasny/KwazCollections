@@ -11,15 +11,14 @@ ArrayList::~ArrayList() {
 }
 
 int& ArrayList::operator[](const unsigned int index) {
-	if (index >= size) {
-		string msg = "TODO: Better Error Message";
-		throw IndexOutOfBoundsError(msg);
-	}
-	
-	return values[index];
+	return get(index);
 }
 
-const int& ArrayList::operator[] (unsigned int index) const {
+const int& ArrayList::operator[](unsigned int index) const {
+	return get(index);
+}
+
+int& ArrayList::get(unsigned int index) const {
 	if (index >= size) {
 		string msg = "TODO: Better Error Message";
 		throw IndexOutOfBoundsError(msg);

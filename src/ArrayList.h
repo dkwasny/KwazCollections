@@ -8,6 +8,7 @@ class ArrayList {
 
 		int& operator[](const unsigned int index);
 		const int& operator[](const unsigned int index) const;
+		int& get(const unsigned int index) const;
 	
 	private:
 		static const int DEFAULT_SIZE = 10;
