@@ -1,6 +1,5 @@
 #include "ArrayList.h"
 #include "IndexOutOfBoundsError.h"
-#include <cstdio>
 
 ArrayList::ArrayList() :
 	ADD_REALLOCATION_THRESHOLD(0.75),
@@ -68,8 +67,6 @@ void ArrayList::add(const int pValue) {
 	}
 	
 	values[size++] = pValue;
-
-		printf("\nadding %d %d\n", capacity, size);
 }
 
 int ArrayList::remove(const unsigned int pIndex) {	
@@ -86,7 +83,6 @@ int ArrayList::remove(const unsigned int pIndex) {
 		values[i] = values[i + 1];
 	}
 	
-		printf("\nSHRINGKING %d %d\n", capacity, size);
 	// Shrink the array if we are only using a small portion of it.
 	// To prevent non-stop resizing, the array will not be shrunk
 	// past its initial capacity.
