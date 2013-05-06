@@ -26,14 +26,15 @@ typedef struct {
 
 ArrayList* ArrayList_createDefault();
 ArrayList* ArrayList_createCustom(
-        const unsigned int pInitialCapacity,
-        const float pAddReallocationThreshold,
-        const unsigned short pAddReallocationMultiplier,
-        const float pRemoveReallocationThreshold,
-        const float pRemoveReallocationMultiplier);
+	const unsigned int pInitialCapacity,
+	const float pAddReallocationThreshold,
+	const unsigned short pAddReallocationMultiplier,
+	const float pRemoveReallocationThreshold,
+	const float pRemoveReallocationMultiplier);
+ArrayList* ArrayList_createCopy(const ArrayList* pOther);
+
 void ArrayList_destroy(ArrayList* pList);
 // TODO: Maybe a deep destroy?  Frees all entries wuthin the list too?
-ArrayList* ArrayList_createCopy(const ArrayList* pOther);
 	
 void ArrayList_add(ArrayList* pList, const int pValue);
 int ArrayList_remove(ArrayList* pList, const unsigned int pIndex);

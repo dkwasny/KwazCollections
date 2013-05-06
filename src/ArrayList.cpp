@@ -2,36 +2,61 @@
 #include "IndexOutOfBoundsError.h"
 
 ArrayList::ArrayList() :
-	ADD_REALLOCATION_THRESHOLD(0.75),
-	REMOVE_REALLOCATION_THRESHOLD(0.25),
-	REMOVE_REALLOCATION_MULTIPLIER(0.5),
-	INITIAL_CAPACITY(10)
+	addReallocationThreshold(ARRAY_LIST_ADD_REALLOCATION_THRESHOLD),
+	addReallocationMultiplier(ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER),
+	removeReallocationThreshold(ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD),
+	removeReallocationMultiplier(ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER),
+	initialCapacity(ARRAY_LIST_INITIAL_CAPACITY)
 {
 	size = 0;
-	capacity = INITIAL_CAPACITY;
+	capacity = initialCapacity;
 	values = new int[capacity];
 }
 
-ArrayList::ArrayList(const unsigned int pCapacity) :
-	ADD_REALLOCATION_THRESHOLD(0.75),
-	REMOVE_REALLOCATION_THRESHOLD(0.25),
-	REMOVE_REALLOCATION_MULTIPLIER(0.5),
-	INITIAL_CAPACITY(pCapacity)
+ArrayList::ArrayList(
+	const unsigned int pCapacity,
+	const unsigned int pInitialCapacity,
+	const float pAddReallocationThreshold,
+	const unsigned short pAddReallocationMultiplier,
+	const float pRemoveReallocationThreshold,
+	const float pRemoveReallocationMultiplier
+	) :
+	addReallocationThreshold(pAddReallocationThreshold),
+	addReallocationMultiplier(pAddReallocationMultiplier),
+	removeReallocationThreshold(pRemoveReallocationMultiplier),
+	removeReallocationMultiplier(pRemoveReallocationMultiplier),
+	initialCapacity(pCapacity)
 {
 	size = 0;
 	capacity = pCapacity;
 	values = new int[capacity];
 }
 
-ArrayList::ArrayList(const ArrayList& pOther) : 
-	ADD_REALLOCATION_THRESHOLD(0.75),
-	REMOVE_REALLOCATION_THRESHOLD(0.25),
-	REMOVE_REALLOCATION_MULTIPLIER(0.5),
-	INITIAL_CAPACITY(pOther.capacity)
+ArrayList::ArrayList(const ArrayList& pOther) :
+	addReallocationThreshold(pOther.addReallocationThreshold),
+	addReallocationMultiplier(pOther.addReallocationMultiplier),
+	removeReallocationThreshold(pOther.removeReallocationThreshold),
+	removeReallocationMultiplier(pOther.removeReallocationMultiplier),
+	initialCapacity(pOther.capacity)
 {
-	int* values = allocateArray(pOther.values, pOther.size, pOther.capacity);
+	values = allocateArray(pOther.values, pOther.size, pOther.capacity);
 	size = pOther.size;
 	capacity = pOther.capacity;
+}
+
+ArrayList::ArrayList(const IList& pOther) :
+	addReallocationThreshold(ARRAY_LIST_ADD_REALLOCATION_THRESHOLD),
+	addReallocationMultiplier(ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER),
+	removeReallocationThreshold(ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD),
+	removeReallocationMultiplier(ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER),
+	initialCapacity(ARRAY_LIST_INITIAL_CAPACITY)
+{
+	size = 0;
+	capacity = pOther.getSize() * addReallocationMultiplier;
+	values = new int[capacity];
+	for (int i = 0; i < pOther.getSize(); ++i) {
+		add(pOther[i]);
+	}
 }
 
 ArrayList::~ArrayList() {
@@ -55,10 +80,14 @@ unsigned int ArrayList::getSize() const {
 	return size;	
 }
 
+unsigned int ArrayList::getCapacity() const {
+	return capacity;
+}
+
 void ArrayList::add(const int pValue) {
 	// Expand the array if we pass a specified threshold
-	if ((capacity * ADD_REALLOCATION_THRESHOLD) <= size) {
-		int newCapacity = capacity * ADD_REALLOCATION_MULTIPLIER;
+	if ((capacity * addReallocationThreshold) <= size) {
+		int newCapacity = capacity * addReallocationMultiplier;
 		if (newCapacity == 0) { newCapacity++; }  // Gotta handle 0...
 		int* newValues = allocateArray(values, size, newCapacity);
 		delete[] values;
@@ -89,8 +118,9 @@ int ArrayList::remove(const unsigned int pIndex) {
 	// NERD ALERT: This floating point arithmetic could slow things down
 	//             but the potential memory savings is better IMO until
 	//             proven otherwise.
-	if (capacity > INITIAL_CAPACITY && (capacity * REMOVE_REALLOCATION_THRESHOLD) >= size) {
-		int newCapacity = capacity * REMOVE_REALLOCATION_MULTIPLIER;
+	int newCapacity = capacity * removeReallocationMultiplier;
+	if (newCapacity >= initialCapacity && (capacity * removeReallocationThreshold) >= size)
+	{
 		int* newValues = allocateArray(values, size, newCapacity);
 		delete[] values;
 		values = newValues;
@@ -119,12 +149,9 @@ int* ArrayList::allocateArray(
 		// TODO: Throw reallocation error or something
 	}
 
-	// TODO: Maybe theres some old C hoodoo (like memcpy) I can use here
-	// for no other reason than being a nerd
-	int* retVal = new int[pNewCapacity];	
-	for(int i = 0; i < pOrigValuesSize; ++i) {
-		retVal[i] = pOrigValues[i];
-	}
+	size_t valuesSize = sizeof(int) * pNewCapacity;
+	int* retVal = new int[valuesSize];
+	memcpy(retVal, pOrigValues, valuesSize);	
 
 	return retVal;
 }

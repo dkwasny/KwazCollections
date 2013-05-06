@@ -45,10 +45,10 @@ ArrayList* ArrayList_createCustom(
 
 ArrayList* ArrayList_createCopy(const ArrayList* pOther)
 {
-	int* values = (int*)malloc(sizeof(int) * pOther->capacity);
+	int* values = ArrayList_allocateArray(pOther->values, pOther->size, pOther->capacity);
 	ArrayList tmpVal = {
 		values,
-		0,
+		pOther->size,
 		pOther->capacity,
 		pOther->initialCapacity,
 		pOther->addReallocationThreshold,
@@ -99,8 +99,10 @@ int ArrayList_remove(ArrayList* pList, const unsigned int pIndex) {
 	// past its initial capacity.
 	// I understand that most lists do not do this, but I
 	// wanted to do this anyways.
-	if (pList->capacity > pList->initialCapacity && (pList->capacity * pList->removeReallocationThreshold) >= pList->size) {
-		int newCapacity = pList->capacity * pList->removeReallocationMultiplier;
+	int newCapacity = pList->capacity * pList->removeReallocationMultiplier;
+	if (newCapacity >= pList->initialCapacity 
+		&& (pList->capacity * pList->removeReallocationThreshold) >= pList->size)
+	{
 		int* newValues = ArrayList_allocateArray(pList->values, pList->size, newCapacity);
 		free(pList->values);
 		pList->values = newValues;
