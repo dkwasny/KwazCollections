@@ -1,8 +1,12 @@
-# A hideous makefile for compiling KwazCollections under both the
+# A makefile for compiling KwazCollections under both the
 # clang and/or gnu compilers
 #
-# I am really sad that I have to keep track of every source and output
-# file name, but that appears to be the way c compilers work.
+# The only special part of this file is the generated compilation commands.
+#
+# To get around gxx/clang's restriction of disallowing the use of -o with
+# multiple input files, I use make functions to generate a list of gxx/clang
+# commands into a set of variables. 
+# These variables are then referenced in each compilation task.
 #
 # -David Kwasny
 
@@ -13,29 +17,36 @@ GPP_BUILD_DIR := $(BUILD_DIR)/gpp
 CLANG_BUILD_DIR := $(BUILD_DIR)/clang
 CLANGPP_BUILD_DIR := $(BUILD_DIR)/clangpp
 
-# Class/object name constants...eww
-ARRAY_LIST := ArrayList
-
-# C source and build files...eww
+# Source directories
 C_SOURCE_DIR := ./csrc
-C_ARRAY_LIST := $(C_SOURCE_DIR)/$(ARRAY_LIST).c
-GCC_ARRAY_LIST_O := $(GCC_BUILD_DIR)/$(ARRAY_LIST).o
-CLANG_ARRAY_LIST_O := $(CLANG_BUILD_DIR)/$(ARRAY_LIST).o
-
-# C++ source and build files...eww
 CPP_SOURCE_DIR := ./src
-CPP_ARRAY_LIST := $(CPP_SOURCE_DIR)/$(ARRAY_LIST).cpp
-GPP_ARRAY_LIST_O := $(GPP_BUILD_DIR)/$(ARRAY_LIST).o
-CLANGPP_ARRAY_LIST_O := $(CLANGPP_BUILD_DIR)/$(ARRAY_LIST).o
 
 # Compilation commands
-CLANG := clang -Wall
-CLANGPP := clang++ -Wall
-GCC := gcc -Wall
-GPP := g++ -Wall
+CLANG := clang -Wall -Wextra -Werror -pedantic-errors -c
+CLANGPP := clang++ -Wall -Wextra -Werror -pedantic-errors -c
+GCC := gcc -Wall -Wextra -Werror -pedantic-errors -c
+GPP := g++ -Wall -Wextra -Werror -pedantic-errors -c
+
+# Generated variables to assist in C compilation
+C_SOURCE_FILES := $(wildcard $(C_SOURCE_DIR)/*.c)
+C_OBJECT_NAMES := $(basename $(notdir $(C_SOURCE_FILES)))
+GCC_COMPILE := $(foreach object, $(C_OBJECT_NAMES), $(GCC) -o $(GCC_BUILD_DIR)/$(object).o $(C_SOURCE_DIR)/$(object).c;)
+CLANG_COMPILE := $(foreach object, $(C_OBJECT_NAMES), $(CLANG) -o $(CLANG_BUILD_DIR)/$(object).o $(C_SOURCE_DIR)/$(object).c;)
+
+# Generated variables to assist in C++ compilation
+CPP_SOURCE_FILES := $(wildcard $(CPP_SOURCE_DIR)/*.cpp)
+CPP_OBJECT_NAMES := $(basename $(notdir $(CPP_SOURCE_FILES)))
+GPP_COMPILE := $(foreach object, $(CPP_OBJECT_NAMES), $(GPP) -o $(GPP_BUILD_DIR)/$(object).o $(CPP_SOURCE_DIR)/$(object).cpp;)
+CLANGPP_COMPILE := $(foreach object, $(CPP_OBJECT_NAMES), $(CLANGPP) -o $(CLANGPP_BUILD_DIR)/$(object).o $(CPP_SOURCE_DIR)/$(object).cpp;)
 
 .PHONY: all
 all: gnu clang
+
+.PHONY: c
+c: gccbuild clangbuild
+
+.PHONY: cpp
+cpp: gppbuild clangppbuild
 
 .PHONY: gnu
 gnu: gccbuild gppbuild
@@ -44,25 +55,29 @@ gnu: gccbuild gppbuild
 clang: clangbuild clangppbuild
 
 .PHONY: gccbuild
-gccbuild: | $(GCC_BUILD_DIR)
-	$(GCC) $(C_ARRAY_LIST) -c -o $(GCC_ARRAY_LIST_O)
+gccbuild: $(C_SOURCE_FILES) | $(GCC_BUILD_DIR)
+	$(GCC_COMPILE)
 
 .PHONY: gppbuild
-gppbuild: | $(GPP_BUILD_DIR)
-	$(GPP) $(CPP_ARRAY_LIST) -c -o $(GPP_ARRAY_LIST_O)
+gppbuild: $(CPP_SOURCE_FILES) | $(GPP_BUILD_DIR)
+	$(GPP_COMPILE)
 
 .PHONY: clangbuild
-clangbuild: | $(CLANG_BUILD_DIR)
-	$(CLANG) $(C_ARRAY_LIST) -c -o $(CLANG_ARRAY_LIST_O)
+clangbuild: $(C_SOURCE_FILES) | $(CLANG_BUILD_DIR)
+	$(CLANG_COMPILE)
 
 .PHONY: clangppbuild
-clangppbuild: | $(CLANGPP_BUILD_DIR)
-	$(CLANGPP) $(CPP_ARRAY_LIST) -c -o $(CLANGPP_ARRAY_LIST_O)
+clangppbuild: $(CPP_SOURCE_FILES) | $(CLANGPP_BUILD_DIR)
+	$(CLANGPP_COMPILE)
+
+# TODO: Maybe make an archive target that brings all the .o files
+# into 1 lib file.  One per lang/compiler of course...
 
 .PHONY: clean
 clean:
 	rm -r $(BUILD_DIR)
 
+# Build directory structure creation targets
 $(BUILD_DIR):
 	mkdir $(BUILD_DIR)
 
