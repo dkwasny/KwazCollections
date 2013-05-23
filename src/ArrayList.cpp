@@ -14,7 +14,7 @@ ArrayList::ArrayList() :
 }
 
 ArrayList::ArrayList(
-	const unsigned int pCapacity,
+	const size_t pCapacity,
 	const float pAddReallocationThreshold,
 	const unsigned short pAddReallocationMultiplier,
 	const float pRemoveReallocationThreshold,
@@ -53,7 +53,7 @@ ArrayList::ArrayList(const IList& pOther) :
 	size = 0;
 	capacity = pOther.getSize() * addReallocationMultiplier;
 	values = new int[capacity];
-	for (unsigned int i = 0; i < pOther.getSize(); ++i) {
+	for (size_t i = 0; i < pOther.getSize(); ++i) {
 		add(pOther[i]);
 	}
 }
@@ -75,18 +75,18 @@ ArrayList& ArrayList::operator=(const ArrayList& pOther) {
 	return *this;
 }
 
-unsigned int ArrayList::getSize() const {
+size_t ArrayList::getSize() const {
 	return size;	
 }
 
-unsigned int ArrayList::getCapacity() const {
+size_t ArrayList::getCapacity() const {
 	return capacity;
 }
 
 void ArrayList::add(const int pValue) {
 	// Expand the array if we pass a specified threshold
 	if ((capacity * addReallocationThreshold) <= size) {
-		int newCapacity = capacity * addReallocationMultiplier;
+		size_t newCapacity = capacity * addReallocationMultiplier;
 		if (newCapacity == 0) { newCapacity++; }  // Gotta handle 0...
 		int* newValues = allocateArray(values, size, newCapacity);
 		delete[] values;
@@ -97,7 +97,7 @@ void ArrayList::add(const int pValue) {
 	values[size++] = pValue;
 }
 
-int ArrayList::remove(const unsigned int pIndex) {	
+int ArrayList::remove(const size_t pIndex) {	
 	if (pIndex >= size) {
 		// TODO: Deal with sprintf later...pain in the...
 		string msg = "Exception during ArrayList remove";
@@ -107,7 +107,7 @@ int ArrayList::remove(const unsigned int pIndex) {
 	int removedVal = values[pIndex];
 	
 	--size;
-	for (unsigned int i = pIndex; i < size; ++i) {
+	for (size_t i = pIndex; i < size; ++i) {
 		values[i] = values[i + 1];
 	}
 	
@@ -117,7 +117,7 @@ int ArrayList::remove(const unsigned int pIndex) {
 	// NERD ALERT: This floating point arithmetic could slow things down
 	//             but the potential memory savings is better IMO until
 	//             proven otherwise.
-	unsigned int newCapacity = capacity * removeReallocationMultiplier;
+	size_t newCapacity = capacity * removeReallocationMultiplier;
 	if (newCapacity >= initialCapacity && (capacity * removeReallocationThreshold) >= size)
 	{
 		int* newValues = allocateArray(values, size, newCapacity);
@@ -129,7 +129,7 @@ int ArrayList::remove(const unsigned int pIndex) {
 	return removedVal;	
 }
 
-int& ArrayList::get(unsigned int pIndex) const {
+int& ArrayList::get(size_t pIndex) const {
 	if (pIndex >= size) {
 		// TODO: Deal with sprintf later...pain in the...
 		string msg = "Exception during ArrayList get";
@@ -141,8 +141,8 @@ int& ArrayList::get(unsigned int pIndex) const {
 
 int* ArrayList::allocateArray(
 	const int* pOrigValues,
-	const unsigned int pOrigValuesSize,
-	const unsigned int pNewCapacity) const
+	const size_t pOrigValuesSize,
+	const size_t pNewCapacity) const
 {
 	if (pOrigValuesSize > pNewCapacity) {
 		// TODO: Throw reallocation error or something

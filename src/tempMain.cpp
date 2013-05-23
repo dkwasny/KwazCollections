@@ -4,7 +4,7 @@
 void printArrayList(ArrayList& list) {
 	printf("size: %d\n", list.getSize());
 	printf("capacity: %d\n", list.getCapacity());
-	for (unsigned int i = 0; i < list.getSize(); ++i) {
+	for (size_t i = 0; i < list.getSize(); ++i) {
 		printf("%d ", list[i]);
 	}
 	printf("\n");

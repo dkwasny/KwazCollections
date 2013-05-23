@@ -24,7 +24,7 @@ ArrayList* ArrayList_createDefault()
 /* See header file for more info
  *
 ArrayList* ArrayList_createCustom(
-	const unsigned int pInitialCapacity,
+	const size_t pInitialCapacity,
 	const float pAddReallocationThreshold,
 	const unsigned short pAddReallocationMultiplier,
 	const float pRemoveReallocationThreshold,
@@ -80,7 +80,7 @@ void ArrayList_destroy(ArrayList* pList)
 void ArrayList_add(ArrayList* pList, const int pValue) {
 	/* Expand the array if we pass a specified threshold */
 	if ((pList->capacity * pList->addReallocationThreshold) <= pList->size) {
-		int newCapacity = pList->capacity * pList->addReallocationMultiplier;
+		size_t newCapacity = pList->capacity * pList->addReallocationMultiplier;
 		int* newValues;
 		if (newCapacity == 0) { newCapacity++; }  /* Gotta handle 0... */
 		newValues = ArrayList_allocateArray(pList->values, pList->size, newCapacity);
@@ -92,10 +92,10 @@ void ArrayList_add(ArrayList* pList, const int pValue) {
 	pList->values[pList->size++] = pValue;
 }
 
-int ArrayList_remove(ArrayList* pList, const unsigned int pIndex) {	
+int ArrayList_remove(ArrayList* pList, const size_t pIndex) {	
 	int removedVal = 0;
-	unsigned int i = 0;
-	unsigned int newCapacity = 0;
+	size_t i = 0;
+	size_t newCapacity = 0;
 	
 	if (pIndex >= pList->size) {
 		/*TODO: Need some sort of return code to prevent this */
@@ -129,8 +129,8 @@ int ArrayList_remove(ArrayList* pList, const unsigned int pIndex) {
 
 int* ArrayList_allocateArray(
 	const int* pOrigValues,
-	const unsigned int pOrigValuesSize,
-	const unsigned int pNewCapacity)
+	const size_t pOrigValuesSize,
+	const size_t pNewCapacity)
 {
 	size_t valuesSize;
 	int* retVal;

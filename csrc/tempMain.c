@@ -2,7 +2,7 @@
 #include "ArrayList.h"
 
 void printArrayList(ArrayList* list) {
-	unsigned int i = 0;
+	size_t i = 0;
 	printf("size: %d\n", list->size);
 	printf("capacity: %d\n", list->capacity);
 	for (i = 0; i < list->size; ++i) {

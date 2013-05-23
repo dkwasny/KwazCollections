@@ -15,7 +15,7 @@ class ArrayList : public IList {
 	public:
 		ArrayList();
 		ArrayList(
-			const unsigned int pCapacity,
+			const size_t pCapacity,
         		const float pAddReallocationThreshold,
         		const unsigned short pAddReallocationMultiplier,
         		const float pRemoveReallocationThreshold,
@@ -27,31 +27,31 @@ class ArrayList : public IList {
 		
 		ArrayList& operator=(const ArrayList& pOther);
 	
-		unsigned int getSize() const;
+		size_t getSize() const;
 		// This shouldn't be here but i need it for testing right now.
-		unsigned int getCapacity() const;
-		int& get(const unsigned int pIndex) const;
+		size_t getCapacity() const;
+		int& get(const size_t pIndex) const;
 		void add(const int pValue);
-		int remove(const unsigned int pIndex);
+		int remove(const size_t pIndex);
 	
 	private:
 		// Configuration constants
-		const unsigned int initialCapacity;
+		const size_t initialCapacity;
 		const float addReallocationThreshold;
-		const unsigned int addReallocationMultiplier;
+		const unsigned short addReallocationMultiplier;
 		const float removeReallocationThreshold;
 		const float removeReallocationMultiplier;
 		
 		// Mutable values
 		int* values;
-		unsigned int size;
-		unsigned int capacity;
+		size_t size;
+		size_t capacity;
 
 		// Internal methods
 		int* allocateArray(
 			const int* pOrigValues,
-			const unsigned int pOrigValuesSize,
-			const unsigned int pNewCapacity
+			const size_t pOrigValuesSize,
+			const size_t pNewCapacity
 		) const;
 };
 

@@ -13,11 +13,11 @@
 
 typedef struct {
 	int* values;
-	unsigned int size;
-	unsigned int capacity;
+	size_t size;
+	size_t capacity;
 
 	/* Configuration constants */
-	const unsigned int initialCapacity;
+	const size_t initialCapacity;
 	const float addReallocationThreshold;
 	const unsigned short addReallocationMultiplier;
 	const float removeReallocationThreshold;
@@ -33,7 +33,7 @@ ArrayList* ArrayList_createDefault();
  * This is due to: "initializer element is not computable at load time"
  *
 ArrayList* ArrayList_createCustom(
-	const unsigned int pInitialCapacity,
+	const size_t pInitialCapacity,
 	const float pAddReallocationThreshold,
 	const unsigned short pAddReallocationMultiplier,
 	const float pRemoveReallocationThreshold,
@@ -45,13 +45,13 @@ void ArrayList_destroy(ArrayList* pList);
 /* TODO: Maybe a deep destroy?  Frees all entries wuthin the list too? */
 	
 void ArrayList_add(ArrayList* pList, const int pValue);
-int ArrayList_remove(ArrayList* pList, const unsigned int pIndex);
+int ArrayList_remove(ArrayList* pList, const size_t pIndex);
 
 /* Internal methods */
 int* ArrayList_allocateArray(
 	const int* pOrigValues,
-	const unsigned int pOrigValuesSize,
-	const unsigned int pNewCapacity
+	const size_t pOrigValuesSize,
+	const size_t pNewCapacity
 );
 
 #endif
