@@ -2,11 +2,11 @@
 #include "IndexOutOfBoundsError.h"
 
 ArrayList::ArrayList() :
+	initialCapacity(ARRAY_LIST_INITIAL_CAPACITY),
 	addReallocationThreshold(ARRAY_LIST_ADD_REALLOCATION_THRESHOLD),
 	addReallocationMultiplier(ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER),
 	removeReallocationThreshold(ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD),
-	removeReallocationMultiplier(ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER),
-	initialCapacity(ARRAY_LIST_INITIAL_CAPACITY)
+	removeReallocationMultiplier(ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER)
 {
 	size = 0;
 	capacity = initialCapacity;
@@ -15,17 +15,16 @@ ArrayList::ArrayList() :
 
 ArrayList::ArrayList(
 	const unsigned int pCapacity,
-	const unsigned int pInitialCapacity,
 	const float pAddReallocationThreshold,
 	const unsigned short pAddReallocationMultiplier,
 	const float pRemoveReallocationThreshold,
 	const float pRemoveReallocationMultiplier
 	) :
+	initialCapacity(pCapacity),
 	addReallocationThreshold(pAddReallocationThreshold),
 	addReallocationMultiplier(pAddReallocationMultiplier),
-	removeReallocationThreshold(pRemoveReallocationMultiplier),
-	removeReallocationMultiplier(pRemoveReallocationMultiplier),
-	initialCapacity(pCapacity)
+	removeReallocationThreshold(pRemoveReallocationThreshold),
+	removeReallocationMultiplier(pRemoveReallocationMultiplier)
 {
 	size = 0;
 	capacity = pCapacity;
@@ -33,11 +32,11 @@ ArrayList::ArrayList(
 }
 
 ArrayList::ArrayList(const ArrayList& pOther) :
+	initialCapacity(pOther.capacity),
 	addReallocationThreshold(pOther.addReallocationThreshold),
 	addReallocationMultiplier(pOther.addReallocationMultiplier),
 	removeReallocationThreshold(pOther.removeReallocationThreshold),
-	removeReallocationMultiplier(pOther.removeReallocationMultiplier),
-	initialCapacity(pOther.capacity)
+	removeReallocationMultiplier(pOther.removeReallocationMultiplier)
 {
 	values = allocateArray(pOther.values, pOther.size, pOther.capacity);
 	size = pOther.size;
@@ -45,16 +44,16 @@ ArrayList::ArrayList(const ArrayList& pOther) :
 }
 
 ArrayList::ArrayList(const IList& pOther) :
+	initialCapacity(ARRAY_LIST_INITIAL_CAPACITY),
 	addReallocationThreshold(ARRAY_LIST_ADD_REALLOCATION_THRESHOLD),
 	addReallocationMultiplier(ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER),
 	removeReallocationThreshold(ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD),
-	removeReallocationMultiplier(ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER),
-	initialCapacity(ARRAY_LIST_INITIAL_CAPACITY)
+	removeReallocationMultiplier(ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER)
 {
 	size = 0;
 	capacity = pOther.getSize() * addReallocationMultiplier;
 	values = new int[capacity];
-	for (int i = 0; i < pOther.getSize(); ++i) {
+	for (unsigned int i = 0; i < pOther.getSize(); ++i) {
 		add(pOther[i]);
 	}
 }
@@ -108,7 +107,7 @@ int ArrayList::remove(const unsigned int pIndex) {
 	int removedVal = values[pIndex];
 	
 	--size;
-	for (int i = pIndex; i < size; ++i) {
+	for (unsigned int i = pIndex; i < size; ++i) {
 		values[i] = values[i + 1];
 	}
 	
@@ -118,7 +117,7 @@ int ArrayList::remove(const unsigned int pIndex) {
 	// NERD ALERT: This floating point arithmetic could slow things down
 	//             but the potential memory savings is better IMO until
 	//             proven otherwise.
-	int newCapacity = capacity * removeReallocationMultiplier;
+	unsigned int newCapacity = capacity * removeReallocationMultiplier;
 	if (newCapacity >= initialCapacity && (capacity * removeReallocationThreshold) >= size)
 	{
 		int* newValues = allocateArray(values, size, newCapacity);

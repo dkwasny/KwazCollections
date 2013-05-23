@@ -16,7 +16,6 @@ class ArrayList : public IList {
 		ArrayList();
 		ArrayList(
 			const unsigned int pCapacity,
-			const unsigned int pInitialCapacity,
         		const float pAddReallocationThreshold,
         		const unsigned short pAddReallocationMultiplier,
         		const float pRemoveReallocationThreshold,

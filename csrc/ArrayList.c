@@ -2,9 +2,10 @@
 
 ArrayList* ArrayList_createDefault()
 {
+	ArrayList* retVal;
 	int* values = (int*)malloc(sizeof(int) * ARRAY_LIST_INITIAL_CAPACITY);
 	ArrayList tmpVal = {
-		values,
+		NULL,
 		0,
 		ARRAY_LIST_INITIAL_CAPACITY,
 		ARRAY_LIST_INITIAL_CAPACITY,
@@ -13,12 +14,15 @@ ArrayList* ArrayList_createDefault()
 		ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD,
 		ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER
 	};
+	tmpVal.values = values;
 
-	ArrayList* retVal = (ArrayList*) malloc(sizeof(ArrayList));
+	retVal = (ArrayList*) malloc(sizeof(ArrayList));
 	memcpy(retVal, &tmpVal, sizeof(ArrayList));
 	return retVal;
 }
 
+/* See header file for more info
+ *
 ArrayList* ArrayList_createCustom(
 	const unsigned int pInitialCapacity,
 	const float pAddReallocationThreshold,
@@ -26,9 +30,10 @@ ArrayList* ArrayList_createCustom(
 	const float pRemoveReallocationThreshold,
 	const float pRemoveReallocationMultiplier)
 {
+	ArrayList* retVal;
 	int* values = (int*)malloc(sizeof(int) * pInitialCapacity);
 	ArrayList tmpVal = {
-		values,
+		NULL,
 		0,
 		pInitialCapacity,
 		pInitialCapacity,
@@ -37,28 +42,33 @@ ArrayList* ArrayList_createCustom(
 		pRemoveReallocationThreshold,
 		pRemoveReallocationMultiplier
 	};
+	tmpVal.values = values;
 
-	ArrayList* retVal = (ArrayList*) malloc(sizeof(ArrayList));
+	retVal = (ArrayList*) malloc(sizeof(ArrayList));
 	memcpy(retVal, &tmpVal, sizeof(ArrayList));
 	return retVal;
-}
+}*/
 
 ArrayList* ArrayList_createCopy(const ArrayList* pOther)
 {
-	int* values = ArrayList_allocateArray(pOther->values, pOther->size, pOther->capacity);
-	ArrayList tmpVal = {
-		values,
-		pOther->size,
-		pOther->capacity,
-		pOther->initialCapacity,
-		pOther->addReallocationThreshold,
-		pOther->addReallocationMultiplier,
-		pOther->removeReallocationThreshold,
-		pOther->removeReallocationMultiplier
-	};
-
 	ArrayList* retVal = (ArrayList*) malloc(sizeof(ArrayList));
+	int* values;
+	ArrayList tmpVal = {
+		NULL,
+		0,
+		0,
+		ARRAY_LIST_INITIAL_CAPACITY,
+		ARRAY_LIST_ADD_REALLOCATION_THRESHOLD,
+		ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER,
+		ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD,
+		ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER
+	};
+	values = ArrayList_allocateArray(pOther->values, pOther->size, pOther->capacity);
+	tmpVal.values = values;
+	tmpVal.capacity = pOther->capacity;
+	tmpVal.size = pOther->size;
 	memcpy(retVal, &tmpVal, sizeof(ArrayList));
+
 	return retVal;
 }
 
@@ -68,11 +78,12 @@ void ArrayList_destroy(ArrayList* pList)
 }
 
 void ArrayList_add(ArrayList* pList, const int pValue) {
-	// Expand the array if we pass a specified threshold
+	/* Expand the array if we pass a specified threshold */
 	if ((pList->capacity * pList->addReallocationThreshold) <= pList->size) {
 		int newCapacity = pList->capacity * pList->addReallocationMultiplier;
-		if (newCapacity == 0) { newCapacity++; }  // Gotta handle 0...
-		int* newValues = ArrayList_allocateArray(pList->values, pList->size, newCapacity);
+		int* newValues;
+		if (newCapacity == 0) { newCapacity++; }  /* Gotta handle 0... */
+		newValues = ArrayList_allocateArray(pList->values, pList->size, newCapacity);
 		free(pList->values);
 		pList->values = newValues;
 		pList->capacity = newCapacity;
@@ -82,24 +93,28 @@ void ArrayList_add(ArrayList* pList, const int pValue) {
 }
 
 int ArrayList_remove(ArrayList* pList, const unsigned int pIndex) {	
+	int removedVal = 0;
+	unsigned int i = 0;
+	unsigned int newCapacity = 0;
+	
 	if (pIndex >= pList->size) {
-		//TODO: Need some sort of return code to prevent this
+		/*TODO: Need some sort of return code to prevent this */
 	}
 
-	int removedVal = pList->values[pIndex];
+	removedVal = pList->values[pIndex];
 	
 	--pList->size;
-	int i;
 	for (i = pIndex; i < pList->size; ++i) {
 		pList->values[i] = pList->values[i + 1];
 	}
 	
-	// Shrink the array if we are only using a small portion of it.
-	// To prevent non-stop resizing, the array will not be shrunk
-	// past its initial capacity.
-	// I understand that most lists do not do this, but I
-	// wanted to do this anyways.
-	int newCapacity = pList->capacity * pList->removeReallocationMultiplier;
+	/* Shrink the array if we are only using a small portion of it.
+	 * To prevent non-stop resizing, the array will not be shrunk
+	 * past its initial capacity.
+	 * I understand that most lists do not do this, but I
+	 * wanted to do this anyways.
+	 */
+	newCapacity = pList->capacity * pList->removeReallocationMultiplier;
 	if (newCapacity >= pList->initialCapacity 
 		&& (pList->capacity * pList->removeReallocationThreshold) >= pList->size)
 	{
@@ -117,12 +132,15 @@ int* ArrayList_allocateArray(
 	const unsigned int pOrigValuesSize,
 	const unsigned int pNewCapacity)
 {
+	size_t valuesSize;
+	int* retVal;
+
 	if (pOrigValuesSize > pNewCapacity) {
-		// TODO: Return error code or something
+		/* TODO: Return error code or something*/
 	}
 
-	size_t valuesSize = sizeof(int) * pNewCapacity;
-	int* retVal = (int*)malloc(valuesSize);
+	valuesSize = sizeof(int) * pNewCapacity;
+	retVal = (int*)malloc(valuesSize);
 	memcpy(retVal, pOrigValues, valuesSize);
 
 	return retVal;

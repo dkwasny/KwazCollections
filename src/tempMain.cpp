@@ -4,7 +4,7 @@
 void printArrayList(ArrayList& list) {
 	printf("size: %d\n", list.getSize());
 	printf("capacity: %d\n", list.getCapacity());
-	for (int i = 0; i < list.getSize(); ++i) {
+	for (unsigned int i = 0; i < list.getSize(); ++i) {
 		printf("%d ", list[i]);
 	}
 	printf("\n");
@@ -12,6 +12,10 @@ void printArrayList(ArrayList& list) {
 
 
 int main(int argc, char* argv[]) {
+	// Even in C++ I gotta please the compiler by voiding unused args
+	// </shocked...notreally>
+	(void)argc; (void)argv;
+
 	IList* list = new ArrayList();
 	
 	for (int i = 0; i < 100; ++i) {
