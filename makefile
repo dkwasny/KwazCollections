@@ -36,8 +36,8 @@ CLANGPP_LIB := $(CLANGPP_BUILD_DIR)/$(CPP_LIB_FILENAME)
 
 # Main directories
 # TODO: Make separate makefiles for each lang?
-C_DIR := ./csrc
-CPP_DIR := ./src
+C_DIR := ./c
+CPP_DIR := ./cpp
 
 # Source directories
 C_SOURCE_DIR := $(C_DIR)/src
