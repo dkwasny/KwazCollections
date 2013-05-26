@@ -140,6 +140,8 @@ $(CLANGPP_LIB): $(CLANGPP_OUTPUT_FILES)
 # 
 # Right now this makes sense because the full lib paths are
 # convieniently defined as variables in the prequisite lists.
+#
+# Google test itself is only compiled once via g++.
 $(GTEST_LIB): | $(GTEST_BUILD_DIR)
 	$(GPP_TEST_COMPILE) -pthread -I $(GTEST_INCLUDE_DIR) -I $(GTEST_DIR) -o $(GTEST_BUILD_DIR)/gtest-all.o -c $(GTEST_DIR)/src/gtest-all.cc;
 	$(GPP_TEST_COMPILE) -pthread -I $(GTEST_INCLUDE_DIR) -I $(GTEST_DIR) -o $(GTEST_BUILD_DIR)/gtest_main.o -c $(GTEST_DIR)/src/gtest_main.cc;
