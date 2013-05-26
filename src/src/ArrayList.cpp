@@ -1,5 +1,5 @@
-#include "ArrayList.h"
-#include "IndexOutOfBoundsError.h"
+#include "ArrayList.hpp"
+#include "IndexOutOfBoundsError.hpp"
 
 ArrayList::ArrayList() :
 	initialCapacity(ARRAY_LIST_INITIAL_CAPACITY),

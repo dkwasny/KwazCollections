@@ -24,6 +24,11 @@ typedef struct {
 	const float removeReallocationMultiplier; 
 } ArrayList;
 
+/* Start extern for c++ */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ArrayList* ArrayList_createDefault();
 
 /* I am currently punting on this "constructor".
@@ -53,5 +58,10 @@ int* ArrayList_allocateArray(
 	const size_t pOrigValuesSize,
 	const size_t pNewCapacity
 );
+
+/* Close c++ extern */
+#ifdef __cplusplus
+}
+#endif
 
 #endif

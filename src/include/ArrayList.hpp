@@ -8,7 +8,7 @@
 #define ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD 0.25f
 #define ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER 0.5f
 
-#include "IList.h"
+#include "IList.hpp"
 #include <cstring>
 
 class ArrayList : public IList {
