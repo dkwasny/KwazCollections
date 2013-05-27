@@ -11,11 +11,23 @@ void ArrayListTest_checkContents(ArrayList* list) {
 	}	
 }
 
+void ArrayListTest_smokeTest(ArrayList* list) {
+	for (int i = 0; i < 20; ++i) {
+		ArrayList_add(list, i);
+	}
+	ArrayListTest_checkContents(list);
+	for (int i = 0; i < 20; ++i) {
+		ArrayList_remove(list, 0);
+	}
+}
+
 // Actual test cases
 TEST(ArrayList, TestDefaultConstructor) {
 	ArrayList* list = ArrayList_createDefault();
 	ASSERT_EQ(0, list->size);
 	ASSERT_EQ(ARRAY_LIST_INITIAL_CAPACITY, list->capacity);
+	ArrayListTest_smokeTest(list);
+	ArrayList_destroy(list);
 }
 
 TEST(ArrayList, TestAddNoReallocation) {
@@ -32,6 +44,7 @@ TEST(ArrayList, TestAddNoReallocation) {
 	ASSERT_EQ(list->capacity, list->size);
 	ASSERT_EQ(oldArray, list->values);
 	ArrayListTest_checkContents(list);
+	ArrayList_destroy(list);
 }
 
 TEST(ArrayList, TestAddOneReallocation) {
@@ -70,9 +83,10 @@ TEST(ArrayList, TestAddOneReallocation) {
 	ASSERT_EQ(expectedCapacity, list->capacity);
 	ASSERT_EQ(oldArray, list->values);
 	ArrayListTest_checkContents(list);
+	ArrayList_destroy(list);
 }
 
-TEST(ArrayList, TestAddMultipleReallocation) {
+TEST(ArrayList, TestAddStressTest) {
 	ArrayList* list = ArrayList_createDefault();
 	
 	int* oldArray = list->values;
@@ -108,4 +122,5 @@ TEST(ArrayList, TestAddMultipleReallocation) {
 		oldArray = list->values;
 		ArrayListTest_checkContents(list);
 	}
+	ArrayList_destroy(list);
 }

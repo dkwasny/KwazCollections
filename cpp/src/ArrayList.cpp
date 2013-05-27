@@ -59,10 +59,7 @@ ArrayList::~ArrayList() {
 
 ArrayList& ArrayList::operator=(const ArrayList& pOther) {
 	if (this != &pOther) {
-		int* newValues = allocateArray(pOther.values, pOther.size, pOther.capacity);
-		delete[] values;
-		values = newValues;	
-		
+		values = pOther.values;	
 		size = pOther.size;
 		capacity = pOther.capacity;
 	}
