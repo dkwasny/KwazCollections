@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "ArrayList.h"
 #include <cmath>
+#include <cstdio>
 
 // Test helper methods
 void ArrayListTest_checkContents(ArrayList* list) {
@@ -77,9 +78,15 @@ TEST(ArrayList, TestAddMultipleReallocation) {
 	int* oldArray = list->values;
 	int i = 0;
 	int iteration = 0;
-	for (iteration = 0; iteration < 10; ++iteration) {
-		int numToAdd = list->capacity;
-		for (; i < numToAdd; ++i) {
+	/* 20 is a good number of iterations that stress
+ 	 * test the list without segfaulting or taking too long.
+ 	 * It appears to segfault at around 24 iterations.
+ 	 * I may want to revisit that since we shouldnt be
+ 	 * up against the 32 bit limit yet...but i may just be
+ 	 * stupid on these memory things.
+ 	 */
+	for (iteration = 0; iteration < 20; ++iteration) {
+		for (; i < list->capacity; ++i) {
 			ArrayList_add(list, i);
 		}
 

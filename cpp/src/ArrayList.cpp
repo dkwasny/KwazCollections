@@ -3,10 +3,9 @@
 
 ArrayList::ArrayList() :
 	initialCapacity(ARRAY_LIST_INITIAL_CAPACITY),
-	addReallocationThreshold(ARRAY_LIST_ADD_REALLOCATION_THRESHOLD),
 	addReallocationMultiplier(ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER),
 	removeReallocationThreshold(ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD),
-	removeReallocationMultiplier(ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER)
+	removeReallocationDivisor(ARRAY_LIST_REMOVE_REALLOCATION_DIVISOR)
 {
 	size = 0;
 	capacity = initialCapacity;
@@ -15,16 +14,14 @@ ArrayList::ArrayList() :
 
 ArrayList::ArrayList(
 	const size_t pCapacity,
-	const float pAddReallocationThreshold,
-	const unsigned short pAddReallocationMultiplier,
-	const float pRemoveReallocationThreshold,
-	const float pRemoveReallocationMultiplier
+	const unsigned int pAddReallocationMultiplier,
+	const unsigned int pRemoveReallocationThreshold,
+	const unsigned int pRemoveReallocationDivisor
 	) :
 	initialCapacity(pCapacity),
-	addReallocationThreshold(pAddReallocationThreshold),
 	addReallocationMultiplier(pAddReallocationMultiplier),
 	removeReallocationThreshold(pRemoveReallocationThreshold),
-	removeReallocationMultiplier(pRemoveReallocationMultiplier)
+	removeReallocationDivisor(pRemoveReallocationDivisor)
 {
 	size = 0;
 	capacity = pCapacity;
@@ -33,10 +30,9 @@ ArrayList::ArrayList(
 
 ArrayList::ArrayList(const ArrayList& pOther) :
 	initialCapacity(pOther.capacity),
-	addReallocationThreshold(pOther.addReallocationThreshold),
 	addReallocationMultiplier(pOther.addReallocationMultiplier),
 	removeReallocationThreshold(pOther.removeReallocationThreshold),
-	removeReallocationMultiplier(pOther.removeReallocationMultiplier)
+	removeReallocationDivisor(pOther.removeReallocationDivisor)
 {
 	values = allocateArray(pOther.values, pOther.size, pOther.capacity);
 	size = pOther.size;
@@ -45,10 +41,9 @@ ArrayList::ArrayList(const ArrayList& pOther) :
 
 ArrayList::ArrayList(const IList& pOther) :
 	initialCapacity(ARRAY_LIST_INITIAL_CAPACITY),
-	addReallocationThreshold(ARRAY_LIST_ADD_REALLOCATION_THRESHOLD),
 	addReallocationMultiplier(ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER),
 	removeReallocationThreshold(ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD),
-	removeReallocationMultiplier(ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER)
+	removeReallocationDivisor(ARRAY_LIST_REMOVE_REALLOCATION_DIVISOR)
 {
 	size = 0;
 	capacity = pOther.getSize() * addReallocationMultiplier;
@@ -79,13 +74,9 @@ size_t ArrayList::getSize() const {
 	return size;	
 }
 
-size_t ArrayList::getCapacity() const {
-	return capacity;
-}
-
 void ArrayList::add(const int pValue) {
 	// Expand the array if we pass a specified threshold
-	if ((capacity * addReallocationThreshold) <= size) {
+	if (capacity == size) {
 		size_t newCapacity = capacity * addReallocationMultiplier;
 		if (newCapacity == 0) { newCapacity++; }  // Gotta handle 0...
 		int* newValues = allocateArray(values, size, newCapacity);
@@ -117,8 +108,8 @@ int ArrayList::remove(const size_t pIndex) {
 	// NERD ALERT: This floating point arithmetic could slow things down
 	//             but the potential memory savings is better IMO until
 	//             proven otherwise.
-	size_t newCapacity = capacity * removeReallocationMultiplier;
-	if (newCapacity >= initialCapacity && (capacity * removeReallocationThreshold) >= size)
+	size_t newCapacity = capacity / removeReallocationDivisor;
+	if (newCapacity >= initialCapacity && (size * removeReallocationThreshold) < capacity)
 	{
 		int* newValues = allocateArray(values, size, newCapacity);
 		delete[] values;
@@ -148,9 +139,9 @@ int* ArrayList::allocateArray(
 		// TODO: Throw reallocation error or something
 	}
 
-	size_t valuesSize = sizeof(int) * pNewCapacity;
-	int* retVal = new int[valuesSize];
-	memcpy(retVal, pOrigValues, valuesSize);	
+	int* retVal = new int[pNewCapacity];
+	size_t origValuesBytes = sizeof(int) * pOrigValuesSize;
+	memcpy(retVal, pOrigValues, origValuesBytes);	
 
 	return retVal;
 }

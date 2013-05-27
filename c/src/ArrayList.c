@@ -94,16 +94,18 @@ int* ArrayList_allocateArray(
 	const size_t pOrigValuesSize,
 	const size_t pNewCapacity)
 {
-	size_t valuesSize;
+	size_t origValuesBytes;
+	size_t retValBytes;
 	int* retVal;
 
 	if (pOrigValuesSize > pNewCapacity) {
 		/* TODO: Return error code or something*/
 	}
 
-	valuesSize = sizeof(int) * pNewCapacity;
-	retVal = (int*)malloc(valuesSize);
-	memcpy(retVal, pOrigValues, valuesSize);
+	origValuesBytes = sizeof(int) * pOrigValuesSize;
+	retValBytes = sizeof(int) * pNewCapacity;
+	retVal = (int*)malloc(retValBytes);
+	memcpy(retVal, pOrigValues, origValuesBytes);
 
 	return retVal;
 }

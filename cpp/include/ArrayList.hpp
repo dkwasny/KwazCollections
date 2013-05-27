@@ -3,10 +3,29 @@
 
 // Default configuration values
 #define ARRAY_LIST_INITIAL_CAPACITY 10
-#define ARRAY_LIST_ADD_REALLOCATION_THRESHOLD 0.75f
+
+/* The multiplier used to expand an ArrayList's backing array whenever the
+ * list's size equals its capacity.
+ *
+ * EX: A multiplier of 2 doubles the capacity.
+ */
 #define ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER 2
-#define ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD 0.25f
-#define ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER 0.5f
+
+/* The threshold value is multiplied by an ArrayList's size.
+ * If the resulting value is <= the ArrayList's capacity,
+ * a reallocation (shrink) of the backing array is performed.
+ *
+ * EX: A threshold of 4 requires <= 25% of an ArrayList's capacity
+ * to be used before triggering a reallocation during removal.
+ */
+#define ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD 4
+
+/* The divisor used to shrink an ArrayList's backing array whenever the
+ * list's size * reallocation threshold is greater than the list's capacity.
+ *
+ * EX: A divisor of 2 halfs the capacity.
+ */
+#define ARRAY_LIST_REMOVE_REALLOCATION_DIVISOR 2
 
 #include "IList.hpp"
 #include <cstring>
@@ -16,10 +35,9 @@ class ArrayList : public IList {
 		ArrayList();
 		ArrayList(
 			const size_t pCapacity,
-        		const float pAddReallocationThreshold,
-        		const unsigned short pAddReallocationMultiplier,
-        		const float pRemoveReallocationThreshold,
-        		const float pRemoveReallocationMultiplier
+        		const unsigned int pAddReallocationMultiplier,
+        		const unsigned int pRemoveReallocationThreshold,
+        		const unsigned int pRemoveReallocationDivisor
 		);
 		ArrayList(const ArrayList& pOther);
 		ArrayList(const IList& pOther);
@@ -28,8 +46,6 @@ class ArrayList : public IList {
 		ArrayList& operator=(const ArrayList& pOther);
 	
 		size_t getSize() const;
-		// This shouldn't be here but i need it for testing right now.
-		size_t getCapacity() const;
 		int& get(const size_t pIndex) const;
 		void add(const int pValue);
 		int remove(const size_t pIndex);
@@ -37,10 +53,9 @@ class ArrayList : public IList {
 	private:
 		// Configuration constants
 		const size_t initialCapacity;
-		const float addReallocationThreshold;
-		const unsigned short addReallocationMultiplier;
-		const float removeReallocationThreshold;
-		const float removeReallocationMultiplier;
+		const unsigned int addReallocationMultiplier;
+		const unsigned int removeReallocationThreshold;
+		const unsigned int removeReallocationDivisor;
 		
 		// Mutable values
 		int* values;
