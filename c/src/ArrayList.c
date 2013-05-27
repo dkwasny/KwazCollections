@@ -7,12 +7,7 @@ ArrayList* ArrayList_createDefault()
 	ArrayList tmpVal = {
 		NULL,
 		0,
-		ARRAY_LIST_INITIAL_CAPACITY,
-		ARRAY_LIST_INITIAL_CAPACITY,
-		ARRAY_LIST_ADD_REALLOCATION_THRESHOLD,
-		ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER,
-		ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD,
-		ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER
+		ARRAY_LIST_INITIAL_CAPACITY
 	};
 	tmpVal.values = values;
 
@@ -21,34 +16,6 @@ ArrayList* ArrayList_createDefault()
 	return retVal;
 }
 
-/* See header file for more info
- *
-ArrayList* ArrayList_createCustom(
-	const size_t pInitialCapacity,
-	const float pAddReallocationThreshold,
-	const unsigned short pAddReallocationMultiplier,
-	const float pRemoveReallocationThreshold,
-	const float pRemoveReallocationMultiplier)
-{
-	ArrayList* retVal;
-	int* values = (int*)malloc(sizeof(int) * pInitialCapacity);
-	ArrayList tmpVal = {
-		NULL,
-		0,
-		pInitialCapacity,
-		pInitialCapacity,
-		pAddReallocationThreshold,
-		pAddReallocationMultiplier,
-		pRemoveReallocationThreshold,
-		pRemoveReallocationMultiplier
-	};
-	tmpVal.values = values;
-
-	retVal = (ArrayList*) malloc(sizeof(ArrayList));
-	memcpy(retVal, &tmpVal, sizeof(ArrayList));
-	return retVal;
-}*/
-
 ArrayList* ArrayList_createCopy(const ArrayList* pOther)
 {
 	ArrayList* retVal = (ArrayList*) malloc(sizeof(ArrayList));
@@ -56,12 +23,7 @@ ArrayList* ArrayList_createCopy(const ArrayList* pOther)
 	ArrayList tmpVal = {
 		NULL,
 		0,
-		0,
-		ARRAY_LIST_INITIAL_CAPACITY,
-		ARRAY_LIST_ADD_REALLOCATION_THRESHOLD,
-		ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER,
-		ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD,
-		ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER
+		0
 	};
 	values = ArrayList_allocateArray(pOther->values, pOther->size, pOther->capacity);
 	tmpVal.values = values;
@@ -79,8 +41,8 @@ void ArrayList_destroy(ArrayList* pList)
 
 void ArrayList_add(ArrayList* pList, const int pValue) {
 	/* Expand the array if we pass a specified threshold */
-	if ((pList->capacity * pList->addReallocationThreshold) <= pList->size) {
-		size_t newCapacity = pList->capacity * pList->addReallocationMultiplier;
+	if (pList->capacity == pList->size) {
+		size_t newCapacity = pList->capacity * ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER;
 		int* newValues;
 		if (newCapacity == 0) { newCapacity++; }  /* Gotta handle 0... */
 		newValues = ArrayList_allocateArray(pList->values, pList->size, newCapacity);
@@ -114,9 +76,9 @@ int ArrayList_remove(ArrayList* pList, const size_t pIndex) {
 	 * I understand that most lists do not do this, but I
 	 * wanted to do this anyways.
 	 */
-	newCapacity = pList->capacity * pList->removeReallocationMultiplier;
-	if (newCapacity >= pList->initialCapacity 
-		&& (pList->capacity * pList->removeReallocationThreshold) >= pList->size)
+	newCapacity = pList->capacity / ARRAY_LIST_REMOVE_REALLOCATION_DIVISOR;
+	if (newCapacity >= ARRAY_LIST_INITIAL_CAPACITY
+		&& (pList->size * ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD) < pList->capacity)
 	{
 		int* newValues = ArrayList_allocateArray(pList->values, pList->size, newCapacity);
 		free(pList->values);
@@ -124,7 +86,7 @@ int ArrayList_remove(ArrayList* pList, const size_t pIndex) {
 		pList->capacity = newCapacity;
 	}
 
-	return removedVal;	
+	return removedVal;
 }
 
 int* ArrayList_allocateArray(

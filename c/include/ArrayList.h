@@ -3,10 +3,29 @@
 
 /* Default configuration values */
 #define ARRAY_LIST_INITIAL_CAPACITY 10
-#define ARRAY_LIST_ADD_REALLOCATION_THRESHOLD 0.75f
+
+/* The multiplier used to expand an ArrayList's backing array whenever the
+ * list's size equals its capacity.
+ *
+ * EX: A multiplier of 2 doubles the capacity.
+ */
 #define ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER 2
-#define ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD 0.25f
-#define ARRAY_LIST_REMOVE_REALLOCATION_MULTIPLIER 0.5f
+
+/* The threshold value is multiplied by an ArrayList's size.
+ * If the resulting value is <= the ArrayList's capacity,
+ * a reallocation (shrink) of the backing array is performed.
+ *
+ * EX: A threshold of 4 requires <= 25% of an ArrayList's capacity
+ * to be used before triggering a reallocation during removal.
+ */
+#define ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD 4
+
+/* The divisor used to shrink an ArrayList's backing array whenever the
+ * list's size * reallocation threshold is greater than the list's capacity.
+ *
+ * EX: A divisor of 2 halfs the capacity.
+ */
+#define ARRAY_LIST_REMOVE_REALLOCATION_DIVISOR 2
 
 #include <stdlib.h>
 #include <string.h>
@@ -15,13 +34,6 @@ typedef struct {
 	int* values;
 	size_t size;
 	size_t capacity;
-
-	/* Configuration constants */
-	const size_t initialCapacity;
-	const float addReallocationThreshold;
-	const unsigned short addReallocationMultiplier;
-	const float removeReallocationThreshold;
-	const float removeReallocationMultiplier; 
 } ArrayList;
 
 /* Start extern for c++ */
@@ -30,20 +42,6 @@ extern "C" {
 #endif
 
 ArrayList* ArrayList_createDefault();
-
-/* I am currently punting on this "constructor".
- * I cannot get it to satisfy pedantic AND maintain my const members.
- * I will revisit when I have time and/or need for it.
- *
- * This is due to: "initializer element is not computable at load time"
- *
-ArrayList* ArrayList_createCustom(
-	const size_t pInitialCapacity,
-	const float pAddReallocationThreshold,
-	const unsigned short pAddReallocationMultiplier,
-	const float pRemoveReallocationThreshold,
-	const float pRemoveReallocationMultiplier);*/
-
 ArrayList* ArrayList_createCopy(const ArrayList* pOther);
 
 void ArrayList_destroy(ArrayList* pList);

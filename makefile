@@ -45,9 +45,11 @@ C_INCLUDE_DIR := $(C_DIR)/include
 CPP_SOURCE_DIR := $(CPP_DIR)/src
 CPP_INCLUDE_DIR := $(CPP_DIR)/include
 
-# Test source directories
-C_TEST_SUITE := $(C_DIR)/test/TestSuite.cpp
-CPP_TEST_SUITE := $(CPP_DIR)/test/TestSuite.cpp
+# Test source directories and suites
+C_TEST_DIR := $(C_DIR)/test
+C_TEST_SUITE := $(C_TEST_DIR)/TestSuite.cpp
+CPP_TEST_DIR := $(CPP_DIR)/test
+CPP_TEST_SUITE := $(CPP_TEST_DIR)/TestSuite.cpp
 
 # Google Test stuff
 GTEST_BUILD_DIR := $(BUILD_DIR)/gtest
@@ -82,6 +84,8 @@ CLANGPP_COMPILE := $(foreach object, $(CPP_OBJECT_NAMES), $(CLANGPP) -o $(CLANGP
 # Generated variables to assist in make target declaration
 C_HEADER_FILES := $(wildcard $(C_INCLUDE_DIR)/*.h)
 CPP_HEADER_FILES := $(wildcard $(CPP_INCLUDE_DIR)/*.hpp)
+C_TEST_FILES := $(wildcard $(C_TEST_DIR)/*.cpp)
+CPP_TEST_FILES := $(wildcard $(CPP_TEST_DIR)/*.cpp)
 GCC_OUTPUT_FILES := $(foreach object, $(C_OBJECT_NAMES), $(GCC_BUILD_DIR)/$(object).o)
 CLANG_OUTPUT_FILES := $(foreach object, $(C_OBJECT_NAMES), $(CLANG_BUILD_DIR)/$(object).o)
 GPP_OUTPUT_FILES := $(foreach object, $(CPP_OBJECT_NAMES), $(GPP_BUILD_DIR)/$(object).o)
@@ -147,19 +151,19 @@ $(GTEST_LIB): | $(GTEST_BUILD_DIR)
 	$(GPP_TEST_COMPILE) -pthread -I $(GTEST_INCLUDE_DIR) -I $(GTEST_DIR) -o $(GTEST_BUILD_DIR)/gtest_main.o -c $(GTEST_DIR)/src/gtest_main.cc;
 	ar -crs $@ $(GTEST_BUILD_DIR)/*.o;
 
-$(GCC_TEST_EXEC): $(GCC_LIB) $(GTEST_LIB)
+$(GCC_TEST_EXEC): $(GCC_LIB) $(GTEST_LIB) $(C_TEST_FILES)
 	$(GPP_TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(C_INCLUDE_DIR) -o $@ -pthread $(C_TEST_SUITE) $< $(word 2, $^);
 
 
-$(GPP_TEST_EXEC): $(GPP_LIB) $(GTEST_LIB)
+$(GPP_TEST_EXEC): $(GPP_LIB) $(GTEST_LIB) $(CPP_TEST_FILES)
 	$(GPP_TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(CPP_INCLUDE_DIR) -o $@ -pthread $(CPP_TEST_SUITE) $< $(word 2, $^);
 
 
-$(CLANG_TEST_EXEC): $(CLANG_LIB) $(GTEST_LIB)
+$(CLANG_TEST_EXEC): $(CLANG_LIB) $(GTEST_LIB) $(C_TEST_FILES)
 	$(CLANGPP_TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(C_INCLUDE_DIR) -o $@ -pthread $(C_TEST_SUITE) $< $(word 2, $^);
 
 
-$(CLANGPP_TEST_EXEC): $(CLANGPP_LIB) $(GTEST_LIB)
+$(CLANGPP_TEST_EXEC): $(CLANGPP_LIB) $(GTEST_LIB) $(CPP_TEST_FILES)
 	$(CLANGPP_TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(CPP_INCLUDE_DIR) -o $@ -pthread $(CPP_TEST_SUITE) $< $(word 2, $^);
 
 # 5) Test Execution
