@@ -21,6 +21,87 @@ void ArrayListTest_smokeTestAddRemove(IList& list) {
 	}
 }
 
+TEST(ArrayList, ICollection_TestConstructor) {
+	ICollection* coll = new ArrayList();
+	ASSERT_EQ(0, coll->getSize());
+	delete coll;
+}
+
+TEST(ArrayList, ICollection_TestAdd) {
+	ICollection* coll = new ArrayList();
+
+	for (int i = 1; i <= 30; ++i) {
+		coll->add(i);
+		ASSERT_EQ(i, coll->getSize());
+	}
+
+	delete coll;
+}
+
+TEST(ArrayList, IList_TestConstructor) {
+	IList* list = new ArrayList();
+	ASSERT_EQ(0, list->getSize());
+	delete list;
+}
+
+TEST(ArrayList, IList_TestAdd) {
+	IList* list = new ArrayList();
+
+	for (int i = 1; i <= 30; ++i) {
+		list->add(i);
+		ASSERT_EQ(i, list->getSize());
+	}
+
+	delete list;
+}
+
+TEST(ArrayList, IList_TestGet) {
+	IList* list = new ArrayList();
+
+	for (int i = 0; i < 30; ++i) {
+		list->add(i);
+	}
+
+	for (int i = 0; i < list->getSize(); ++i) {
+		ASSERT_EQ(i, list->get(i));
+	}
+
+	delete list;
+}
+
+TEST(ArrayList, IList_TestRemove) {
+	IList* list = new ArrayList();
+
+	for (int i = 0; i < 30; ++i) {
+		list->add(i);
+	}
+
+	for (int i = 0; i < list->getSize(); ++i) {
+		ASSERT_EQ(i, list->remove(0));
+	}
+
+	delete list;
+}
+
+TEST(ArrayList, TestIListCopyConstructor) {
+	IList* list = new ArrayList();
+	ArrayListTest_smokeTestAdd(*list);
+
+	ArrayList* other = new ArrayList(*list);
+
+	//I have no idea if this is a valid assertion...
+	ASSERT_NE(((ArrayList*)list), other);
+
+	ASSERT_EQ(list->getSize(), other->getSize());
+	for (int i = 0; i < list->getSize(); ++i) {
+		ASSERT_EQ((*list)[i], (*other)[i]);
+	}
+
+	delete other;
+	delete list;
+}
+
+
 TEST(ArrayList, TestDefaultConstructor) {
 	ArrayList list = ArrayList();
 	ASSERT_EQ(0, list.getSize());
@@ -50,24 +131,6 @@ TEST(ArrayList, TestCopyConstructor) {
 	for (int i = 0; i < list.getSize(); ++i) {
 		ASSERT_EQ(list[i], other[i]);
 	}
-}
-
-TEST(ArrayList, TestIListConstructor) {
-	IList* list = new ArrayList();
-	ArrayListTest_smokeTestAdd(*list);
-
-	ArrayList* other = new ArrayList(*list);
-
-	//I have no idea if this is a valid assertion...
-	ASSERT_NE(((ArrayList*)list), other);
-
-	ASSERT_EQ(list->getSize(), other->getSize());
-	for (int i = 0; i < list->getSize(); ++i) {
-		ASSERT_EQ((*list)[i], (*other)[i]);
-	}
-
-	delete other;
-	delete list;
 }
 
 TEST(ArrayList, TestAssignmentOperator) {

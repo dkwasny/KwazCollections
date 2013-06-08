@@ -26,49 +26,51 @@ void ArrayListTest_smokeTest(ArrayList* list)
 	}
 }
 
-TEST(ArrayList_ICollection, TestConstructor)
+TEST(ArrayList, ICollection_TestConstructor)
 {
 	ICollection* collection = ArrayList_ICollection_create();
 	ASSERT_EQ(0, collection->getSize(collection));
 	collection->destroy(collection);
 }
 
-TEST(ArrayList_ICollection, TestAdd)
+TEST(ArrayList, ICollection_TestAdd)
 {
 	ICollection* collection = ArrayList_ICollection_create();
 
-	int i = 0;
-	for (i = 0; i < 30; ++i)
+	int i = 1;
+	for (i = 1; i <= 30; ++i)
 	{
 		collection->add(collection, i);
+		ASSERT_EQ(i, collection->getSize(collection));
 	}
 
 	ASSERT_EQ(30, collection->getSize(collection));
 	collection->destroy(collection);
 }
 
-TEST(ArrayList_IList, TestConstructor)
+TEST(ArrayList, IList_TestConstructor)
 {
 	IList* list = ArrayList_IList_create(NULL);
 	ASSERT_EQ(0, list->getSize(list));
 	list->destroy(list);	
 }
 
-TEST(ArrayList_IList, TestAdd)
+TEST(ArrayList, IList_TestAdd)
 {
 	IList* list = ArrayList_IList_create(NULL);
 
-	int i = 0;
-	for (i = 0; i < 30; ++i)
+	int i = 1;
+	for (i = 1; i <= 30; ++i)
 	{
 		list->add(list, i);
+		ASSERT_EQ(i, list->getSize(list));
 	}
 
 	ASSERT_EQ(30, list->getSize(list));
 	list->destroy(list);
 }
 
-TEST(ArrayList_IList, TestGet)
+TEST(ArrayList, IList_TestGet)
 {
 	IList* list = ArrayList_IList_create(NULL);
 	
@@ -85,7 +87,7 @@ TEST(ArrayList_IList, TestGet)
 }
 
 
-TEST(ArrayList_IList, TestRemove)
+TEST(ArrayList, IList_TestRemove)
 {
 	IList* list = ArrayList_IList_create(NULL);
 	
