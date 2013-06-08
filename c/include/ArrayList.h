@@ -29,11 +29,14 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "IList.h"
 
 typedef struct {
 	int* values;
 	size_t size;
 	size_t capacity;
+
+	IList* superType;
 } ArrayList;
 
 /* Start extern for c++ */
@@ -41,14 +44,33 @@ typedef struct {
 extern "C" {
 #endif
 
-ArrayList* ArrayList_createDefault();
+/* Constructors
+ * Pass NULL if you do not intend to work with a list's supertype.
+ * e.g: ArrayList_create(NULL):
+ */
+ICollection* ArrayList_ICollection_create();
+IList* ArrayList_IList_create(ICollection* pCollection);
+ArrayList* ArrayList_create(IList* pList);
 ArrayList* ArrayList_createCopy(const ArrayList* pOther);
 
+/* Destructors */
+void ArrayList_ICollection_destroy(ICollection* pCollection);
+void ArrayList_IList_destroy(IList* pList);
 void ArrayList_destroy(ArrayList* pList);
-/* TODO: Maybe a deep destroy?  Frees all entries wuthin the list too? */
-	
+
+/* External and Interface Methods */
+int ArrayList_ICollection_getSize(const ICollection* pCollection);
+int ArrayList_IList_getSize(const IList* pList);
+
+void ArrayList_ICollection_add(ICollection* pCollection, const int pValue);
+void ArrayList_IList_add(IList* pList, const int pValue);
 void ArrayList_add(ArrayList* pList, const int pValue);
+
+int ArrayList_IList_remove(IList* pList, const size_t pIndex);
 int ArrayList_remove(ArrayList* pList, const size_t pIndex);
+
+int ArrayList_IList_get(const IList* pList, const size_t pIndex);
+int ArrayList_get(const ArrayList* pList, const size_t pIndex);
 
 /* Internal methods */
 int* ArrayList_allocateArray(
