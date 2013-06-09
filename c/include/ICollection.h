@@ -1,5 +1,5 @@
-#ifndef _C_KWAZ_COLLECTION_
-#define _C_KWAZ_COLLECTION_
+#ifndef _C_KWAZ_ICOLLECTION_
+#define _C_KWAZ_ICOLLECTION_
 
 typedef struct ICollection
 {

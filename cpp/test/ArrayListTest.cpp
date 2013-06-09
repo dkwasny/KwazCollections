@@ -22,13 +22,13 @@ void ArrayListTest_smokeTestAddRemove(IList& list) {
 }
 
 TEST(ArrayList, ICollection_TestConstructor) {
-	ICollection* coll = new ArrayList();
+	ICollection* coll = new ArrayList(10, 2, 4, 2);
 	ASSERT_EQ(0, coll->getSize());
 	delete coll;
 }
 
 TEST(ArrayList, ICollection_TestAdd) {
-	ICollection* coll = new ArrayList();
+	ICollection* coll = new ArrayList(10, 2, 4, 2);
 
 	for (int i = 1; i <= 30; ++i) {
 		coll->add(i);
@@ -39,13 +39,13 @@ TEST(ArrayList, ICollection_TestAdd) {
 }
 
 TEST(ArrayList, IList_TestConstructor) {
-	IList* list = new ArrayList();
+	IList* list = new ArrayList(10, 2, 4, 2);
 	ASSERT_EQ(0, list->getSize());
 	delete list;
 }
 
 TEST(ArrayList, IList_TestAdd) {
-	IList* list = new ArrayList();
+	IList* list = new ArrayList(10, 2, 4, 2);
 
 	for (int i = 1; i <= 30; ++i) {
 		list->add(i);
@@ -56,7 +56,7 @@ TEST(ArrayList, IList_TestAdd) {
 }
 
 TEST(ArrayList, IList_TestGet) {
-	IList* list = new ArrayList();
+	IList* list = new ArrayList(10, 2, 4, 2);
 
 	for (int i = 0; i < 30; ++i) {
 		list->add(i);
@@ -70,7 +70,7 @@ TEST(ArrayList, IList_TestGet) {
 }
 
 TEST(ArrayList, IList_TestRemove) {
-	IList* list = new ArrayList();
+	IList* list = new ArrayList(10, 2, 4, 2);
 
 	for (int i = 0; i < 30; ++i) {
 		list->add(i);
@@ -84,7 +84,7 @@ TEST(ArrayList, IList_TestRemove) {
 }
 
 TEST(ArrayList, TestIListCopyConstructor) {
-	IList* list = new ArrayList();
+	IList* list = new ArrayList(10, 2, 4, 2);
 	ArrayListTest_smokeTestAdd(*list);
 
 	ArrayList* other = new ArrayList(*list);
@@ -121,7 +121,7 @@ TEST(ArrayList, TestCustomConstructorZeroCapacity) {
 }
 
 TEST(ArrayList, TestCopyConstructor) {
-	ArrayList list = ArrayList();
+	ArrayList list = ArrayList(10, 2, 4, 2);
 	ArrayListTest_smokeTestAdd(list);
 
 	ArrayList other = ArrayList(list);
@@ -134,7 +134,7 @@ TEST(ArrayList, TestCopyConstructor) {
 }
 
 TEST(ArrayList, TestAssignmentOperator) {
-	ArrayList list = ArrayList();
+	ArrayList list = ArrayList(10, 2, 4, 2);
 	ArrayListTest_smokeTestAdd(list);
 
 	ArrayList other = list;
@@ -147,10 +147,10 @@ TEST(ArrayList, TestAssignmentOperator) {
 }
 
 TEST(ArrayList, TestAddNoReallocation) {
-	ArrayList list = ArrayList();
+	ArrayList list = ArrayList(10, 2, 4, 2);
 
 	int i = 0;
- 	for (; i < ARRAY_LIST_INITIAL_CAPACITY; ++i) {
+ 	for (; i < 10; ++i) {
                 list.add(i);
         }
 
@@ -159,10 +159,10 @@ TEST(ArrayList, TestAddNoReallocation) {
 }
 
 TEST(ArrayList, TestAddOneReallocation) {
-	ArrayList list = ArrayList();
+	ArrayList list = ArrayList(10, 2, 4, 2);
 
 	int i = 0;
-	for (; i < ARRAY_LIST_INITIAL_CAPACITY; ++i) {
+	for (; i < 10; ++i) {
 		list.add(i);
 	}
 	ArrayListTest_checkContents(list);
@@ -172,7 +172,7 @@ TEST(ArrayList, TestAddOneReallocation) {
 	ASSERT_EQ(i, list.getSize());
 	ArrayListTest_checkContents(list);
 
-	for (; i < ARRAY_LIST_INITIAL_CAPACITY + 3; ++i) {
+	for (; i < 13; ++i) {
 		list.add(i);
 	}
 
@@ -184,15 +184,15 @@ TEST(ArrayList, TestAddOneReallocation) {
 // pretty much boiled down to an arbitrary stress test
 // that mimics the number of iterations done in the C tests.
 TEST(ArrayList, TestAddStressTest) {
-	ArrayList list = ArrayList();
+	ArrayList list = ArrayList(10, 2, 4, 2);
 	unsigned int i = 0;
-	unsigned int goal = ARRAY_LIST_INITIAL_CAPACITY;
-	for (int iteration = 0; iteration < 20; ++iteration) {
+	unsigned int goal = 10;
+	for (int iteration = 0; iteration < 10; ++iteration) {
 		for (; i < goal; ++i) {
 			list.add(i);
 		}
 		ASSERT_EQ(i, list.getSize());
 		ArrayListTest_checkContents(list);
-		goal = i * ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER;
+		goal = i * 2;
 	}
 }

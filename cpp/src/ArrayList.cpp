@@ -1,11 +1,16 @@
 #include "ArrayList.hpp"
 #include "IndexOutOfBoundsError.hpp"
 
+static const size_t DEFAULT_CAPACITY = 10;
+static const unsigned int DEFAULT_ADD_REALLOCATION_MULTIPLIER = 2;
+static const unsigned int DEFAULT_REMOVE_REALLOCATION_THRESHOLD = 4;
+static const unsigned int DEFAULT_REMOVE_REALLOCATION_DIVISOR = 2;
+
 ArrayList::ArrayList() :
-	initialCapacity(ARRAY_LIST_INITIAL_CAPACITY),
-	addReallocationMultiplier(ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER),
-	removeReallocationThreshold(ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD),
-	removeReallocationDivisor(ARRAY_LIST_REMOVE_REALLOCATION_DIVISOR)
+	initialCapacity(DEFAULT_CAPACITY),
+	addReallocationMultiplier(DEFAULT_ADD_REALLOCATION_MULTIPLIER),
+	removeReallocationThreshold(DEFAULT_REMOVE_REALLOCATION_THRESHOLD),
+	removeReallocationDivisor(DEFAULT_REMOVE_REALLOCATION_DIVISOR)
 {
 	size = 0;
 	capacity = initialCapacity;
@@ -40,10 +45,10 @@ ArrayList::ArrayList(const ArrayList& pOther) :
 }
 
 ArrayList::ArrayList(const IList& pOther) :
-	initialCapacity(ARRAY_LIST_INITIAL_CAPACITY),
-	addReallocationMultiplier(ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER),
-	removeReallocationThreshold(ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD),
-	removeReallocationDivisor(ARRAY_LIST_REMOVE_REALLOCATION_DIVISOR)
+	initialCapacity(DEFAULT_CAPACITY),
+	addReallocationMultiplier(DEFAULT_ADD_REALLOCATION_MULTIPLIER),
+	removeReallocationThreshold(DEFAULT_REMOVE_REALLOCATION_THRESHOLD),
+	removeReallocationDivisor(DEFAULT_REMOVE_REALLOCATION_DIVISOR)
 {
 	size = 0;
 	capacity = pOther.getSize() * addReallocationMultiplier;

@@ -1,5 +1,5 @@
-#ifndef _I_LIST_
-#define _I_LIST_
+#ifndef _CPP_KWAZ_ILIST_
+#define _CPP_KWAZ_ILIST_
 
 #include <cstddef>
 #include "ICollection.hpp"
