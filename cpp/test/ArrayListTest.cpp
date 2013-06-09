@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "ArrayList.hpp"
+#include <cmath>
 
 void ArrayListTest_checkContents(IList& list) {
 	for (int i = 0; i < list.getSize(); ++i) {
@@ -21,12 +22,6 @@ void ArrayListTest_smokeTestAddRemove(IList& list) {
 	}
 }
 
-TEST(ArrayList, ICollection_TestConstructor) {
-	ICollection* coll = new ArrayList(10, 2, 4, 2);
-	ASSERT_EQ(0, coll->getSize());
-	delete coll;
-}
-
 TEST(ArrayList, ICollection_TestAdd) {
 	ICollection* coll = new ArrayList(10, 2, 4, 2);
 
@@ -36,12 +31,6 @@ TEST(ArrayList, ICollection_TestAdd) {
 	}
 
 	delete coll;
-}
-
-TEST(ArrayList, IList_TestConstructor) {
-	IList* list = new ArrayList(10, 2, 4, 2);
-	ASSERT_EQ(0, list->getSize());
-	delete list;
 }
 
 TEST(ArrayList, IList_TestAdd) {
@@ -104,18 +93,21 @@ TEST(ArrayList, TestIListCopyConstructor) {
 
 TEST(ArrayList, TestDefaultConstructor) {
 	ArrayList list = ArrayList();
+	ASSERT_EQ(10, list.getCapacity());
 	ASSERT_EQ(0, list.getSize());
 	ArrayListTest_smokeTestAddRemove(list);
 }
 
 TEST(ArrayList, TestCustomConstructor) {
 	ArrayList list = ArrayList(1,4,3,2);
+	ASSERT_EQ(1, list.getCapacity());
 	ASSERT_EQ(0, list.getSize());
 	ArrayListTest_smokeTestAddRemove(list);
 }
 
 TEST(ArrayList, TestCustomConstructorZeroCapacity) {
 	ArrayList list = ArrayList(0,4,3,2);
+	ASSERT_EQ(0, list.getCapacity());
 	ASSERT_EQ(0, list.getSize());
 	ArrayListTest_smokeTestAddRemove(list);
 }
@@ -149,12 +141,12 @@ TEST(ArrayList, TestAssignmentOperator) {
 TEST(ArrayList, TestAddNoReallocation) {
 	ArrayList list = ArrayList(10, 2, 4, 2);
 
-	int i = 0;
- 	for (; i < 10; ++i) {
+ 	for (int i = 0; i < 10; ++i) {
                 list.add(i);
+		ASSERT_EQ(i+1, list.getSize());
+        	ASSERT_EQ(10, list.getCapacity());
         }
 
-        ASSERT_EQ(i, list.getSize());
         ArrayListTest_checkContents(list);
 }
 
@@ -165,18 +157,24 @@ TEST(ArrayList, TestAddOneReallocation) {
 	for (; i < 10; ++i) {
 		list.add(i);
 	}
+
+	ASSERT_EQ(10, list.getSize());
+        ASSERT_EQ(list.getSize(), list.getCapacity());
 	ArrayListTest_checkContents(list);
 
 	list.add(i++); 
 
-	ASSERT_EQ(i, list.getSize());
+	ASSERT_NE(list.getCapacity(), list.getSize());
+	ASSERT_EQ(11, list.getSize());
+	ASSERT_EQ(20, list.getCapacity());
 	ArrayListTest_checkContents(list);
 
-	for (; i < 13; ++i) {
+	for (; i < list.getCapacity(); ++i) {
 		list.add(i);
 	}
 
-	ASSERT_EQ(i, list.getSize());
+	ASSERT_EQ(20, list.getSize());
+	ASSERT_EQ(list.getSize(), list.getCapacity());
 	ArrayListTest_checkContents(list);
 }
 
@@ -186,13 +184,24 @@ TEST(ArrayList, TestAddOneReallocation) {
 TEST(ArrayList, TestAddStressTest) {
 	ArrayList list = ArrayList(10, 2, 4, 2);
 	unsigned int i = 0;
-	unsigned int goal = 10;
 	for (int iteration = 0; iteration < 10; ++iteration) {
-		for (; i < goal; ++i) {
+		for (; i < list.getCapacity(); ++i) {
 			list.add(i);
 		}
+
+		int expectedCapacity = 10 * pow(2, iteration);
+		ASSERT_EQ(expectedCapacity, list.getCapacity());
+		ASSERT_EQ(list.getCapacity(), list.getSize());	
 		ASSERT_EQ(i, list.getSize());
 		ArrayListTest_checkContents(list);
-		goal = i * 2;
+
+		list.add(i++);
+
+		expectedCapacity = 10 * pow(2, iteration + 1);
+		ASSERT_EQ(expectedCapacity, list.getCapacity());
+		ASSERT_NE(list.getCapacity(), list.getSize());	
+		ASSERT_EQ(i, list.getSize());
+		ArrayListTest_checkContents(list);
+
 	}
 }

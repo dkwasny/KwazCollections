@@ -90,8 +90,26 @@ TEST(ArrayList, IList_TestRemove)
 
 TEST(ArrayList, TestDefaultConstructor)
 {
-	ArrayList* list = ArrayList_create(10, 2, 4, 2);
+	ArrayList* list = ArrayList_createDefault();
 	ASSERT_EQ(10, list->getCapacity(list));
+	ASSERT_EQ(0, list->getSize(list));
+	ArrayListTest_smokeTest(list);
+	list->destroy(list);
+}
+
+TEST(ArrayList, TestCustomConstructor)
+{
+	ArrayList* list = ArrayList_create(1, 2, 3, 4);
+	ASSERT_EQ(1, list->getCapacity(list));
+	ASSERT_EQ(0, list->getSize(list));
+	ArrayListTest_smokeTest(list);
+	list->destroy(list);
+}
+
+TEST(ArrayList, TestCustomConstructorZeroCapacity)
+{
+	ArrayList* list = ArrayList_create(0, 2, 3, 4);
+	ASSERT_EQ(0, list->getCapacity(list));
 	ASSERT_EQ(0, list->getSize(list));
 	ArrayListTest_smokeTest(list);
 	list->destroy(list);

@@ -25,7 +25,16 @@ ArrayList::ArrayList(
 	) :
 	initialCapacity(pCapacity),
 	addReallocationMultiplier(pAddReallocationMultiplier),
-	removeReallocationThreshold(pRemoveReallocationThreshold),
+	/* Safety Dance:
+ 	 * Ensure that the remove reallocation threshold is NEVER lower
+ 	 * than the rempove reallocation threshold.
+ 	 * Set the threshold to double the divisor if this happens.
+ 	 */
+	removeReallocationThreshold(
+		pRemoveReallocationThreshold < pRemoveReallocationDivisor
+			? pRemoveReallocationDivisor * 2
+			: pRemoveReallocationThreshold
+	),
 	removeReallocationDivisor(pRemoveReallocationDivisor)
 {
 	size = 0;
@@ -74,6 +83,10 @@ ArrayList& ArrayList::operator=(const ArrayList& pOther) {
 
 size_t ArrayList::getSize() const {
 	return size;	
+}
+
+size_t ArrayList::getCapacity() const {
+	return capacity;
 }
 
 void ArrayList::add(const int pValue) {
