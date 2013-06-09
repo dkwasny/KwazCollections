@@ -1,42 +1,80 @@
-#ifndef _KWAZ_ARRAY_LIST_
-#define _KWAZ_ARRAY_LIST_
+#ifndef _C_KWAZ_ARRAY_LIST_
+#define _C_KWAZ_ARRAY_LIST_
 
-/* Default configuration values */
-#define ARRAY_LIST_INITIAL_CAPACITY 10
-
-/* The multiplier used to expand an ArrayList's backing array whenever the
- * list's size equals its capacity.
+/* Description:
+ * 	This is just a plain old list backed by a normal array.
  *
- * EX: A multiplier of 2 doubles the capacity.
- */
-#define ARRAY_LIST_ADD_REALLOCATION_MULTIPLIER 2
-
-/* The threshold value is multiplied by an ArrayList's size.
- * If the resulting value is <= the ArrayList's capacity,
- * a reallocation (shrink) of the backing array is performed.
+ * 	This allows for good random reads but will take up more memory than
+ * 	a linked list.
+ * 	
+ * 	One difference between this ArrayList and other implementations is
+ * 	that this implementation will resize the backing array if enough
+ * 	remove operations happen.
+ * 
  *
- * EX: A threshold of 4 requires <= 25% of an ArrayList's capacity
- * to be used before triggering a reallocation during removal.
- */
-#define ARRAY_LIST_REMOVE_REALLOCATION_THRESHOLD 4
-
-/* The divisor used to shrink an ArrayList's backing array whenever the
- * list's size * reallocation threshold is greater than the list's capacity.
+ * Configuration value explination:
+ * 
+ * Capacity (default 10):
+ * 	The ArrayList's capacity determines how many elements the list can contain
+ * 	before resisizing the backing array.
+ * 	
+ * 	NOTE: While this changes as you use the list, the backing array shall never
+ * 	shrink below the original capacity used to create the list.
+ * 
+ * Add Reallocation Multiplier (default 2):
+ * 	The multiplier used to expand an ArrayList's backing array whenever the
+ * 	list's size equals its capacity.
  *
- * EX: A divisor of 2 halfs the capacity.
+ * 	EX: A multiplier of 2 doubles the capacity.
+ * 
+ * Remove Reallocation Threshold (default 4):
+ * 	The threshold value is multiplied by an ArrayList's size during
+ * 	every remove operation.
+ * 	If the resulting value is <= the ArrayList's capacity,
+ * 	a reallocation (shrink) of the backing array is performed.
+ *
+ * 	EX: A threshold of 4 requires <= 25% of an ArrayList's capacity
+ * 	to be used before triggering a reallocation during removal.
+ *
+ * 	NOTE: This value must never be below the remove reallocation divisor.
+ * 	If this is true, the constructor will override the provided value with
+ * 	double the remove reallocation divisor.
+ *
+ * Remove Reallocation Divisor (default 2):
+ * 	The divisor used to shrink an ArrayList's backing array whenever the
+ * 	list's size * reallocation threshold is greater than the list's capacity.
+ *
+ * 	EX: A divisor of 2 halfs the capacity.
  */
-#define ARRAY_LIST_REMOVE_REALLOCATION_DIVISOR 2
 
 #include <stdlib.h>
 #include <string.h>
 #include "IList.h"
 
-typedef struct {
-	int* values;
-	size_t size;
-	size_t capacity;
+/* The internal ArrayList structure.
+ * Defined in the *.c file
+ */
+struct _ArrayList;
+
+/* The public interface structure.
+ */
+typedef struct ArrayList
+{
+	/* ICollection Methods */
+	int (* const getSize)(const struct ArrayList* pList);
+	void (* const destroy)(struct ArrayList* pList);
+	void (* const add)(struct ArrayList* pList, const int pValue);
+
+	/* IList Methods */
+	int (* const get)(const struct ArrayList* pList, const size_t pIndex);
+	int (* const remove)(struct ArrayList* pList, const size_t pIndex);
+
+	/* ArrayList Methods */
+	int (* const getCapacity)(const struct ArrayList* pList);
 
 	IList* superType;
+	struct _ArrayList* impl;
+
 } ArrayList;
 
 /* Start extern for c++ */
@@ -44,39 +82,13 @@ typedef struct {
 extern "C" {
 #endif
 
-/* Constructors
- * Pass NULL if you do not intend to work with a list's supertype.
- * e.g: ArrayList_create(NULL):
- */
-ICollection* ArrayList_ICollection_create();
-IList* ArrayList_IList_create(ICollection* pCollection);
-ArrayList* ArrayList_create(IList* pList);
-ArrayList* ArrayList_createCopy(const ArrayList* pOther);
-
-/* Destructors */
-void ArrayList_ICollection_destroy(ICollection* pCollection);
-void ArrayList_IList_destroy(IList* pList);
-void ArrayList_destroy(ArrayList* pList);
-
-/* External and Interface Methods */
-int ArrayList_ICollection_getSize(const ICollection* pCollection);
-int ArrayList_IList_getSize(const IList* pList);
-
-void ArrayList_ICollection_add(ICollection* pCollection, const int pValue);
-void ArrayList_IList_add(IList* pList, const int pValue);
-void ArrayList_add(ArrayList* pList, const int pValue);
-
-int ArrayList_IList_remove(IList* pList, const size_t pIndex);
-int ArrayList_remove(ArrayList* pList, const size_t pIndex);
-
-int ArrayList_IList_get(const IList* pList, const size_t pIndex);
-int ArrayList_get(const ArrayList* pList, const size_t pIndex);
-
-/* Internal methods */
-int* ArrayList_allocateArray(
-	const int* pOrigValues,
-	const size_t pOrigValuesSize,
-	const size_t pNewCapacity
+/* Constructors */
+ArrayList* ArrayList_createDefault();
+ArrayList* ArrayList_create(
+	const size_t pCapacity,
+	const unsigned int pAddReallocationMultiplier,
+	const unsigned int pRemoveReallocationThreshold,
+	const unsigned int pRemoveReallocationDivisor
 );
 
 /* Close c++ extern */
