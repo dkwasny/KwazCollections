@@ -2,30 +2,38 @@
 #include "ArrayList.hpp"
 #include <cmath>
 
-void ArrayListTest_checkContents(IList& list) {
-	for (int i = 0; i < list.getSize(); ++i) {
+void ArrayListTest_checkContents(IList& list)
+{
+	for (int i = 0; i < list.getSize(); ++i)
+	{
 		ASSERT_EQ(i, list[i]);
 	}
 }
 
-void ArrayListTest_smokeTestAdd(IList& list) {
-	for (int i = 0; i < 20; ++i) {
+void ArrayListTest_smokeTestAdd(IList& list)
+{
+	for (int i = 0; i < 20; ++i)
+	{
 		list.add(i);
 	}
 	ArrayListTest_checkContents(list);
 }
 
-void ArrayListTest_smokeTestAddRemove(IList& list) {
+void ArrayListTest_smokeTestAddRemove(IList& list)
+{
 	ArrayListTest_smokeTestAdd(list);
-	for (int i = 0; i < 20; ++i) {
+	for (int i = 0; i < 20; ++i)
+	{
 		list.remove(0);
 	}
 }
 
-TEST(ArrayList, ICollection_TestAdd) {
+TEST(ArrayList, ICollection_TestAdd)
+{
 	ICollection* coll = new ArrayList(10, 2, 4, 2);
 
-	for (int i = 1; i <= 30; ++i) {
+	for (int i = 1; i <= 30; ++i)
+	{
 		coll->add(i);
 		ASSERT_EQ(i, coll->getSize());
 	}
@@ -33,10 +41,12 @@ TEST(ArrayList, ICollection_TestAdd) {
 	delete coll;
 }
 
-TEST(ArrayList, IList_TestAdd) {
+TEST(ArrayList, IList_TestAdd)
+{
 	IList* list = new ArrayList(10, 2, 4, 2);
 
-	for (int i = 1; i <= 30; ++i) {
+	for (int i = 1; i <= 30; ++i)
+	{
 		list->add(i);
 		ASSERT_EQ(i, list->getSize());
 	}
@@ -44,35 +54,42 @@ TEST(ArrayList, IList_TestAdd) {
 	delete list;
 }
 
-TEST(ArrayList, IList_TestGet) {
+TEST(ArrayList, IList_TestGet)
+{
 	IList* list = new ArrayList(10, 2, 4, 2);
 
-	for (int i = 0; i < 30; ++i) {
+	for (int i = 0; i < 30; ++i)
+	{
 		list->add(i);
 	}
 
-	for (int i = 0; i < list->getSize(); ++i) {
+	for (int i = 0; i < list->getSize(); ++i)
+	{
 		ASSERT_EQ(i, list->get(i));
 	}
 
 	delete list;
 }
 
-TEST(ArrayList, IList_TestRemove) {
+TEST(ArrayList, IList_TestRemove)
+{
 	IList* list = new ArrayList(10, 2, 4, 2);
 
-	for (int i = 0; i < 30; ++i) {
+	for (int i = 0; i < 30; ++i)
+	{
 		list->add(i);
 	}
 
-	for (int i = 0; i < list->getSize(); ++i) {
+	for (int i = 0; i < list->getSize(); ++i)
+	{
 		ASSERT_EQ(i, list->remove(0));
 	}
 
 	delete list;
 }
 
-TEST(ArrayList, TestIListCopyConstructor) {
+TEST(ArrayList, TestIListCopyConstructor)
+{
 	IList* list = new ArrayList(10, 2, 4, 2);
 	ArrayListTest_smokeTestAdd(*list);
 
@@ -82,7 +99,8 @@ TEST(ArrayList, TestIListCopyConstructor) {
 	ASSERT_NE(((ArrayList*)list), other);
 
 	ASSERT_EQ(list->getSize(), other->getSize());
-	for (int i = 0; i < list->getSize(); ++i) {
+	for (int i = 0; i < list->getSize(); ++i)
+	{
 		ASSERT_EQ((*list)[i], (*other)[i]);
 	}
 
@@ -90,29 +108,32 @@ TEST(ArrayList, TestIListCopyConstructor) {
 	delete list;
 }
 
-
-TEST(ArrayList, TestDefaultConstructor) {
+TEST(ArrayList, TestDefaultConstructor)
+{
 	ArrayList list = ArrayList();
 	ASSERT_EQ(10, list.getCapacity());
 	ASSERT_EQ(0, list.getSize());
 	ArrayListTest_smokeTestAddRemove(list);
 }
 
-TEST(ArrayList, TestCustomConstructor) {
+TEST(ArrayList, TestCustomConstructor)
+{
 	ArrayList list = ArrayList(1,4,3,2);
 	ASSERT_EQ(1, list.getCapacity());
 	ASSERT_EQ(0, list.getSize());
 	ArrayListTest_smokeTestAddRemove(list);
 }
 
-TEST(ArrayList, TestCustomConstructorZeroCapacity) {
+TEST(ArrayList, TestCustomConstructorZeroCapacity)
+{
 	ArrayList list = ArrayList(0,4,3,2);
 	ASSERT_EQ(0, list.getCapacity());
 	ASSERT_EQ(0, list.getSize());
 	ArrayListTest_smokeTestAddRemove(list);
 }
 
-TEST(ArrayList, TestCopyConstructor) {
+TEST(ArrayList, TestCopyConstructor)
+{
 	ArrayList list = ArrayList(10, 2, 4, 2);
 	ArrayListTest_smokeTestAdd(list);
 
@@ -120,12 +141,14 @@ TEST(ArrayList, TestCopyConstructor) {
 	ASSERT_NE(&list, &other);	
 
 	ASSERT_EQ(list.getSize(), other.getSize());
-	for (int i = 0; i < list.getSize(); ++i) {
+	for (int i = 0; i < list.getSize(); ++i)
+	{
 		ASSERT_EQ(list[i], other[i]);
 	}
 }
 
-TEST(ArrayList, TestAssignmentOperator) {
+TEST(ArrayList, TestAssignmentOperator)
+{
 	ArrayList list = ArrayList(10, 2, 4, 2);
 	ArrayListTest_smokeTestAdd(list);
 
@@ -133,15 +156,18 @@ TEST(ArrayList, TestAssignmentOperator) {
 	ASSERT_NE(&list, &other);	
 
 	ASSERT_EQ(list.getSize(), other.getSize());
-	for (int i = 0; i < list.getSize(); ++i) {
+	for (int i = 0; i < list.getSize(); ++i)
+	{
 		ASSERT_EQ(list[i], other[i]);
 	}
 }
 
-TEST(ArrayList, TestAddNoReallocation) {
+TEST(ArrayList, TestAddNoReallocation)
+{
 	ArrayList list = ArrayList(10, 2, 4, 2);
 
- 	for (int i = 0; i < 10; ++i) {
+ 	for (int i = 0; i < 10; ++i)
+	{
                 list.add(i);
 		ASSERT_EQ(i+1, list.getSize());
         	ASSERT_EQ(10, list.getCapacity());
@@ -150,11 +176,13 @@ TEST(ArrayList, TestAddNoReallocation) {
         ArrayListTest_checkContents(list);
 }
 
-TEST(ArrayList, TestAddOneReallocation) {
+TEST(ArrayList, TestAddOneReallocation)
+{
 	ArrayList list = ArrayList(10, 2, 4, 2);
 
 	int i = 0;
-	for (; i < 10; ++i) {
+	for (; i < 10; ++i)
+	{
 		list.add(i);
 	}
 
@@ -169,7 +197,8 @@ TEST(ArrayList, TestAddOneReallocation) {
 	ASSERT_EQ(20, list.getCapacity());
 	ArrayListTest_checkContents(list);
 
-	for (; i < list.getCapacity(); ++i) {
+	for (; i < list.getCapacity(); ++i)
+	{
 		list.add(i);
 	}
 
@@ -178,11 +207,14 @@ TEST(ArrayList, TestAddOneReallocation) {
 	ArrayListTest_checkContents(list);
 }
 
-TEST(ArrayList, TestAddStressTest) {
+TEST(ArrayList, TestAddStressTest)
+{
 	ArrayList list = ArrayList(10, 2, 4, 2);
 	unsigned int i = 0;
-	for (int iteration = 0; iteration < 10; ++iteration) {
-		for (; i < list.getCapacity(); ++i) {
+	for (int iteration = 0; iteration < 10; ++iteration)
+	{
+		for (; i < list.getCapacity(); ++i)
+		{
 			list.add(i);
 		}
 

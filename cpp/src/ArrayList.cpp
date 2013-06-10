@@ -66,17 +66,21 @@ ArrayList::ArrayList(const IList& pOther) :
 	size = 0;
 	capacity = pOther.getSize() * addReallocationMultiplier;
 	values = new int[capacity];
-	for (size_t i = 0; i < pOther.getSize(); ++i) {
+	for (size_t i = 0; i < pOther.getSize(); ++i)
+	{
 		add(pOther[i]);
 	}
 }
 
-ArrayList::~ArrayList() {
+ArrayList::~ArrayList()
+{
 	delete[] values;
 }
 
-ArrayList& ArrayList::operator=(const ArrayList& pOther) {
-	if (this != &pOther) {
+ArrayList& ArrayList::operator=(const ArrayList& pOther)
+{
+	if (this != &pOther)
+	{
 		values = allocateArray(
 			pOther.values,
 			pOther.capacity,
@@ -89,19 +93,27 @@ ArrayList& ArrayList::operator=(const ArrayList& pOther) {
 	return *this;
 }
 
-size_t ArrayList::getSize() const {
+size_t ArrayList::getSize() const
+{
 	return size;	
 }
 
-size_t ArrayList::getCapacity() const {
+size_t ArrayList::getCapacity() const
+{
 	return capacity;
 }
 
-void ArrayList::add(const int pValue) {
+void ArrayList::add(const int pValue)
+{
 	// Expand the array if we pass a specified threshold
-	if (capacity == size) {
+	if (capacity == size)
+	{
 		size_t newCapacity = capacity * addReallocationMultiplier;
-		if (newCapacity == 0) { newCapacity++; }  // Gotta handle 0...
+		// Gotta handle 0...
+		if (newCapacity == 0)
+		{
+			newCapacity++;
+		}
 		int* newValues = allocateArray(values, size, newCapacity);
 		delete[] values;
 		values = newValues;
@@ -111,8 +123,10 @@ void ArrayList::add(const int pValue) {
 	values[size++] = pValue;
 }
 
-int ArrayList::remove(const size_t pIndex) {	
-	if (pIndex >= size) {
+int ArrayList::remove(const size_t pIndex)
+{
+	if (pIndex >= size)
+	{
 		// TODO: Deal with sprintf later...pain in the...
 		string msg = "Exception during ArrayList remove";
 		throw IndexOutOfBoundsError(msg);
@@ -121,7 +135,8 @@ int ArrayList::remove(const size_t pIndex) {
 	int removedVal = values[pIndex];
 	
 	--size;
-	for (size_t i = pIndex; i < size; ++i) {
+	for (size_t i = pIndex; i < size; ++i)
+	{
 		values[i] = values[i + 1];
 	}
 	
@@ -143,8 +158,10 @@ int ArrayList::remove(const size_t pIndex) {
 	return removedVal;	
 }
 
-int& ArrayList::get(size_t pIndex) const {
-	if (pIndex >= size) {
+int& ArrayList::get(size_t pIndex) const
+{
+	if (pIndex >= size)
+	{
 		// TODO: Deal with sprintf later...pain in the...
 		string msg = "Exception during ArrayList get";
 		throw IndexOutOfBoundsError(msg);

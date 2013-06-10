@@ -1,7 +1,8 @@
 #ifndef _CPP_KWAZ_ICOLLECTION_
 #define _CPP_KWAZ_ICOLLECTION_
 
-class ICollection {
+class ICollection
+{
 	public:
 		virtual ~ICollection() {};
 		

@@ -224,12 +224,14 @@ TEST(ArrayList, TestRemoveOneReallocation) {
 
 	int i = 0;
 	int currCapacity = list->getCapacity(list);
-	for (int i = 0; i < currCapacity + 1; ++i) {
+	for (int i = 0; i < currCapacity + 1; ++i)
+	{
 		list->add(list, i);
 	}
 
 	int oldSize = list->getSize(list);
-	for (int i = 0; i < 6;) {
+	for (int i = 0; i < 6;)
+	{
 		ASSERT_EQ(i++, list->remove(list, 0));
 		ASSERT_EQ(oldSize-i, list->getSize(list));
 		ASSERT_EQ(20, list->getCapacity(list));
@@ -256,4 +258,8 @@ TEST(ArrayList, TestRemoveOneReallocation) {
 }
 
 TEST(ArrayList, TestRemoveMultipleReallocation) {
+	for (int iteration = 0; iteration < 10; ++iteration)
+	{
+	}
+
 }

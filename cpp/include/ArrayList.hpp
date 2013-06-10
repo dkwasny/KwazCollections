@@ -50,7 +50,8 @@
 #include "IList.hpp"
 #include <cstring>
 
-class ArrayList : public IList {
+class ArrayList : public IList
+{
 	public:
 		ArrayList();
 		ArrayList(
