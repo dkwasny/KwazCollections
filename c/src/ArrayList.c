@@ -91,7 +91,7 @@ static int _ArrayList_IList_getSize(const IList* pList)
 	return _ArrayList_ArrayList_getSize(pList->subType);
 }
 
-int _ArrayList_ICollection_getSize(const ICollection* pCollection)
+static int _ArrayList_ICollection_getSize(const ICollection* pCollection)
 {
 	return _ArrayList_IList_getSize(pCollection->subType);
 }
