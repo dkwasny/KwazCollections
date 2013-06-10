@@ -2,15 +2,21 @@
 #include "ArrayList.hpp"
 #include <cmath>
 
-void ArrayListTest_checkContents(IList& list)
+// Helper methods
+static void ArrayListTest_checkContents(IList& list, int offset)
 {
-	for (int i = 0; i < list.getSize(); ++i)
+	for(size_t i = 0; i < list.getSize(); ++i)
 	{
-		ASSERT_EQ(i, list[i]);
-	}
+		ASSERT_EQ(offset + i, list[i]);
+	}	
 }
 
-void ArrayListTest_smokeTestAdd(IList& list)
+static void ArrayListTest_checkContents(IList& list)
+{
+	ArrayListTest_checkContents(list, 0);	
+}
+
+static void ArrayListTest_smokeTestAdd(IList& list)
 {
 	for (int i = 0; i < 20; ++i)
 	{
@@ -19,7 +25,7 @@ void ArrayListTest_smokeTestAdd(IList& list)
 	ArrayListTest_checkContents(list);
 }
 
-void ArrayListTest_smokeTestAddRemove(IList& list)
+static void ArrayListTest_smokeTestAddRemove(IList& list)
 {
 	ArrayListTest_smokeTestAdd(list);
 	for (int i = 0; i < 20; ++i)
@@ -28,6 +34,7 @@ void ArrayListTest_smokeTestAddRemove(IList& list)
 	}
 }
 
+// Actual Tests
 TEST(ArrayList, ICollection_TestAdd)
 {
 	ICollection* coll = new ArrayList(10, 2, 4, 2);
@@ -232,5 +239,113 @@ TEST(ArrayList, TestAddStressTest)
 		ASSERT_EQ(i, list.getSize());
 		ArrayListTest_checkContents(list);
 
+	}
+}
+
+TEST(ArrayList, TestRemoveNoReallocation)
+{
+	ArrayList list = ArrayList(10, 2, 4, 2);
+
+	for (int i = 0; i < list.getCapacity(); ++i)
+	{
+		list.add(i);
+	}
+
+	ASSERT_EQ(10, list.getSize());
+	ASSERT_EQ(list.getSize(), list.getCapacity());
+
+	int oldSize = list.getSize();
+	for (int i = 0; i < oldSize;)
+	{
+		ASSERT_EQ(i++, list.remove(0));
+		ASSERT_EQ(oldSize-i, list.getSize());
+		ASSERT_EQ(oldSize, list.getCapacity());
+		ArrayListTest_checkContents(list, i);
+	}
+
+	ASSERT_EQ(0, list.getSize());
+}
+
+TEST(ArrayList, TestRemoveOneReallocation)
+{
+	ArrayList list = ArrayList(10, 2, 4, 2);
+
+	int i = 0;
+	int currCapacity = list.getCapacity();
+	for (int i = 0; i < currCapacity + 1; ++i)
+	{
+		list.add(i);
+	}
+
+	int oldSize = list.getSize();
+	for (int i = 0; i < 6;)
+	{
+		ASSERT_EQ(i++, list.remove(0));
+		ASSERT_EQ(oldSize-i, list.getSize());
+		ASSERT_EQ(20, list.getCapacity());
+		ArrayListTest_checkContents(list, i);
+	}
+	
+	int oldCapacity = list.getCapacity();
+	list.remove(0);
+
+	ASSERT_NE(oldCapacity, list.getCapacity());
+	ASSERT_EQ(10, list.getCapacity());
+	ASSERT_EQ(4, list.getSize());
+	ArrayListTest_checkContents(list, 7);
+}
+
+TEST(ArrayList, TestRemoveMultipleReallocation)
+{
+	int reallocations = 8;
+	int initialCapacity = 10;
+	int removeThreshold = 4;
+	int addRemoveMultiplier = 2;
+	int maxSize = 10 * pow(2, reallocations);
+	ArrayList list = ArrayList(
+		initialCapacity,
+		addRemoveMultiplier,
+		removeThreshold,
+		addRemoveMultiplier
+	);
+	
+	for (int i = 0; i < maxSize; ++i)
+	{
+		list.add(i);
+	}
+	
+	int currOffset = 0;
+	int iteration = 0;
+	while (list.getSize() != 0)
+	{
+		int numToRemove = list.getSize() - (list.getCapacity() / removeThreshold);
+		for (int i = 0; i < numToRemove; ++i)
+		{
+			ASSERT_EQ(currOffset++, list.remove(0));
+		}
+		
+		ArrayListTest_checkContents(list, currOffset);
+		ASSERT_EQ(maxSize - currOffset, list.getSize());
+		// Do not forget that ArrayLists do not resize below their initial capacity...
+		if (list.getCapacity() != initialCapacity)
+		{
+			ASSERT_EQ(
+				initialCapacity * pow(addRemoveMultiplier, reallocations - iteration),
+				list.getCapacity()
+			);
+		}
+
+		ASSERT_EQ(currOffset++, list.remove(0));
+		
+		ArrayListTest_checkContents(list, currOffset);
+		ASSERT_EQ(maxSize - currOffset, list.getSize());
+		// Do not forget that ArrayLists do not resize below their initial capacity...
+		if (list.getCapacity() != initialCapacity)
+		{
+			ASSERT_EQ(
+				initialCapacity * pow(addRemoveMultiplier, reallocations - ++iteration),
+				list.getCapacity()
+			);
+		}
 	}
 }

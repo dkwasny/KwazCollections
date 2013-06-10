@@ -4,16 +4,20 @@
 #include <cstdio>
 
 // Test helper methods
-void ArrayListTest_checkContents(ArrayList* list)
+static void ArrayListTest_checkContents(ArrayList* list, int offset)
 {
-	size_t i = 0;
-	for(i = 0; i < list->getSize(list); ++i)
+	for(size_t i = 0; i < list->getSize(list); ++i)
 	{
-		ASSERT_EQ(i, list->get(list, i));
+		ASSERT_EQ(offset + i, list->get(list, i));
 	}	
 }
 
-void ArrayListTest_smokeTest(ArrayList* list)
+static void ArrayListTest_checkContents(ArrayList* list)
+{
+	ArrayListTest_checkContents(list, 0);
+}
+
+static void ArrayListTest_smokeTest(ArrayList* list)
 {
 	for (int i = 0; i < 20; ++i)
 	{
@@ -191,7 +195,8 @@ TEST(ArrayList, TestAddMultipleReallocation)
 	list->destroy(list);
 }
 
-TEST(ArrayList, TestRemoveNoReallocation) {
+TEST(ArrayList, TestRemoveNoReallocation)
+{
 	ArrayList* list = ArrayList_create(10, 2, 4, 2);
 
 	for (int i = 0; i < list->getCapacity(list); ++i)
@@ -208,10 +213,7 @@ TEST(ArrayList, TestRemoveNoReallocation) {
 		ASSERT_EQ(i++, list->remove(list, 0));
 		ASSERT_EQ(oldSize-i, list->getSize(list));
 		ASSERT_EQ(oldSize, list->getCapacity(list));
-		for (int j = 0; j < list->getSize(list); ++j)
-		{
-			ASSERT_EQ(i+j, list->get(list, j));
-		}
+		ArrayListTest_checkContents(list, i);
 	}
 
 	ASSERT_EQ(0, list->getSize(list));
@@ -219,7 +221,8 @@ TEST(ArrayList, TestRemoveNoReallocation) {
 	list->destroy(list);
 }
 
-TEST(ArrayList, TestRemoveOneReallocation) {
+TEST(ArrayList, TestRemoveOneReallocation)
+{
 	ArrayList* list = ArrayList_create(10, 2, 4, 2);
 
 	int i = 0;
@@ -235,10 +238,7 @@ TEST(ArrayList, TestRemoveOneReallocation) {
 		ASSERT_EQ(i++, list->remove(list, 0));
 		ASSERT_EQ(oldSize-i, list->getSize(list));
 		ASSERT_EQ(20, list->getCapacity(list));
-		for (int j = 0; j < list->getSize(list); ++j)
-		{
-			ASSERT_EQ(i+j, list->get(list, j));
-		}
+		ArrayListTest_checkContents(list, i);
 	}
 	
 	int oldCapacity = list->getCapacity(list);
@@ -247,19 +247,62 @@ TEST(ArrayList, TestRemoveOneReallocation) {
 	ASSERT_NE(oldCapacity, list->getCapacity(list));
 	ASSERT_EQ(10, list->getCapacity(list));
 	ASSERT_EQ(4, list->getSize(list));
-
-	for (int i = 0; i < 4; ++i)
-	{
-		int expected = i + 7;
-		ASSERT_EQ(expected, list->get(list, i));
-	}
+	ArrayListTest_checkContents(list, 7);
 
 	list->destroy(list);
 }
 
-TEST(ArrayList, TestRemoveMultipleReallocation) {
-	for (int iteration = 0; iteration < 10; ++iteration)
+TEST(ArrayList, TestRemoveMultipleReallocation)
+{
+	int reallocations = 8;
+	int initialCapacity = 10;
+	int removeThreshold = 4;
+	int addRemoveMultiplier = 2;
+	int maxSize = 10 * pow(2, reallocations);
+	ArrayList* list = ArrayList_create(
+		initialCapacity,
+		addRemoveMultiplier,
+		removeThreshold,
+		addRemoveMultiplier
+	);
+	
+	for (int i = 0; i < maxSize; ++i)
 	{
+		list->add(list, i);
 	}
+	
+	int currOffset = 0;
+	int iteration = 0;
+	while (list->getSize(list) != 0)
+	{
+		int numToRemove = list->getSize(list) - (list->getCapacity(list) / removeThreshold);
+		for (int i = 0; i < numToRemove; ++i)
+		{
+			ASSERT_EQ(currOffset++, list->remove(list, 0));
+		}
+		
+		ArrayListTest_checkContents(list, currOffset);
+		ASSERT_EQ(maxSize - currOffset, list->getSize(list));
+		// Do not forget that ArrayLists do not resize below their initial capacity...
+		if (list->getCapacity(list) != initialCapacity)
+		{
+			ASSERT_EQ(
+				initialCapacity * pow(addRemoveMultiplier, reallocations - iteration),
+				list->getCapacity(list)
+			);
+		}
 
+		ASSERT_EQ(currOffset++, list->remove(list, 0));
+		
+		ArrayListTest_checkContents(list, currOffset);
+		ASSERT_EQ(maxSize - currOffset, list->getSize(list));
+		// Do not forget that ArrayLists do not resize below their initial capacity...
+		if (list->getCapacity(list) != initialCapacity)
+		{
+			ASSERT_EQ(
+				initialCapacity * pow(addRemoveMultiplier, reallocations - ++iteration),
+				list->getCapacity(list)
+			);
+		}
+	}
 }
