@@ -65,11 +65,16 @@ class ArrayList : public IList {
 		
 		ArrayList& operator=(const ArrayList& pOther);
 	
+		// ICollection Methods
 		size_t getSize() const;
-		size_t getCapacity() const;
-		int& get(const size_t pIndex) const;
 		void add(const int pValue);
+		
+		// IList Methods
+		int& get(const size_t pIndex) const;
 		int remove(const size_t pIndex);
+		
+		// ArrayList Methods
+		size_t getCapacity() const;
 	
 	private:
 		// Configuration constants

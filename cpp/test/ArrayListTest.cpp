@@ -178,9 +178,6 @@ TEST(ArrayList, TestAddOneReallocation) {
 	ArrayListTest_checkContents(list);
 }
 
-// Since I really cant test the internals here, this test
-// pretty much boiled down to an arbitrary stress test
-// that mimics the number of iterations done in the C tests.
 TEST(ArrayList, TestAddStressTest) {
 	ArrayList list = ArrayList(10, 2, 4, 2);
 	unsigned int i = 0;

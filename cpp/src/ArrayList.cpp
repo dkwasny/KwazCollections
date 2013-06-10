@@ -48,7 +48,11 @@ ArrayList::ArrayList(const ArrayList& pOther) :
 	removeReallocationThreshold(pOther.removeReallocationThreshold),
 	removeReallocationDivisor(pOther.removeReallocationDivisor)
 {
-	values = allocateArray(pOther.values, pOther.size, pOther.capacity);
+	values = allocateArray(
+		pOther.values,
+		pOther.size,
+		pOther.capacity
+	);
 	size = pOther.size;
 	capacity = pOther.capacity;
 }
@@ -73,7 +77,11 @@ ArrayList::~ArrayList() {
 
 ArrayList& ArrayList::operator=(const ArrayList& pOther) {
 	if (this != &pOther) {
-		values = pOther.values;	
+		values = allocateArray(
+			pOther.values,
+			pOther.capacity,
+			pOther.size
+		);	
 		size = pOther.size;
 		capacity = pOther.capacity;
 	}
