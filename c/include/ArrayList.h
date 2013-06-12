@@ -50,11 +50,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "IList.h"
-
-/* The internal ArrayList structure.
- * Defined in the *.c file
- */
-struct _ArrayList;
+#include "ArrayListImpl.h"
 
 /* The public interface structure.
  */
@@ -73,7 +69,7 @@ typedef struct ArrayList
 	int (* const getCapacity)(const struct ArrayList* pList);
 
 	IList* superType;
-	struct _ArrayList* impl;
+	ArrayListImpl* impl;
 
 } ArrayList;
 
