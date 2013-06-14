@@ -119,7 +119,10 @@ TEST(ArrayList, TestCustomConstructorZeroCapacity)
 	list->destroy(list);
 }
 
-TEST(ArrayList, TestAddNoReallocation)
+// TODO: Test add and remove at a contract level instead of an implementation
+//       level...thats what the impl tests are for
+
+/*TEST(ArrayList, TestAddNoReallocation)
 {
 	ArrayList* list = ArrayList_create(10, 2, 4, 2);
 
@@ -305,4 +308,4 @@ TEST(ArrayList, TestRemoveMultipleReallocation)
 			);
 		}
 	}
-}
+}*/

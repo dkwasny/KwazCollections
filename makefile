@@ -58,10 +58,10 @@ GTEST_INCLUDE_DIR := $(GTEST_DIR)/include
 GTEST_LIB := $(GTEST_BUILD_DIR)/libgtest.a
 
 # Compilation commands
-CLANG := clang -Wall -Wextra -Werror -pedantic-errors -I $(C_INCLUDE_DIR) -c
-CLANGPP := clang++ -Wall -Wextra -Werror -pedantic-errors -I $(CPP_INCLUDE_DIR) -c
-GCC := gcc -Wall -Wextra -Werror -pedantic-errors -I $(C_INCLUDE_DIR) -c
-GPP := g++ -Wall -Wextra -Werror -pedantic-errors -I $(CPP_INCLUDE_DIR) -c
+CLANG := clang -Wall -Wextra -Werror -pedantic-errors -ansi -I $(C_INCLUDE_DIR) -c
+CLANGPP := clang++ -Wall -Wextra -Werror -pedantic-errors -ansi -I $(CPP_INCLUDE_DIR) -c
+GCC := gcc -Wall -Wextra -Werror -pedantic-errors -ansi -I $(C_INCLUDE_DIR) -c
+GPP := g++ -Wall -Wextra -Werror -pedantic-errors -ansi -I $(CPP_INCLUDE_DIR) -c
 
 # Special compilation commands used to compile test code.
 # I do not want to have to worry about my test code and google test
