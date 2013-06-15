@@ -14,6 +14,64 @@ static void ArrayListImplTest_checkContents(ArrayListImpl* list)
 	ArrayListImplTest_checkContents(list, 0);
 }
 
+static void ArrayListImplTest_smokeTest(ArrayListImpl* list)
+{
+	for (int i = 0; i < 20; ++i)
+	{
+		ArrayListImpl_add(list, i);
+	}
+	ArrayListImplTest_checkContents(list);
+	for (int i = 0; i < 20; ++i)
+	{
+		ArrayListImpl_remove(list, 0);
+	}
+}
+
+TEST(ArrayListImpl, TestDefaultConstructor)
+{
+	ArrayListImpl* list = ArrayListImpl_createDefault();
+	ASSERT_EQ(10, list->capacity);
+	ASSERT_EQ(0, list->size);
+	ASSERT_EQ(2, list->addReallocationMultiplier);
+	ASSERT_EQ(4, list->removeReallocationThreshold);
+	ASSERT_EQ(2, list->removeReallocationDivisor);
+	ArrayListImplTest_smokeTest(list);
+	ArrayListImpl_delete(list);
+}
+
+TEST(ArrayListImpl, TestCustomConstructor)
+{
+	ArrayListImpl* list = ArrayListImpl_create(1, 5, 10, 5);
+	ASSERT_EQ(1, list->capacity);
+	ASSERT_EQ(0, list->size);
+	ASSERT_EQ(5, list->addReallocationMultiplier);
+	ASSERT_EQ(10, list->removeReallocationThreshold);
+	ASSERT_EQ(5, list->removeReallocationDivisor);
+	ArrayListImplTest_smokeTest(list);
+	ArrayListImpl_delete(list);
+}
+
+TEST(ArrayListImpl, TestCustomConstructorZeroCapacity)
+{
+	ArrayListImpl* list = ArrayListImpl_create(0, 2, 3, 4);
+	ASSERT_EQ(0, list->capacity);
+	ASSERT_EQ(0, list->size);
+	ArrayListImplTest_smokeTest(list);
+	ArrayListImpl_delete(list);
+}
+
+TEST(ArrayListImpl, TestCustomConstructorRemoveThresholdLowerThanDivisor)
+{
+	ArrayListImpl* list = ArrayListImpl_create(10, 2, 4, 100);
+	ASSERT_EQ(10, list->capacity);
+	ASSERT_EQ(0, list->size);
+	ASSERT_EQ(2, list->addReallocationMultiplier);
+	ASSERT_EQ(200, list->removeReallocationThreshold);
+	ASSERT_EQ(100, list->removeReallocationDivisor);
+	ArrayListImplTest_smokeTest(list);
+	ArrayListImpl_delete(list);
+}
+
 TEST(ArrayListImpl, TestAddNoReallocation)
 {
 	ArrayListImpl* list = ArrayListImpl_create(10, 2, 4, 2);
