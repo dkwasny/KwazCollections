@@ -51,27 +51,30 @@
 #include <string.h>
 #include "IList.h"
 #include "ArrayListImpl.h"
+#include "IIterator.h"
 
 /* The public interface structure.
  */
-typedef struct ArrayList
+typedef struct ArrayList ArrayList;
+
+struct ArrayList
 {
 	/* ICollection Methods */
-	int (* const getSize)(const struct ArrayList* pList);
-	void (* const destroy)(struct ArrayList* pList);
-	void (* const add)(struct ArrayList* pList, const int pValue);
+	int (* const getSize)(const ArrayList* pList);
+	void (* const destroy)(ArrayList* pList);
+	void (* const add)(ArrayList* pList, const int pValue);
+	IIterator* (* const iterator)(ArrayList* pList);
 
 	/* IList Methods */
-	int (* const get)(const struct ArrayList* pList, const size_t pIndex);
-	int (* const remove)(struct ArrayList* pList, const size_t pIndex);
+	int (* const get)(const ArrayList* pList, const size_t pIndex);
+	int (* const remove)(ArrayList* pList, const size_t pIndex);
 
 	/* ArrayList Methods */
-	int (* const getCapacity)(const struct ArrayList* pList);
+	int (* const getCapacity)(const ArrayList* pList);
 
 	IList* superType;
 	ArrayListImpl* impl;
-
-} ArrayList;
+};
 
 /* Start extern for c++ */
 #ifdef __cplusplus

@@ -30,6 +30,32 @@ static void ArrayListTest_smokeTest(ArrayList* list)
 	}
 }
 
+static void ArrayListTest_smokeTestIterator(IIterator* iter, int expectedElements)
+{
+	int i = 0;
+	while (iter->hasNext(iter))
+	{
+		ASSERT_EQ(i, iter->peekNext(iter));
+		ASSERT_EQ(i, iter->next(iter));
+		ASSERT_EQ(i, iter->current(iter));
+		++i;
+	}
+
+	// Need to decrement to counteract the final increment done in the
+	// previous loop.
+	ASSERT_EQ(expectedElements, i--);
+
+	while(iter->hasPrevious(iter))
+	{
+		--i;
+		ASSERT_EQ(i, iter->peekPrevious(iter));
+		ASSERT_EQ(i, iter->previous(iter));
+		ASSERT_EQ(i, iter->current(iter));
+	}
+
+	ASSERT_EQ(0, i);
+}
+
 // Actual Tests
 TEST(ArrayList, ICollection_TestAdd)
 {
@@ -41,6 +67,22 @@ TEST(ArrayList, ICollection_TestAdd)
 		ASSERT_EQ(i, collection->getSize(collection));
 	}
 
+	collection->destroy(collection);
+}
+
+TEST(ArrayList, ICollection_TestIterator)
+{
+	ICollection* collection = ArrayList_create(10, 2, 4, 2)->superType->superType;
+
+	for (int i = 0; i < 50; ++i)
+	{
+		collection->add(collection, i);
+	}
+
+	IIterator* iter = collection->iterator(collection);
+	ArrayListTest_smokeTestIterator(iter, 50);
+
+	iter->destroy(iter);
 	collection->destroy(collection);
 }
 
@@ -92,6 +134,22 @@ TEST(ArrayList, IList_TestRemove)
 	list->destroy(list);
 }
 
+TEST(ArrayList, IList_TestIterator)
+{
+	IList* list = ArrayList_create(10, 2, 4, 2)->superType;
+
+	for (int i = 0; i < 50; ++i)
+	{
+		list->add(list, i);
+	}
+
+	IIterator* iter = list->iterator(list);
+	ArrayListTest_smokeTestIterator(iter, 50);
+
+	iter->destroy(iter);
+	list->destroy(list);
+}
+
 TEST(ArrayList, TestDefaultConstructor)
 {
 	ArrayList* list = ArrayList_createDefault();
@@ -109,3 +167,5 @@ TEST(ArrayList, TestCustomConstructor)
 	ArrayListTest_smokeTest(list);
 	list->destroy(list);
 }
+
+//TODO: Smoke test all of the ArrayList interface methods...why arent they here again??

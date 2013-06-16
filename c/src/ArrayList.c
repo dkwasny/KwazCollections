@@ -1,4 +1,5 @@
 #include "ArrayList.h"
+#include "Boolean.h" /* Some internal methods use Boolean */
 
 /* Destructor Methods
  *
@@ -100,6 +101,81 @@ static int _ArrayList_ArrayList_getCapacity(const ArrayList* pList)
 	return pList->impl->capacity;
 }
 
+/* Iterator Methods */
+static Boolean _ArrayList_IIterator_hasNext(IIterator* pIter)
+{
+	return ArrayListImplIterator_hasNext(pIter->impl);
+}
+
+static int _ArrayList_IIterator_peekNext(IIterator* pIter)
+{
+	return ArrayListImplIterator_peekNext(pIter->impl);
+}
+
+static int _ArrayList_IIterator_next(IIterator* pIter)
+{
+	return ArrayListImplIterator_next(pIter->impl);
+}
+
+static int _ArrayList_IIterator_current(IIterator* pIter)
+{
+	return ArrayListImplIterator_current(pIter->impl);
+}
+
+static Boolean _ArrayList_IIterator_hasPrevious(IIterator* pIter)
+{
+	return ArrayListImplIterator_hasPrevious(pIter->impl);
+}
+
+static int _ArrayList_IIterator_peekPrevious(IIterator* pIter)
+{
+	return ArrayListImplIterator_peekPrevious(pIter->impl);
+}
+
+static int _ArrayList_IIterator_previous(IIterator* pIter)
+{
+	return ArrayListImplIterator_previous(pIter->impl);
+}
+
+static void _ArrayList_IIterator_destroy(IIterator* pIter)
+{
+	ArrayListImplIterator_delete(pIter->impl);
+	free(pIter);
+}
+
+/* Iterator Creation Methods */
+static IIterator* _ArrayList_ArrayList_iterator(ArrayList* pList)
+{
+	IIterator tmpVal = {
+		_ArrayList_IIterator_hasNext,
+		_ArrayList_IIterator_peekNext,
+		_ArrayList_IIterator_next,
+		_ArrayList_IIterator_current,
+		_ArrayList_IIterator_hasPrevious,
+		_ArrayList_IIterator_peekPrevious,
+		_ArrayList_IIterator_previous,
+		_ArrayList_IIterator_destroy,
+		NULL
+	};
+
+	IIterator* retVal = malloc(sizeof(IIterator));
+	memcpy(retVal, &tmpVal, sizeof(IIterator));
+
+	retVal->impl = ArrayListImpl_iterator(pList->impl);
+
+	return retVal;
+}
+
+static IIterator* _ArrayList_IList_iterator(IList* pList)
+{
+	return _ArrayList_ArrayList_iterator(pList->subType);
+}
+
+static IIterator* _ArrayList_ICollection_iterator(ICollection* pCollection)
+{
+	return _ArrayList_IList_iterator(pCollection->subType);
+}
+
 /* Private Creation Methods */
 static ICollection* _ArrayList_ICollection_create(IList* pSubType)
 {
@@ -107,6 +183,7 @@ static ICollection* _ArrayList_ICollection_create(IList* pSubType)
 		_ArrayList_ICollection_getSize,
 		_ArrayList_ICollection_destroy,
 		_ArrayList_ICollection_add,
+		_ArrayList_ICollection_iterator,
 		NULL
 	};
 	
@@ -124,6 +201,7 @@ static IList* _ArrayList_IList_create(ArrayList* pSubType)
 		_ArrayList_IList_getSize,
 		_ArrayList_IList_destroy,
 		_ArrayList_IList_add,
+		_ArrayList_IList_iterator,
 		_ArrayList_IList_get,
 		_ArrayList_IList_remove,
 		NULL,
@@ -145,6 +223,7 @@ static ArrayList* _ArrayList_createInternal(ArrayListImpl* pImpl)
 		_ArrayList_ArrayList_getSize,
 		_ArrayList_ArrayList_destroy,
 		_ArrayList_ArrayList_add,
+		_ArrayList_ArrayList_iterator,
 		_ArrayList_ArrayList_get,
 		_ArrayList_ArrayList_remove,
 		_ArrayList_ArrayList_getCapacity,

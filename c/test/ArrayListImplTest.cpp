@@ -27,6 +27,32 @@ static void ArrayListImplTest_smokeTest(ArrayListImpl* list)
 	}
 }
 
+static void ArrayListTest_smokeTestIterator(ArrayListImplIterator* iter, int expectedElements)
+{
+	int i = 0;
+	while (ArrayListImplIterator_hasNext(iter))
+	{
+		ASSERT_EQ(i, ArrayListImplIterator_peekNext(iter));
+		ASSERT_EQ(i, ArrayListImplIterator_next(iter));
+		ASSERT_EQ(i, ArrayListImplIterator_current(iter));
+		++i;
+	}
+
+	// Need to decrement to counteract the final increment done in the
+	// previous loop.
+	ASSERT_EQ(expectedElements, i--);
+
+	while(ArrayListImplIterator_hasPrevious(iter))
+	{
+		--i;
+		ASSERT_EQ(i, ArrayListImplIterator_peekPrevious(iter));
+		ASSERT_EQ(i, ArrayListImplIterator_previous(iter));
+		ASSERT_EQ(i, ArrayListImplIterator_current(iter));
+	}
+
+	ASSERT_EQ(0, i);
+}
+
 TEST(ArrayListImpl, TestDefaultConstructor)
 {
 	ArrayListImpl* list = ArrayListImpl_createDefault();
@@ -258,4 +284,119 @@ TEST(ArrayListImpl, TestRemoveMultipleReallocation)
 			);
 		}
 	}
+}
+
+TEST(ArrayListImpl, TestIterator)
+{
+	ArrayListImpl* list = ArrayListImpl_create(10, 2, 4, 2);
+	ArrayListImplIterator* iter = ArrayListImpl_iterator(list);
+	
+	ASSERT_EQ(list, iter->list);
+	ASSERT_EQ(0, iter->currIndex);
+	ASSERT_TRUE(iter->firstOperation);
+}
+
+TEST(ArrayListImpl, TestIteratorNextOperations)
+{
+	ArrayListImpl* list = ArrayListImpl_create(10, 2, 4, 2);
+
+	const int expectedSize = 50;	
+	for (int i = 0; i < expectedSize; ++i)
+	{
+		ArrayListImpl_add(list, i);
+	}
+
+	ArrayListImplIterator* iter = ArrayListImpl_iterator(list);
+	ASSERT_TRUE(ArrayListImplIterator_hasNext(iter));
+	ASSERT_TRUE(iter->firstOperation);
+	ASSERT_EQ(0, ArrayListImplIterator_peekNext(iter));
+
+	int times = 0;
+	while(ArrayListImplIterator_hasNext(iter))
+	{
+		ASSERT_EQ(times, ArrayListImplIterator_peekNext(iter));
+		ASSERT_EQ(times, ArrayListImplIterator_next(iter));
+		ASSERT_EQ(times, ArrayListImplIterator_current(iter));
+		ASSERT_FALSE(iter->firstOperation);
+		ASSERT_EQ(times, iter->currIndex);
+		++times;
+	}
+
+	ASSERT_FALSE(ArrayListImplIterator_hasNext(iter));
+	ASSERT_EQ(expectedSize, times);
+
+	ArrayListImplIterator_delete(iter);
+	ArrayListImpl_delete(list);
+}
+
+TEST(ArrayListImpl, TestIteratorPreviousOperationsAfterFullNextIterations)
+{
+	ArrayListImpl* list = ArrayListImpl_create(10, 2, 4, 2);
+
+	const int expectedSize = 50;	
+	for (int i = 0; i < expectedSize; ++i)
+	{
+		ArrayListImpl_add(list, i);
+	}
+
+	ArrayListImplIterator* iter = ArrayListImpl_iterator(list);
+	ASSERT_FALSE(ArrayListImplIterator_hasPrevious(iter));
+	ASSERT_TRUE(iter->firstOperation);
+	ASSERT_EQ(0, ArrayListImplIterator_peekPrevious(iter));
+
+	while(ArrayListImplIterator_hasNext(iter))
+	{
+		ArrayListImplIterator_next(iter);
+	}
+
+	ASSERT_TRUE(ArrayListImplIterator_hasPrevious(iter));
+
+	// Use -1 because the first "previous" operation will not be our
+	// first on the iterator, thus skipping the first element.
+	// Subtract first in the loop  because the values are base 0 (unlike "size").
+	int times = expectedSize - 1;
+	ASSERT_EQ(times, ArrayListImplIterator_current(iter));
+	while(ArrayListImplIterator_hasPrevious(iter))
+	{
+		--times;
+		ASSERT_EQ(times, ArrayListImplIterator_peekPrevious(iter));
+		ASSERT_EQ(times, ArrayListImplIterator_previous(iter));
+		ASSERT_EQ(times, ArrayListImplIterator_current(iter));
+		ASSERT_EQ(times, iter->currIndex);
+	}
+	ASSERT_EQ(0, times);
+	
+	ArrayListImplIterator_delete(iter);
+	ArrayListImpl_delete(list);
+}
+
+TEST(ArrayListImpl, TestIteratorEmptyList)
+{
+	ArrayListImpl* list = ArrayListImpl_create(10, 2, 4, 2);
+	ArrayListImplIterator* iter = ArrayListImpl_iterator(list);
+	
+	ASSERT_TRUE(iter->firstOperation);
+	ASSERT_FALSE(ArrayListImplIterator_hasNext(iter));
+	ASSERT_EQ(0, ArrayListImplIterator_peekNext(iter));
+	ASSERT_EQ(0, ArrayListImplIterator_next(iter));
+	ASSERT_TRUE(iter->firstOperation);
+	ASSERT_EQ(0, ArrayListImplIterator_current(iter));
+	ASSERT_FALSE(ArrayListImplIterator_hasPrevious(iter));
+	ASSERT_EQ(0, ArrayListImplIterator_peekPrevious(iter));
+	ASSERT_EQ(0, ArrayListImplIterator_previous(iter));
+	ASSERT_TRUE(iter->firstOperation);
+}
+
+TEST(ArrayListImpl, TestIteratorCreatedBeforeListModification)
+{
+	ArrayListImpl* list = ArrayListImpl_create(10, 2, 4, 2);
+	ArrayListImplIterator* iter = ArrayListImpl_iterator(list);
+
+	const int expectedSize = 50;	
+	for (int i = 0; i < expectedSize; ++i)
+	{
+		ArrayListImpl_add(list, i);
+	}
+
+	ArrayListTest_smokeTestIterator(iter, expectedSize);
 }
