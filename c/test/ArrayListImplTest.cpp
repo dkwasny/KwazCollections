@@ -308,6 +308,8 @@ TEST(ArrayListImpl, TestIteratorNextOperations)
 	}
 
 	ASSERT_FALSE(ArrayListImplIterator_hasNext(iter));
+	ASSERT_EQ(0, ArrayListImplIterator_peekNext(iter));
+	ASSERT_EQ(0, ArrayListImplIterator_next(iter));
 	ASSERT_EQ(expectedSize, times);
 
 	ArrayListImplIterator_delete(iter);

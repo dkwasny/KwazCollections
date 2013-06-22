@@ -4,17 +4,12 @@
 #include <cstdio>
 
 // Test helper methods
-static void ArrayListTest_checkContents(ArrayList* list, int offset)
+static void ArrayListTest_checkContents(ArrayList* list)
 {
 	for(size_t i = 0; i < list->getSize(list); ++i)
 	{
-		ASSERT_EQ(offset + i, list->get(list, i));
+		ASSERT_EQ(i, list->get(list, i));
 	}	
-}
-
-static void ArrayListTest_checkContents(ArrayList* list)
-{
-	ArrayListTest_checkContents(list, 0);
 }
 
 static void ArrayListTest_smokeTest(ArrayList* list)
@@ -40,8 +35,8 @@ static void ArrayListTest_smokeTestIterator(IIterator* iter, int expectedElement
 		++i;
 	}
 
-	// Need to decrement to counteract the final increment done in the
-	// previous loop.
+	ASSERT_EQ(0, iter->peekNext(iter));
+	ASSERT_EQ(0, iter->next(iter));
 	ASSERT_EQ(expectedElements, i);
 }
 
@@ -139,6 +134,87 @@ TEST(ArrayList, IList_TestIterator)
 	list->destroy(list);
 }
 
+TEST(ArrayList, ArrayList_TestAdd)
+{
+	ArrayList* list = ArrayList_create(10, 2, 4, 2);
+
+	for (int i = 1; i <= 30; ++i)
+	{
+		list->add(list, i);
+		ASSERT_EQ(i, list->getSize(list));
+	}
+
+	list->destroy(list);
+}
+
+TEST(ArrayList, ArrayList_TestIterator)
+{
+	ArrayList* list = ArrayList_create(10, 2, 4, 2);
+
+	for (int i = 0; i < 50; ++i)
+	{
+		list->add(list, i);
+	}
+
+	IIterator* iter = list->iterator(list);
+	ArrayListTest_smokeTestIterator(iter, 50);
+
+	iter->destroy(iter);
+	list->destroy(list);
+}
+
+TEST(ArrayList, ArrayList_TestGet)
+{
+	ArrayList* list = ArrayList_create(10, 2, 4, 2);
+	
+	for (int i = 0; i < 30; ++i)
+	{
+		list->add(list, i);
+	}
+
+	for (int i = 0; i < 30; ++i)
+	{
+		ASSERT_EQ(i, list->get(list, i));
+	}
+
+	list->destroy(list);
+}
+
+TEST(ArrayList, ArrayList_TestRemove)
+{
+	ArrayList* list = ArrayList_create(10, 2, 4, 2);
+	
+	for (int i = 0; i < 30; ++i)
+	{
+		list->add(list, i);
+	}
+
+	for (int i = 0; i < 30; ++i)
+	{
+		ASSERT_EQ(i, list->remove(list, 0));
+		ASSERT_EQ(30-1-i, list->getSize(list));
+	}
+
+	list->destroy(list);
+}
+
+TEST(ArrayList, ArrayList_TestGetCapacity)
+{
+	ArrayList* list = ArrayList_create(10, 2, 4, 2);
+
+	int i = 0;	
+	for (; i < 10; ++i)
+	{
+		list->add(list, i);
+		ASSERT_EQ(10, list->getCapacity(list));
+	}
+
+	list->add(list, ++i);
+	ASSERT_EQ(20, list->getCapacity(list));
+
+	list->destroy(list);
+}
+
 TEST(ArrayList, TestDefaultConstructor)
 {
 	ArrayList* list = ArrayList_createDefault();
@@ -156,5 +232,3 @@ TEST(ArrayList, TestCustomConstructor)
 	ArrayListTest_smokeTest(list);
 	list->destroy(list);
 }
-
-//TODO: Smoke test all of the ArrayList interface methods...why arent they here again??
