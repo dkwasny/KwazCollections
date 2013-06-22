@@ -2,6 +2,10 @@
 #include "ArrayList.hpp"
 #include <cmath>
 
+using KwazCollections::ICollection;
+using KwazCollections::IList;
+using KwazCollections::ArrayList;
+
 // Helper methods
 static void ArrayListTest_checkContents(IList& list, int offset)
 {

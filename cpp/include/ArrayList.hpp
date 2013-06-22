@@ -50,51 +50,54 @@
 #include "IList.hpp"
 #include <cstring>
 
-class ArrayList : public IList
+namespace KwazCollections
 {
-	public:
-		ArrayList();
-		ArrayList(
-			const size_t pCapacity,
-        		const unsigned int pAddReallocationMultiplier,
-        		const unsigned int pRemoveReallocationThreshold,
-        		const unsigned int pRemoveReallocationDivisor
-		);
-		ArrayList(const ArrayList& pOther);
-		ArrayList(const IList& pOther);
-		~ArrayList();
+	class ArrayList : public IList
+	{
+		public:
+			ArrayList();
+			ArrayList(
+				const size_t pCapacity,
+				const unsigned int pAddReallocationMultiplier,
+				const unsigned int pRemoveReallocationThreshold,
+				const unsigned int pRemoveReallocationDivisor
+			);
+			ArrayList(const ArrayList& pOther);
+			ArrayList(const IList& pOther);
+			~ArrayList();
+			
+			ArrayList& operator=(const ArrayList& pOther);
 		
-		ArrayList& operator=(const ArrayList& pOther);
-	
-		// ICollection Methods
-		size_t getSize() const;
-		void add(const int pValue);
+			// ICollection Methods
+			size_t getSize() const;
+			void add(const int pValue);
+			
+			// IList Methods
+			int& get(const size_t pIndex) const;
+			int remove(const size_t pIndex);
+			
+			// ArrayList Methods
+			size_t getCapacity() const;
 		
-		// IList Methods
-		int& get(const size_t pIndex) const;
-		int remove(const size_t pIndex);
-		
-		// ArrayList Methods
-		size_t getCapacity() const;
-	
-	private:
-		// Configuration constants
-		const size_t initialCapacity;
-		const unsigned int addReallocationMultiplier;
-		const unsigned int removeReallocationThreshold;
-		const unsigned int removeReallocationDivisor;
-		
-		// Mutable values
-		int* values;
-		size_t size;
-		size_t capacity;
+		private:
+			// Configuration constants
+			const size_t initialCapacity;
+			const unsigned int addReallocationMultiplier;
+			const unsigned int removeReallocationThreshold;
+			const unsigned int removeReallocationDivisor;
+			
+			// Mutable values
+			int* values;
+			size_t size;
+			size_t capacity;
 
-		// Internal methods
-		int* allocateArray(
-			const int* pOrigValues,
-			const size_t pOrigValuesSize,
-			const size_t pNewCapacity
-		) const;
-};
+			// Internal methods
+			int* allocateArray(
+				const int* pOrigValues,
+				const size_t pOrigValuesSize,
+				const size_t pNewCapacity
+			) const;
+	};
+}
 
 #endif

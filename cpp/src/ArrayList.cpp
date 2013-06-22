@@ -6,6 +6,8 @@ static const unsigned int DEFAULT_ADD_REALLOCATION_MULTIPLIER = 2;
 static const unsigned int DEFAULT_REMOVE_REALLOCATION_THRESHOLD = 4;
 static const unsigned int DEFAULT_REMOVE_REALLOCATION_DIVISOR = 2;
 
+using KwazCollections::ArrayList;
+
 ArrayList::ArrayList() :
 	initialCapacity(DEFAULT_CAPACITY),
 	addReallocationMultiplier(DEFAULT_ADD_REALLOCATION_MULTIPLIER),
