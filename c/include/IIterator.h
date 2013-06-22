@@ -12,12 +12,6 @@ struct IIterator
 	int (* const peekNext)(IIterator* pIter);	
 	int (* const next)(IIterator* pIter);
 	
-	int (* const current)(IIterator* pIter);
-	
-	Boolean (* const hasPrevious)(IIterator* pIter);
-	int (* const peekPrevious)(IIterator* pIter);
-	int (* const previous)(IIterator* pIter);
-	
 	void (* const destroy)(IIterator* pIter);
 
 	/* Internal References */

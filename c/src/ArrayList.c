@@ -117,26 +117,6 @@ static int _ArrayList_IIterator_next(IIterator* pIter)
 	return ArrayListImplIterator_next(pIter->impl);
 }
 
-static int _ArrayList_IIterator_current(IIterator* pIter)
-{
-	return ArrayListImplIterator_current(pIter->impl);
-}
-
-static Boolean _ArrayList_IIterator_hasPrevious(IIterator* pIter)
-{
-	return ArrayListImplIterator_hasPrevious(pIter->impl);
-}
-
-static int _ArrayList_IIterator_peekPrevious(IIterator* pIter)
-{
-	return ArrayListImplIterator_peekPrevious(pIter->impl);
-}
-
-static int _ArrayList_IIterator_previous(IIterator* pIter)
-{
-	return ArrayListImplIterator_previous(pIter->impl);
-}
-
 static void _ArrayList_IIterator_destroy(IIterator* pIter)
 {
 	ArrayListImplIterator_delete(pIter->impl);
@@ -150,10 +130,6 @@ static IIterator* _ArrayList_ArrayList_iterator(ArrayList* pList)
 		_ArrayList_IIterator_hasNext,
 		_ArrayList_IIterator_peekNext,
 		_ArrayList_IIterator_next,
-		_ArrayList_IIterator_current,
-		_ArrayList_IIterator_hasPrevious,
-		_ArrayList_IIterator_peekPrevious,
-		_ArrayList_IIterator_previous,
 		_ArrayList_IIterator_destroy,
 		NULL
 	};

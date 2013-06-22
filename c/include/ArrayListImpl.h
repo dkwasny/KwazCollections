@@ -22,8 +22,7 @@ struct ArrayListImpl
 
 struct ArrayListImplIterator
 {
-	size_t currIndex;
-	Boolean firstOperation;
+	size_t nextIndex;
 	ArrayListImpl* list;
 };
 
@@ -51,12 +50,6 @@ ArrayListImplIterator* ArrayListImpl_iterator(ArrayListImpl* pList);
 Boolean ArrayListImplIterator_hasNext(ArrayListImplIterator* pIter);
 int ArrayListImplIterator_peekNext(ArrayListImplIterator* pIter);
 int ArrayListImplIterator_next(ArrayListImplIterator* pIter);
-
-int ArrayListImplIterator_current(ArrayListImplIterator* pIter);
-
-Boolean ArrayListImplIterator_hasPrevious(ArrayListImplIterator* pIter);
-int ArrayListImplIterator_peekPrevious(ArrayListImplIterator* pIter);
-int ArrayListImplIterator_previous(ArrayListImplIterator* pIter);
 
 void ArrayListImplIterator_delete(ArrayListImplIterator* pIter);
 

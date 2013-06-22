@@ -37,23 +37,12 @@ static void ArrayListTest_smokeTestIterator(IIterator* iter, int expectedElement
 	{
 		ASSERT_EQ(i, iter->peekNext(iter));
 		ASSERT_EQ(i, iter->next(iter));
-		ASSERT_EQ(i, iter->current(iter));
 		++i;
 	}
 
 	// Need to decrement to counteract the final increment done in the
 	// previous loop.
-	ASSERT_EQ(expectedElements, i--);
-
-	while(iter->hasPrevious(iter))
-	{
-		--i;
-		ASSERT_EQ(i, iter->peekPrevious(iter));
-		ASSERT_EQ(i, iter->previous(iter));
-		ASSERT_EQ(i, iter->current(iter));
-	}
-
-	ASSERT_EQ(0, i);
+	ASSERT_EQ(expectedElements, i);
 }
 
 // Actual Tests

@@ -143,8 +143,7 @@ ArrayListImplIterator* ArrayListImpl_iterator(ArrayListImpl* pList)
 {
 	ArrayListImplIterator* retVal = malloc(sizeof(ArrayListImplIterator));
 
-	retVal->currIndex = 0;
-	retVal->firstOperation = TRUE;
+	retVal->nextIndex = 0;
 	retVal->list = pList;
 
 	return retVal;
@@ -154,10 +153,7 @@ Boolean ArrayListImplIterator_hasNext(ArrayListImplIterator* pIter)
 {
 	Boolean retVal = FALSE;
 
-	size_t size = pIter->list->size;
-	size_t maxIndex = (size == 0 ? 0 : size - 1);
-
-	if (pIter->currIndex < maxIndex)
+	if (pIter->nextIndex < pIter->list->size)
 	{
 		retVal = TRUE;
 	}
@@ -168,16 +164,13 @@ Boolean ArrayListImplIterator_hasNext(ArrayListImplIterator* pIter)
 int ArrayListImplIterator_peekNext(ArrayListImplIterator* pIter)
 {
 	int retVal = 0;
-	size_t index = pIter->currIndex;
 	
 	if (ArrayListImplIterator_hasNext(pIter))
 	{
-		if (!pIter->firstOperation)
-		{
-			++index;
-		}
-
-		retVal = ArrayListImpl_get(pIter->list, index);
+		retVal = ArrayListImpl_get(
+			pIter->list,
+			pIter->nextIndex
+		);
 	}
 
 	return retVal;
@@ -189,84 +182,11 @@ int ArrayListImplIterator_next(ArrayListImplIterator* pIter)
 	
 	if (ArrayListImplIterator_hasNext(pIter))
 	{
-		if (pIter->firstOperation)
-		{
-			pIter->firstOperation = FALSE;
-		}
-		else
-		{
-			++pIter->currIndex;
-		}
-
-		retVal = ArrayListImpl_get(pIter->list, pIter->currIndex);
-	}
-
-	return retVal;
-}
-
-int ArrayListImplIterator_current(ArrayListImplIterator* pIter)
-{
-	int retVal = 0;
-
-	/* This is for consistency.
-	 * If this does not happen then for only the first operation
-	 * the return value of "next" or "previous" will return
-	 * the same value as "current".
-	 */
-	if (!pIter->firstOperation)
-	{
-		retVal = ArrayListImpl_get(pIter->list, pIter->currIndex);
-	}
-
-	return retVal;
-}
-
-Boolean ArrayListImplIterator_hasPrevious(ArrayListImplIterator* pIter)
-{
-	Boolean retVal = FALSE;
-
-	if (pIter->currIndex > 0)
-	{
-		retVal = TRUE;
-	}
-
-	return retVal;
-}
-
-int ArrayListImplIterator_peekPrevious(ArrayListImplIterator* pIter)
-{
-	int retVal = 0;
-	size_t index = pIter->currIndex;
-	
-	if (ArrayListImplIterator_hasPrevious(pIter))
-	{
-		if (!pIter->firstOperation)
-		{
-			--index;
-		}
-
-		retVal = ArrayListImpl_get(pIter->list, index);
-	}
-
-	return retVal;
-}
-
-int ArrayListImplIterator_previous(ArrayListImplIterator* pIter)
-{
-	int retVal = 0;
-	
-	if (ArrayListImplIterator_hasPrevious(pIter))
-	{
-		if (pIter->firstOperation)
-		{
-			pIter->firstOperation = FALSE;
-		}
-		else
-		{
-			--pIter->currIndex;
-		}
-
-		retVal = ArrayListImpl_get(pIter->list, pIter->currIndex);
+		retVal = ArrayListImpl_get(
+			pIter->list, 
+			pIter->nextIndex
+		);
+		++pIter->nextIndex;
 	}
 
 	return retVal;
