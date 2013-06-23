@@ -1,5 +1,6 @@
 #include "ArrayList.hpp"
 #include "IndexOutOfBoundsError.hpp"
+#include "NoMoreElementsError.hpp"
 
 static const size_t DEFAULT_CAPACITY = 10;
 static const unsigned int DEFAULT_ADD_REALLOCATION_MULTIPLIER = 2;
@@ -7,17 +8,17 @@ static const unsigned int DEFAULT_REMOVE_REALLOCATION_THRESHOLD = 4;
 static const unsigned int DEFAULT_REMOVE_REALLOCATION_DIVISOR = 2;
 
 using KwazCollections::ArrayList;
+using KwazCollections::IIterator;
 
 ArrayList::ArrayList() :
 	initialCapacity(DEFAULT_CAPACITY),
 	addReallocationMultiplier(DEFAULT_ADD_REALLOCATION_MULTIPLIER),
 	removeReallocationThreshold(DEFAULT_REMOVE_REALLOCATION_THRESHOLD),
-	removeReallocationDivisor(DEFAULT_REMOVE_REALLOCATION_DIVISOR)
-{
-	size = 0;
-	capacity = initialCapacity;
-	values = new int[capacity];
-}
+	removeReallocationDivisor(DEFAULT_REMOVE_REALLOCATION_DIVISOR),
+	values(new int[capacity]),
+	size(0),
+	capacity(DEFAULT_CAPACITY)
+{}
 
 ArrayList::ArrayList(
 	const size_t pCapacity,
@@ -37,37 +38,37 @@ ArrayList::ArrayList(
 			? pRemoveReallocationDivisor * 2
 			: pRemoveReallocationThreshold
 	),
-	removeReallocationDivisor(pRemoveReallocationDivisor)
-{
-	size = 0;
-	capacity = pCapacity;
-	values = new int[capacity];
-}
+	removeReallocationDivisor(pRemoveReallocationDivisor),
+	values(new int[pCapacity]),
+	size(0),
+	capacity(pCapacity)
+{}
 
 ArrayList::ArrayList(const ArrayList& pOther) :
 	initialCapacity(pOther.capacity),
 	addReallocationMultiplier(pOther.addReallocationMultiplier),
 	removeReallocationThreshold(pOther.removeReallocationThreshold),
-	removeReallocationDivisor(pOther.removeReallocationDivisor)
-{
-	values = allocateArray(
-		pOther.values,
-		pOther.size,
-		pOther.capacity
-	);
-	size = pOther.size;
-	capacity = pOther.capacity;
-}
+	removeReallocationDivisor(pOther.removeReallocationDivisor),
+	values(
+		allocateArray(
+			pOther.values,
+			pOther.size,
+			pOther.capacity
+		)
+	),
+	size(pOther.size),
+	capacity(pOther.capacity)
+{}
 
 ArrayList::ArrayList(const IList& pOther) :
-	initialCapacity(DEFAULT_CAPACITY),
+	initialCapacity(pOther.getSize() * addReallocationMultiplier),
 	addReallocationMultiplier(DEFAULT_ADD_REALLOCATION_MULTIPLIER),
 	removeReallocationThreshold(DEFAULT_REMOVE_REALLOCATION_THRESHOLD),
-	removeReallocationDivisor(DEFAULT_REMOVE_REALLOCATION_DIVISOR)
+	removeReallocationDivisor(DEFAULT_REMOVE_REALLOCATION_DIVISOR),
+	values(new int[initialCapacity]),
+	size(0),
+	capacity(initialCapacity)
 {
-	size = 0;
-	capacity = pOther.getSize() * addReallocationMultiplier;
-	values = new int[capacity];
 	for (size_t i = 0; i < pOther.getSize(); ++i)
 	{
 		add(pOther[i]);
@@ -123,6 +124,11 @@ void ArrayList::add(const int pValue)
 	}
 	
 	values[size++] = pValue;
+}
+
+IIterator* ArrayList::iterator()
+{
+	return new Iterator(*this);
 }
 
 int ArrayList::remove(const size_t pIndex)
@@ -186,4 +192,43 @@ int* ArrayList::allocateArray(
 	memcpy(retVal, pOrigValues, origValuesBytes);	
 
 	return retVal;
+}
+
+ArrayList::Iterator::Iterator(const ArrayList& pImpl) :
+	nextIndex(0),
+	impl(pImpl)
+{}
+
+bool ArrayList::Iterator::hasNext()
+{
+	bool retVal = false;
+
+	if (nextIndex < impl.getSize())
+	{
+		retVal = true;
+	}
+
+	return retVal;
+}
+
+int& ArrayList::Iterator::peekNext()
+{
+	if (!hasNext())
+	{
+		string msg = "No more elements in ArrayList::Iterator::peekNext()";
+		throw new NoMoreElementsError(msg);
+	}
+	
+	return impl.get(nextIndex);
+}
+
+int& ArrayList::Iterator::next()
+{
+	if (!hasNext())
+	{
+		string msg = "No more elements in ArrayList::Iterator::next()";	
+		throw new NoMoreElementsError(msg);
+	}
+
+	return impl.get(nextIndex++);
 }

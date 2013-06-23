@@ -5,6 +5,7 @@
 using KwazCollections::ICollection;
 using KwazCollections::IList;
 using KwazCollections::ArrayList;
+using KwazCollections::IIterator;
 
 // Helper methods
 static void ArrayListTest_checkContents(IList& list, int offset)
@@ -12,7 +13,7 @@ static void ArrayListTest_checkContents(IList& list, int offset)
 	for(size_t i = 0; i < list.getSize(); ++i)
 	{
 		ASSERT_EQ(offset + i, list[i]);
-	}	
+	}
 }
 
 static void ArrayListTest_checkContents(IList& list)
@@ -39,66 +40,6 @@ static void ArrayListTest_smokeTestAddRemove(IList& list)
 }
 
 // Actual Tests
-TEST(ArrayList, ICollection_TestAdd)
-{
-	ICollection* coll = new ArrayList(10, 2, 4, 2);
-
-	for (int i = 1; i <= 30; ++i)
-	{
-		coll->add(i);
-		ASSERT_EQ(i, coll->getSize());
-	}
-
-	delete coll;
-}
-
-TEST(ArrayList, IList_TestAdd)
-{
-	IList* list = new ArrayList(10, 2, 4, 2);
-
-	for (int i = 1; i <= 30; ++i)
-	{
-		list->add(i);
-		ASSERT_EQ(i, list->getSize());
-	}
-
-	delete list;
-}
-
-TEST(ArrayList, IList_TestGet)
-{
-	IList* list = new ArrayList(10, 2, 4, 2);
-
-	for (int i = 0; i < 30; ++i)
-	{
-		list->add(i);
-	}
-
-	for (int i = 0; i < list->getSize(); ++i)
-	{
-		ASSERT_EQ(i, list->get(i));
-	}
-
-	delete list;
-}
-
-TEST(ArrayList, IList_TestRemove)
-{
-	IList* list = new ArrayList(10, 2, 4, 2);
-
-	for (int i = 0; i < 30; ++i)
-	{
-		list->add(i);
-	}
-
-	for (int i = 0; i < list->getSize(); ++i)
-	{
-		ASSERT_EQ(i, list->remove(0));
-	}
-
-	delete list;
-}
-
 TEST(ArrayList, TestIListCopyConstructor)
 {
 	IList* list = new ArrayList(10, 2, 4, 2);
@@ -246,6 +187,27 @@ TEST(ArrayList, TestAddStressTest)
 	}
 }
 
+TEST(ArrayList, TestIterator)
+{
+	ArrayList list = ArrayList(10, 2, 4, 2);
+	for (size_t i = 0; i < 50; ++i)
+	{
+		list.add(i);
+	}
+
+	IIterator* iter = list.iterator();
+	
+	size_t i = 0;
+	for(; iter->hasNext(); ++i)
+	{
+		ASSERT_EQ(i, iter->peekNext());
+		ASSERT_EQ(i, iter->next());
+	}
+	ASSERT_EQ(50, i);
+	
+	delete iter;
+}
+
 TEST(ArrayList, TestRemoveNoReallocation)
 {
 	ArrayList list = ArrayList(10, 2, 4, 2);
@@ -353,3 +315,26 @@ TEST(ArrayList, TestRemoveMultipleReallocation)
 		}
 	}
 }
+
+/* This is a copy of an earlier test..if this is uncommented, bad_alloc will happen.
+ * Look at ticket #17 on GitHub
+TEST(ArrayList, TestIListCopyConstructorBadAllocCopy)
+{
+	IList* list = new ArrayList(10, 2, 4, 2);
+	ArrayListTest_smokeTestAdd(*list);
+
+	ArrayList* other = new ArrayList(*list);
+
+	//I have no idea if this is a valid assertion...
+	ASSERT_NE(((ArrayList*)list), other);
+
+	ASSERT_EQ(list->getSize(), other->getSize());
+	for (int i = 0; i < list->getSize(); ++i)
+	{
+		ASSERT_EQ((*list)[i], (*other)[i]);
+	}
+
+	delete other;
+	delete list;
+}
+*/

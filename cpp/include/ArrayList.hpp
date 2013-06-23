@@ -71,6 +71,7 @@ namespace KwazCollections
 			// ICollection Methods
 			size_t getSize() const;
 			void add(const int pValue);
+			IIterator* iterator();
 			
 			// IList Methods
 			int& get(const size_t pIndex) const;
@@ -97,7 +98,23 @@ namespace KwazCollections
 				const size_t pOrigValuesSize,
 				const size_t pNewCapacity
 			) const;
+
+			// Private Iterator Implementation
+			class Iterator : public IIterator
+			{
+				public:
+					Iterator(const ArrayList& pImpl);
+					
+					bool hasNext();
+					int& peekNext();
+					int& next();
+
+				private:
+					size_t nextIndex;
+					const ArrayList& impl;
+			};
 	};
+	
 }
 
 #endif
