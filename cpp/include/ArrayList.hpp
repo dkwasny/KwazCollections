@@ -113,8 +113,7 @@ namespace KwazCollections
 					size_t nextIndex;
 					const ArrayList& impl;
 			};
-	};
-	
+	};	
 }
 
 #endif
