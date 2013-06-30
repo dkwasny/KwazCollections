@@ -273,6 +273,7 @@ TEST(ArrayListImpl, TestRemoveMultipleReallocation)
 			);
 		}
 	}
+	ArrayListImpl_delete(list);
 }
 
 TEST(ArrayListImpl, TestIterator)
@@ -282,6 +283,9 @@ TEST(ArrayListImpl, TestIterator)
 	
 	ASSERT_EQ(list, iter->list);
 	ASSERT_EQ(0, iter->nextIndex);
+
+	ArrayListImplIterator_delete(iter);
+	ArrayListImpl_delete(list);
 }
 
 TEST(ArrayListImpl, TestIteratorNextOperations)
@@ -325,6 +329,9 @@ TEST(ArrayListImpl, TestIteratorEmptyList)
 	ASSERT_EQ(0, ArrayListImplIterator_peekNext(iter));
 	ASSERT_EQ(0, ArrayListImplIterator_next(iter));
 	ASSERT_EQ(0, iter->nextIndex);
+	
+	ArrayListImplIterator_delete(iter);
+	ArrayListImpl_delete(list);
 }
 
 TEST(ArrayListImpl, TestIteratorCreatedBeforeListModification)
@@ -339,4 +346,7 @@ TEST(ArrayListImpl, TestIteratorCreatedBeforeListModification)
 	}
 
 	ArrayListTest_smokeTestIterator(iter, expectedSize);
+
+	ArrayListImplIterator_delete(iter);
+	ArrayListImpl_delete(list);
 }

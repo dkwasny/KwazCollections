@@ -65,6 +65,7 @@ ArrayListImpl* ArrayListImpl_create(
 void ArrayListImpl_delete(ArrayListImpl* pList)
 {
 	free(pList->values);
+	free(pList);
 }
 
 void ArrayListImpl_add(ArrayListImpl* pList, const int pValue)

@@ -15,19 +15,18 @@
 static void _ArrayList_ArrayList_delete(ArrayList* pList)
 {
 	ArrayListImpl_delete(pList->impl);
-	free(pList->impl);
+	free(pList);
 }
 
 static void _ArrayList_IList_delete(IList* pList)
 {
 	_ArrayList_ArrayList_delete(pList->subType);
-	free(pList->subType);	
+	free(pList);
 }
 
 static void _ArrayList_ICollection_destroy(ICollection* pCollection)
 {
 	_ArrayList_IList_delete(pCollection->subType);
-	free(pCollection->subType);
 	free(pCollection);
 }
 
