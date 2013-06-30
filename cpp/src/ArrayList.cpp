@@ -15,7 +15,7 @@ ArrayList::ArrayList() :
 	addReallocationMultiplier(DEFAULT_ADD_REALLOCATION_MULTIPLIER),
 	removeReallocationThreshold(DEFAULT_REMOVE_REALLOCATION_THRESHOLD),
 	removeReallocationDivisor(DEFAULT_REMOVE_REALLOCATION_DIVISOR),
-	values(new int[capacity]),
+	values(new int[DEFAULT_CAPACITY]),
 	size(0),
 	capacity(DEFAULT_CAPACITY)
 {}
@@ -60,14 +60,28 @@ ArrayList::ArrayList(const ArrayList& pOther) :
 	capacity(pOther.capacity)
 {}
 
+/* FunTip: Valgrind yelled at me when I tried to use the value of
+ *         initialCapacity to initialize values and capacity.
+ *
+ *         It reported that capacity was uninitalized during the following
+ *         add() invocations which leads me to think that initialCapcity
+ *         was uninitalized when I used it to intialize capacity.
+ *
+ *         From what I can tell online, since initialCapacity is earlier
+ *         than values and capacity in both the class declaration and
+ *         initializer list, this SHOULD be valid.
+ *
+ *         Manually doing the declarations appears to of cleared up the error
+ *         even though it is less 'maintainable'.
+ */
 ArrayList::ArrayList(const IList& pOther) :
 	initialCapacity(pOther.getSize() * addReallocationMultiplier),
 	addReallocationMultiplier(DEFAULT_ADD_REALLOCATION_MULTIPLIER),
 	removeReallocationThreshold(DEFAULT_REMOVE_REALLOCATION_THRESHOLD),
 	removeReallocationDivisor(DEFAULT_REMOVE_REALLOCATION_DIVISOR),
-	values(new int[initialCapacity]),
+	values(new int[pOther.getSize() * addReallocationMultiplier]),
 	size(0),
-	capacity(initialCapacity)
+	capacity(pOther.getSize() * addReallocationMultiplier)
 {
 	for (size_t i = 0; i < pOther.getSize(); ++i)
 	{

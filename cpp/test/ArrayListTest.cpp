@@ -315,26 +315,3 @@ TEST(ArrayList, TestRemoveMultipleReallocation)
 		}
 	}
 }
-
-/* This is a copy of an earlier test..if this is uncommented, bad_alloc will happen.
- * Look at ticket #17 on GitHub
-TEST(ArrayList, TestIListCopyConstructorBadAllocCopy)
-{
-	IList* list = new ArrayList(10, 2, 4, 2);
-	ArrayListTest_smokeTestAdd(*list);
-
-	ArrayList* other = new ArrayList(*list);
-
-	//I have no idea if this is a valid assertion...
-	ASSERT_NE(((ArrayList*)list), other);
-
-	ASSERT_EQ(list->getSize(), other->getSize());
-	for (int i = 0; i < list->getSize(); ++i)
-	{
-		ASSERT_EQ((*list)[i], (*other)[i]);
-	}
-
-	delete other;
-	delete list;
-}
-*/
