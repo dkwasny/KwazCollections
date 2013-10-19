@@ -1,101 +1,100 @@
 #include "ArrayList.h"
 #include "Boolean.h" /* Some internal methods use Boolean */
 
-/* Destructor Methods
+/* Destroy Methods
  *
  * The main way to fully destroy an ArrayList and its OO model is to always
  * start the destruction at the highest (currently ICollection) level
  * and work your way down.
  * 
- * That is why there are "delete" and "destroy" methods.
- * Calling a destroy method should free the entire OO stack
- * while a delete should only free the memory for that portion
- * of the OO stack. 
+ * That is why there are "destroyDelegate" methods for the lower level
+ * interfaces.  They delegate to the highest (ICollection) destroy
+ * method and start the downward chain of destruction.
  */
-static void _ArrayList_ArrayList_delete(ArrayList* pList)
+static void _ArrayList_ArrayList_destroy(ArrayList* pList)
 {
-	ArrayListImpl_delete(pList->impl);
+	ArrayListImpl_destroy(pList->impl);
 	free(pList);
 }
 
-static void _ArrayList_IList_delete(IList* pList)
+static void _ArrayList_IList_destroy(IList* pList)
 {
-	_ArrayList_ArrayList_delete(pList->subType);
+	_ArrayList_ArrayList_destroy(pList->subType);
 	free(pList);
 }
 
 static void _ArrayList_ICollection_destroy(ICollection* pCollection)
 {
-	_ArrayList_IList_delete(pCollection->subType);
+	_ArrayList_IList_destroy(pCollection->subType);
 	free(pCollection);
 }
 
-static void _ArrayList_ArrayList_destroy(ArrayList* pList)
+static void _ArrayList_ArrayList_destroyDelegate(ArrayList* pList)
 {
 	_ArrayList_ICollection_destroy(pList->superType->superType);
 }
 
-static void _ArrayList_IList_destroy(IList* pList)
+static void _ArrayList_IList_destroyDelegate(IList* pList)
 {
 	_ArrayList_ICollection_destroy(pList->superType);
 }
 
 /* GetSize Methods */
-static int _ArrayList_ArrayList_getSize(const ArrayList* pList)
+static size_t _ArrayList_ArrayList_getSize(const ArrayList* pList)
 {
 	return pList->impl->size;
 }
 
-static int _ArrayList_IList_getSize(const IList* pList)
+static size_t _ArrayList_IList_getSize(const IList* pList)
 {
 	return _ArrayList_ArrayList_getSize(pList->subType);
 }
 
-static int _ArrayList_ICollection_getSize(const ICollection* pCollection)
+static size_t _ArrayList_ICollection_getSize(const ICollection* pCollection)
 {
 	return _ArrayList_IList_getSize(pCollection->subType);
 }
 
 /* Add Methods */
-static void _ArrayList_ArrayList_add(ArrayList* pList, const int pValue)
+static void _ArrayList_ArrayList_add(ArrayList* pList, const void* pValue)
 {
 	ArrayListImpl_add(pList->impl, pValue);
 }
 
-static void _ArrayList_IList_add(IList* pList, const int pValue)
+static void _ArrayList_IList_add(IList* pList, const void* pValue)
 {
 	_ArrayList_ArrayList_add(pList->subType, pValue);
 }
 
-static void _ArrayList_ICollection_add(ICollection* pCollection, const int pValue)
+static void _ArrayList_ICollection_add(ICollection* pCollection, const void* pValue)
 {
 	_ArrayList_IList_add(pCollection->subType, pValue);
 }
 
 /* Remove Methods */
-static int _ArrayList_ArrayList_remove(ArrayList* pList, const size_t pIndex)
+static void _ArrayList_ArrayList_remove(ArrayList* pList, const size_t pIndex)
 {
-	return ArrayListImpl_remove(pList->impl, pIndex);
+	ArrayListImpl_remove(pList->impl, pIndex);
 }
 
-static int _ArrayList_IList_remove(IList* pList, const size_t pIndex)
+static void _ArrayList_IList_remove(IList* pList, const size_t pIndex)
 {
-	return _ArrayList_ArrayList_remove(pList->subType, pIndex);
+	_ArrayList_ArrayList_remove(pList->subType, pIndex);
 }
 
 /* Get Methods */
-static int _ArrayList_ArrayList_get(const ArrayList* pList, const size_t pIndex)
+static void* _ArrayList_ArrayList_get(const ArrayList* pList, const size_t pIndex)
 {
 	return ArrayListImpl_get(pList->impl, pIndex);
 }
 
-static int _ArrayList_IList_get(const IList* pList, const size_t pIndex)
+static void* _ArrayList_IList_get(const IList* pList, const size_t pIndex)
 {
 	return _ArrayList_ArrayList_get(pList->subType, pIndex);
 }
 
 /* GetCapacity Methods */
-static int _ArrayList_ArrayList_getCapacity(const ArrayList* pList)
+static size_t _ArrayList_ArrayList_getCapacity(const ArrayList* pList)
 {
 	return pList->impl->capacity;
 }
@@ -106,19 +105,19 @@ static Boolean _ArrayList_IIterator_hasNext(IIterator* pIter)
 	return ArrayListImplIterator_hasNext(pIter->impl);
 }
 
-static int _ArrayList_IIterator_peekNext(IIterator* pIter)
+static void* _ArrayList_IIterator_peekNext(IIterator* pIter)
 {
 	return ArrayListImplIterator_peekNext(pIter->impl);
 }
 
-static int _ArrayList_IIterator_next(IIterator* pIter)
+static void* _ArrayList_IIterator_next(IIterator* pIter)
 {
 	return ArrayListImplIterator_next(pIter->impl);
 }
 
 static void _ArrayList_IIterator_destroy(IIterator* pIter)
 {
-	ArrayListImplIterator_delete(pIter->impl);
+	ArrayListImplIterator_destroy(pIter->impl);
 	free(pIter);
 }
 
@@ -174,7 +173,7 @@ static IList* _ArrayList_IList_create(ArrayList* pSubType)
 {
 	IList tmpVal = {
 		_ArrayList_IList_getSize,
-		_ArrayList_IList_destroy,
+		_ArrayList_IList_destroyDelegate,
 		_ArrayList_IList_add,
 		_ArrayList_IList_iterator,
 		_ArrayList_IList_get,
@@ -196,7 +195,7 @@ static ArrayList* _ArrayList_createInternal(ArrayListImpl* pImpl)
 {
 	ArrayList tmpVal = {
 		_ArrayList_ArrayList_getSize,
-		_ArrayList_ArrayList_destroy,
+		_ArrayList_ArrayList_destroyDelegate,
 		_ArrayList_ArrayList_add,
 		_ArrayList_ArrayList_iterator,
 		_ArrayList_ArrayList_get,
@@ -217,6 +216,7 @@ static ArrayList* _ArrayList_createInternal(ArrayListImpl* pImpl)
 
 /* Public methods */
 ArrayList* ArrayList_create(
+	const size_t pTypeSize,
 	const size_t pCapacity,
 	const unsigned int pAddReallocationMultiplier,
 	const unsigned int pRemoveReallocationThreshold,
@@ -224,6 +224,7 @@ ArrayList* ArrayList_create(
 {
 	return _ArrayList_createInternal(
 		ArrayListImpl_create(
+			pTypeSize,
 			pCapacity,
 			pAddReallocationMultiplier,
 			pRemoveReallocationThreshold,
@@ -232,9 +233,9 @@ ArrayList* ArrayList_create(
 	);
 }
 
-ArrayList* ArrayList_createDefault()
+ArrayList* ArrayList_createDefault(const size_t pTypeSize)
 {
 	return _ArrayList_createInternal(
-		ArrayListImpl_createDefault()
+		ArrayListImpl_createDefault(pTypeSize)
 	);
 }

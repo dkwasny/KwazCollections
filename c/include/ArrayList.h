@@ -60,17 +60,17 @@ typedef struct ArrayList ArrayList;
 struct ArrayList
 {
 	/* ICollection Methods */
-	int (* const getSize)(const ArrayList* pList);
+	size_t (* const getSize)(const ArrayList* pList);
 	void (* const destroy)(ArrayList* pList);
-	void (* const add)(ArrayList* pList, const int pValue);
+	void (* const add)(ArrayList* pList, const void* pValue);
 	IIterator* (* const iterator)(ArrayList* pList);
 
 	/* IList Methods */
-	int (* const get)(const ArrayList* pList, const size_t pIndex);
-	int (* const remove)(ArrayList* pList, const size_t pIndex);
+	void* (* const get)(const ArrayList* pList, const size_t pIndex);
+	void (* const remove)(ArrayList* pList, const size_t pIndex);
 
 	/* ArrayList Methods */
-	int (* const getCapacity)(const ArrayList* pList);
+	size_t (* const getCapacity)(const ArrayList* pList);
 
 	IList* superType;
 	ArrayListImpl* impl;
@@ -82,8 +82,9 @@ extern "C" {
 #endif
 
 /* Constructors */
-ArrayList* ArrayList_createDefault();
+ArrayList* ArrayList_createDefault(const size_t pTypeSize);
 ArrayList* ArrayList_create(
+	const size_t pTypeSize,
 	const size_t pCapacity,
 	const unsigned int pAddReallocationMultiplier,
 	const unsigned int pRemoveReallocationThreshold,

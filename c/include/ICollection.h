@@ -8,9 +8,9 @@ typedef struct ICollection ICollection;
 struct ICollection
 {
 	/* Interface Methods */
-	int (* const getSize)(const ICollection* pCollection);
+	size_t (* const getSize)(const ICollection* pCollection);
 	void (* const destroy)(ICollection* pCollection);
-	void (* const add)(ICollection* pCollection, const int pValue);
+	void (* const add)(ICollection* pCollection, const void* pValue);
 	IIterator* (* const iterator)(ICollection* pCollection);
 
 	/* Internal References */

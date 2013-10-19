@@ -9,8 +9,8 @@ struct IIterator
 {
 	/* Methods */
 	Boolean (* const hasNext)(IIterator* pIter);
-	int (* const peekNext)(IIterator* pIter);	
-	int (* const next)(IIterator* pIter);
+	void* (* const peekNext)(IIterator* pIter);	
+	void* (* const next)(IIterator* pIter);
 	
 	void (* const destroy)(IIterator* pIter);
 

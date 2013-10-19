@@ -65,9 +65,9 @@ GPP := g++ -Wall -Wextra -Werror -pedantic-errors -ansi -I $(CPP_INCLUDE_DIR) -c
 
 # Special compilation commands used to compile test code.
 # I do not want to have to worry about my test code and google test
-# passing the goofy warning/pedantic crap I set for the main source.
-GPP_TEST_COMPILE := g++
-CLANGPP_TEST_COMPILE := clang++
+# passing the goofy ansi/pedantic crap I set for the main source.
+GPP_TEST_COMPILE := g++ -Wall -Wextra -Werror
+CLANGPP_TEST_COMPILE := clang++ -Wall -Wextra -Werror
 
 # Generated variables to assist in C compilation
 C_SOURCE_FILES := $(wildcard $(C_SOURCE_DIR)/*.c)
