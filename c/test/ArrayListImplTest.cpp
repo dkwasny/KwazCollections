@@ -71,12 +71,12 @@ TEST(ArrayListImpl, TestCustomConstructorZeroCapacity)
 {
 	ArrayListImpl* list = ArrayListImpl_create(
 		sizeof(size_t),
-		0, 2, 3, 4
+		0, 2, 7, 4
 	);
 	ASSERT_EQ(0U, list->capacity);
 	ASSERT_EQ(0U, list->size);
 	ASSERT_EQ(2U, list->addReallocationMultiplier);
-	ASSERT_EQ(3U, list->removeReallocationThreshold);
+	ASSERT_EQ(7U, list->removeReallocationThreshold);
 	ASSERT_EQ(4U, list->removeReallocationDivisor);
 	ArrayListImplTest_smokeTest(list);
 	ArrayListImpl_destroy(list);
@@ -200,17 +200,16 @@ TEST(ArrayListImpl, TestRemoveNoReallocation)
 	ASSERT_EQ(list->size, list->capacity);
 
 	size_t oldSize = list->size;
-	for (size_t i = 0; i < oldSize;)
+	for (size_t i = 1; i <= oldSize; ++i)
 	{
-		size_t* removedVal = (size_t*)ArrayListImpl_remove(list, 0);
-		ASSERT_EQ(i++, *removedVal);
-		free(removedVal);
+		ArrayListImpl_remove(list, 0);
 		ASSERT_EQ(oldSize-i, list->size);
 		ASSERT_EQ(oldSize, list->capacity);
 		ArrayListImplTest_checkContents(list, i);
 	}
 
 	ASSERT_EQ(0U, list->size);
+	ASSERT_EQ(oldSize, list->capacity);
 
 	ArrayListImpl_destroy(list);
 }
@@ -252,11 +251,11 @@ TEST(ArrayListImpl, TestRemoveOneReallocation)
 
 TEST(ArrayListImpl, TestRemoveMultipleReallocation)
 {
-	size_t reallocations = 8;
 	size_t initialCapacity = 10;
 	unsigned int removeThreshold = 4;
 	unsigned int addRemoveMultiplier = 2;
-	size_t maxSize = 10 * pow(2, reallocations);
+	size_t maxSize = 160; // 4 reallocations of size 10 with a multiplier of 2
+	
 	ArrayListImpl* list = ArrayListImpl_create(
 		sizeof(size_t),
 		initialCapacity,
@@ -264,66 +263,92 @@ TEST(ArrayListImpl, TestRemoveMultipleReallocation)
 		removeThreshold,
 		addRemoveMultiplier
 	);
-	
+
+	// Fill the list
 	for (size_t i = 0; i < maxSize; ++i)
 	{
 		ArrayListImpl_add(list, &i);
 	}
-	
-	size_t currOffset = 0;
-	size_t iteration = 0;
-	while (list->size != 0)
+
+	ArrayListImplTest_checkContents(list, 0);
+	ASSERT_EQ(maxSize, list->size);
+	ASSERT_EQ(maxSize, list->capacity);
+
+	// Remove elements up until the next reallocation (160 / 4 = 40)
+	size_t i = 0;
+	while (list->size > 40)
 	{
-		size_t numToRemove = list->size - (list->capacity / removeThreshold);
-		for (size_t i = 0; i < numToRemove; ++i)
-		{
-			size_t* valToRemove = (size_t*)ArrayListImpl_get(list, 0);
-			ASSERT_EQ(currOffset++, *valToRemove);
-			ArrayListImpl_remove(list, 0);
-		}
-		
-		ArrayListImplTest_checkContents(list, currOffset);
-		ASSERT_EQ(maxSize - currOffset, list->size);
-		// Do not forget that ArrayListImpls do not resize below their initial capacity...
-		if (list->capacity != initialCapacity)
-		{
-			ASSERT_EQ(
-				initialCapacity * pow(addRemoveMultiplier, reallocations - iteration),
-				list->capacity
-			);
-		}
-
-		size_t* valToRemove = (size_t*)ArrayListImpl_get(list, 0);
-		ASSERT_EQ(currOffset++, *valToRemove);
 		ArrayListImpl_remove(list, 0);
-		
-		ArrayListImplTest_checkContents(list, currOffset);
-		ASSERT_EQ(maxSize - currOffset, list->size);
-		// Do not forget that ArrayListImpls do not resize below their initial capacity...
-		if (list->capacity != initialCapacity)
-		{
-			ASSERT_EQ(
-				initialCapacity * pow(addRemoveMultiplier, reallocations - ++iteration),
-				list->capacity
-			);
-		}
+		ArrayListImplTest_checkContents(list, ++i);
+		ASSERT_EQ(maxSize - i, list->size);
+		ASSERT_EQ(maxSize, list->capacity);
 	}
-	ArrayListImpl_destroy(list);
-}
 
-TEST(ArrayListImpl, TestIterator)
-{
-	ArrayListImpl* list = ArrayListImpl_create(
-		sizeof(size_t),
-		10, 2, 4, 2
-	);
-	ArrayListImplIterator* iter = ArrayListImpl_iterator(list);
+	// The following remove should reduce capacity to 80
+	ArrayListImpl_remove(list, 0);
+	ArrayListImplTest_checkContents(list, ++i);
+	ASSERT_EQ(maxSize - i, list->size);
+	ASSERT_EQ(80U, list->capacity);
+
+	// Remove elements up until the next reallocation (80 / 4 = 20)
+	while (list->size > 20)
+	{
+		ArrayListImpl_remove(list, 0);
+		ArrayListImplTest_checkContents(list, ++i);
+		ASSERT_EQ(maxSize - i, list->size);
+		ASSERT_EQ(80U, list->capacity);
+	}
 	
-	ASSERT_EQ(list, iter->list);
-	ASSERT_EQ(0U, iter->nextIndex);
-
-	ArrayListImplIterator_destroy(iter);
-	ArrayListImpl_destroy(list);
+	// The following remove should reduce capacity to 40
+	ArrayListImpl_remove(list, 0);
+	ArrayListImplTest_checkContents(list, ++i);
+	ASSERT_EQ(maxSize - i, list->size);
+	ASSERT_EQ(40U, list->capacity);
+	
+	// Remove elements up until the next reallocation (40 / 4 = 10)
+	while (list->size > 10)
+	{
+		ArrayListImpl_remove(list, 0);
+		ArrayListImplTest_checkContents(list, ++i);
+		ASSERT_EQ(maxSize - i, list->size);
+		ASSERT_EQ(40U, list->capacity);
+	}
+	
+	// The following remove should reduce capacity to 20
+	ArrayListImpl_remove(list, 0);
+	ArrayListImplTest_checkContents(list, ++i);
+	ASSERT_EQ(maxSize - i, list->size);
+	ASSERT_EQ(20U, list->capacity);
+	
+	// Remove elements up until the next reallocation (20 / 4 = 5)
+	while (list->size > 5)
+	{
+		ArrayListImpl_remove(list, 0);
+		ArrayListImplTest_checkContents(list, ++i);
+		ASSERT_EQ(maxSize - i, list->size);
+		ASSERT_EQ(20U, list->capacity);
+	}
+	
+	// The following remove should reduce capacity to 10
+	ArrayListImpl_remove(list, 0);
+	ArrayListImplTest_checkContents(list, ++i);
+	ASSERT_EQ(maxSize - i, list->size);
+	ASSERT_EQ(10U, list->capacity);
+	
+	// Remove the remaining elements
+	while (list->size > 0)
+	{
+		ArrayListImpl_remove(list, 0);
+		ArrayListImplTest_checkContents(list, ++i);
+		ASSERT_EQ(maxSize - i, list->size);
+		ASSERT_EQ(10U, list->capacity);
+	}
+	
+	// The size should be 0, but the capacity should remain 10
+	ArrayListImpl_remove(list, 0);
+	ArrayListImplTest_checkContents(list, ++i);
+	ASSERT_EQ(0U, list->size);
+	ASSERT_EQ(10U, list->capacity);
 }
 
 TEST(ArrayListImpl, TestIteratorNextOperations)
@@ -341,7 +366,7 @@ TEST(ArrayListImpl, TestIteratorNextOperations)
 
 	ArrayListImplIterator* iter = ArrayListImpl_iterator(list);
 	ASSERT_TRUE(ArrayListImplIterator_hasNext(iter));
-	ASSERT_EQ(0U, ArrayListImplIterator_peekNext(iter));
+	ASSERT_EQ(0U, *(size_t*)ArrayListImplIterator_peekNext(iter));
 
 	size_t times = 0;
 	while(ArrayListImplIterator_hasNext(iter))
@@ -356,7 +381,7 @@ TEST(ArrayListImpl, TestIteratorNextOperations)
 	ASSERT_EQ(NULL, ArrayListImplIterator_peekNext(iter));
 	ASSERT_EQ(NULL, ArrayListImplIterator_next(iter));
 	ASSERT_EQ(expectedSize, times);
-	ASSERT_EQ(times + 1, iter->nextIndex);
+	ASSERT_EQ(times, iter->nextIndex);
 
 	ArrayListImplIterator_destroy(iter);
 	ArrayListImpl_destroy(list);

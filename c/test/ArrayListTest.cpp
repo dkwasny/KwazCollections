@@ -21,7 +21,7 @@ static void ArrayListTest_smokeTest(ArrayList* list)
 	ArrayListTest_checkContents(list);
 	for (size_t i = 0; i < 20; ++i)
 	{
-		free(list->remove(list, 0));
+		list->remove(list, 0);
 	}
 }
 
@@ -44,7 +44,7 @@ static void ArrayListTest_smokeTestIterator(IIterator* iter, size_t expectedElem
 TEST(ArrayList, ICollection_TestAdd)
 {
 	ICollection* collection = ArrayList_create(
-		10, 2, 4, 2
+		sizeof(size_t), 10, 2, 4, 2
 	)->superType->superType;
 
 	for (size_t i = 1; i <= 30; ++i)
@@ -59,7 +59,7 @@ TEST(ArrayList, ICollection_TestAdd)
 TEST(ArrayList, ICollection_TestIterator)
 {
 	ICollection* collection = ArrayList_create(
-		10, 2, 4, 2
+		sizeof(size_t), 10, 2, 4, 2
 	)->superType->superType;
 
 	size_t i = 0;
@@ -78,7 +78,7 @@ TEST(ArrayList, ICollection_TestIterator)
 TEST(ArrayList, IList_TestAdd)
 {
 	IList* list = ArrayList_create(
-		10, 2, 4, 2
+		sizeof(size_t), 10, 2, 4, 2
 	)->superType;
 
 	for (size_t i = 1; i <= 30; ++i)
@@ -93,7 +93,7 @@ TEST(ArrayList, IList_TestAdd)
 TEST(ArrayList, IList_TestGet)
 {
 	IList* list = ArrayList_create(
-		10, 2, 4, 2
+		sizeof(size_t), 10, 2, 4, 2
 	)->superType;
 	
 	for (size_t i = 0; i < 30; ++i)
@@ -112,7 +112,7 @@ TEST(ArrayList, IList_TestGet)
 TEST(ArrayList, IList_TestRemove)
 {
 	IList* list = ArrayList_create(
-		10, 2, 4, 2
+		sizeof(size_t), 10, 2, 4, 2
 	)->superType;
 	
 	for (size_t i = 0; i < 30; ++i)
@@ -122,9 +122,7 @@ TEST(ArrayList, IList_TestRemove)
 
 	for (size_t i = 0; i < 30; ++i)
 	{
-		size_t* removedVal = (size_t*)list->remove(list,0);
-		ASSERT_EQ(i, *removedVal);
-		free(removedVal);
+		list->remove(list,0);
 		ASSERT_EQ(30-1-i, list->getSize(list));
 	}
 
@@ -134,7 +132,7 @@ TEST(ArrayList, IList_TestRemove)
 TEST(ArrayList, IList_TestIterator)
 {
 	IList* list = ArrayList_create(
-		10, 2, 4, 2
+		sizeof(size_t), 10, 2, 4, 2
 	)->superType;
 
 	for (size_t i = 0; i < 50; ++i)
@@ -152,7 +150,7 @@ TEST(ArrayList, IList_TestIterator)
 TEST(ArrayList, ArrayList_TestAdd)
 {
 	ArrayList* list = ArrayList_create(
-		10, 2, 4, 2
+		sizeof(size_t), 10, 2, 4, 2
 	);
 
 	for (size_t i = 1; i <= 30; ++i)
@@ -167,7 +165,7 @@ TEST(ArrayList, ArrayList_TestAdd)
 TEST(ArrayList, ArrayList_TestIterator)
 {
 	ArrayList* list = ArrayList_create(
-		10, 2, 4, 2
+		sizeof(size_t), 10, 2, 4, 2
 	);
 
 	for (size_t i = 0; i < 50; ++i)
@@ -185,7 +183,7 @@ TEST(ArrayList, ArrayList_TestIterator)
 TEST(ArrayList, ArrayList_TestGet)
 {
 	ArrayList* list = ArrayList_create(
-		10, 2, 4, 2
+		sizeof(size_t), 10, 2, 4, 2
 	);
 	
 	for (size_t i = 0; i < 30; ++i)
@@ -204,7 +202,7 @@ TEST(ArrayList, ArrayList_TestGet)
 TEST(ArrayList, ArrayList_TestRemove)
 {
 	ArrayList* list = ArrayList_create(
-		10, 2, 4, 2
+		sizeof(size_t), 10, 2, 4, 2
 	);
 	
 	for (size_t i = 0; i < 30; ++i)
@@ -214,9 +212,7 @@ TEST(ArrayList, ArrayList_TestRemove)
 
 	for (size_t i = 0; i < 30; ++i)
 	{
-		size_t* removedVal = (size_t*)list->remove(list, 0);
-		ASSERT_EQ(i, *removedVal);
-		free(removedVal);
+		list->remove(list, 0);
 		ASSERT_EQ(30-1-i, list->getSize(list));
 	}
 
@@ -226,7 +222,7 @@ TEST(ArrayList, ArrayList_TestRemove)
 TEST(ArrayList, ArrayList_TestGetCapacity)
 {
 	ArrayList* list = ArrayList_create(
-		10, 2, 4, 2
+		sizeof(size_t), 10, 2, 4, 2
 	);
 
 	size_t i = 0;	
@@ -244,7 +240,7 @@ TEST(ArrayList, ArrayList_TestGetCapacity)
 
 TEST(ArrayList, TestDefaultConstructor)
 {
-	ArrayList* list = ArrayList_createDefault();
+	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
 	ASSERT_EQ(10U, list->getCapacity(list));
 	ASSERT_EQ(0U, list->getSize(list));
 	ArrayListTest_smokeTest(list);
@@ -254,7 +250,7 @@ TEST(ArrayList, TestDefaultConstructor)
 TEST(ArrayList, TestCustomConstructor)
 {
 	ArrayList* list = ArrayList_create(
-		1, 2, 3, 4
+		sizeof(size_t), 1, 2, 3, 4
 	);
 	ASSERT_EQ(1U, list->getCapacity(list));
 	ASSERT_EQ(0U, list->getSize(list));

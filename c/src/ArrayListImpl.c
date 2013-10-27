@@ -13,6 +13,7 @@ static void** _ArrayListImpl_allocateArray(
 	if (pOrigValuesSize > pNewCapacity)
 	{
 		/* TODO: Return error code or something*/
+		return NULL;
 	}
 
 	origValuesBytes = sizeof(void*) * pOrigValuesSize;
@@ -109,6 +110,7 @@ void ArrayListImpl_remove(ArrayListImpl* pList, const size_t pIndex)
 	if (pIndex >= pList->size)
 	{
 		/*TODO: Need some sort of return code to prevent this */
+		return;
 	}
 
 	--pList->size;
