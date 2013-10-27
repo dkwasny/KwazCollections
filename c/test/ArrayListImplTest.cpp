@@ -214,6 +214,36 @@ TEST(ArrayListImpl, TestRemoveNoReallocation)
 	ArrayListImpl_destroy(list);
 }
 
+TEST(ArrayListImpl, TestRemoveNoReallocationFromEndOfList)
+{
+	ArrayListImpl* list = ArrayListImpl_create(
+		sizeof(size_t),
+		10, 2, 4, 2
+	);
+
+	for (size_t i = 0; i < list->capacity; ++i)
+	{
+		ArrayListImpl_add(list, &i);
+	}
+
+	ASSERT_EQ(10U, list->size);
+	ASSERT_EQ(list->size, list->capacity);
+
+	size_t oldSize = list->size;
+	for (size_t i = 1; i <= oldSize; ++i)
+	{
+		ArrayListImpl_remove(list, oldSize - i);
+		ASSERT_EQ(oldSize-i, list->size);
+		ASSERT_EQ(oldSize, list->capacity);
+		ArrayListImplTest_checkContents(list);
+	}
+
+	ASSERT_EQ(0U, list->size);
+	ASSERT_EQ(oldSize, list->capacity);
+
+	ArrayListImpl_destroy(list);
+}
+
 TEST(ArrayListImpl, TestRemoveOneReallocation)
 {
 	ArrayListImpl* list = ArrayListImpl_create(
@@ -349,6 +379,8 @@ TEST(ArrayListImpl, TestRemoveMultipleReallocation)
 	ArrayListImplTest_checkContents(list, ++i);
 	ASSERT_EQ(0U, list->size);
 	ASSERT_EQ(10U, list->capacity);
+
+	ArrayListImpl_destroy(list);
 }
 
 TEST(ArrayListImpl, TestIteratorNextOperations)

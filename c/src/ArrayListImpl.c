@@ -112,6 +112,8 @@ void ArrayListImpl_remove(ArrayListImpl* pList, const size_t pIndex)
 		/*TODO: Need some sort of return code to prevent this */
 		return;
 	}
+		
+	free(pList->values[pIndex]);
 
 	--pList->size;
 	for (i = pIndex; i < pList->size; ++i)
