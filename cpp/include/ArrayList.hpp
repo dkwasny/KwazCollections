@@ -48,6 +48,8 @@
  */
 
 #include "IList.hpp"
+#include "IndexOutOfBoundsError.hpp"
+#include "NoMoreElementsError.hpp"
 #include <cstring>
 
 namespace KwazCollections
@@ -113,7 +115,11 @@ namespace KwazCollections
 					size_t nextIndex;
 					const ArrayList& impl;
 			};
-	};	
+	};
+	
+	#include "ArrayList.tpp"
+
 }
+
 
 #endif

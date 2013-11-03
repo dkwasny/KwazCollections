@@ -1,14 +1,7 @@
-#include "ArrayList.hpp"
-#include "IndexOutOfBoundsError.hpp"
-#include "NoMoreElementsError.hpp"
-
 static const size_t DEFAULT_CAPACITY = 10;
 static const unsigned int DEFAULT_ADD_REALLOCATION_MULTIPLIER = 2;
 static const unsigned int DEFAULT_REMOVE_REALLOCATION_THRESHOLD = 4;
 static const unsigned int DEFAULT_REMOVE_REALLOCATION_DIVISOR = 2;
-
-using KwazCollections::ArrayList;
-using KwazCollections::IIterator;
 
 ArrayList::ArrayList() :
 	initialCapacity(DEFAULT_CAPACITY),

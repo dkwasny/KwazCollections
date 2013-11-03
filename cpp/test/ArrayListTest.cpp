@@ -8,11 +8,11 @@ using KwazCollections::ArrayList;
 using KwazCollections::IIterator;
 
 // Helper methods
-static void ArrayListTest_checkContents(IList& list, int offset)
+static void ArrayListTest_checkContents(IList& list, size_t offset)
 {
 	for(size_t i = 0; i < list.getSize(); ++i)
 	{
-		ASSERT_EQ(offset + i, list[i]);
+		ASSERT_EQ((int)(offset + i), list[i]);
 	}
 }
 
@@ -51,7 +51,7 @@ TEST(ArrayList, TestIListCopyConstructor)
 	ASSERT_NE(((ArrayList*)list), other);
 
 	ASSERT_EQ(list->getSize(), other->getSize());
-	for (int i = 0; i < list->getSize(); ++i)
+	for (size_t i = 0; i < list->getSize(); ++i)
 	{
 		ASSERT_EQ((*list)[i], (*other)[i]);
 	}
@@ -63,24 +63,24 @@ TEST(ArrayList, TestIListCopyConstructor)
 TEST(ArrayList, TestDefaultConstructor)
 {
 	ArrayList list = ArrayList();
-	ASSERT_EQ(10, list.getCapacity());
-	ASSERT_EQ(0, list.getSize());
+	ASSERT_EQ(10U, list.getCapacity());
+	ASSERT_EQ(0U, list.getSize());
 	ArrayListTest_smokeTestAddRemove(list);
 }
 
 TEST(ArrayList, TestCustomConstructor)
 {
 	ArrayList list = ArrayList(1,4,3,2);
-	ASSERT_EQ(1, list.getCapacity());
-	ASSERT_EQ(0, list.getSize());
+	ASSERT_EQ(1U, list.getCapacity());
+	ASSERT_EQ(0U, list.getSize());
 	ArrayListTest_smokeTestAddRemove(list);
 }
 
 TEST(ArrayList, TestCustomConstructorZeroCapacity)
 {
 	ArrayList list = ArrayList(0,4,3,2);
-	ASSERT_EQ(0, list.getCapacity());
-	ASSERT_EQ(0, list.getSize());
+	ASSERT_EQ(0U, list.getCapacity());
+	ASSERT_EQ(0U, list.getSize());
 	ArrayListTest_smokeTestAddRemove(list);
 }
 
@@ -93,7 +93,7 @@ TEST(ArrayList, TestCopyConstructor)
 	ASSERT_NE(&list, &other);	
 
 	ASSERT_EQ(list.getSize(), other.getSize());
-	for (int i = 0; i < list.getSize(); ++i)
+	for (size_t i = 0; i < list.getSize(); ++i)
 	{
 		ASSERT_EQ(list[i], other[i]);
 	}
@@ -108,7 +108,7 @@ TEST(ArrayList, TestAssignmentOperator)
 	ASSERT_NE(&list, &other);	
 
 	ASSERT_EQ(list.getSize(), other.getSize());
-	for (int i = 0; i < list.getSize(); ++i)
+	for (size_t i = 0; i < list.getSize(); ++i)
 	{
 		ASSERT_EQ(list[i], other[i]);
 	}
@@ -118,11 +118,11 @@ TEST(ArrayList, TestAddNoReallocation)
 {
 	ArrayList list = ArrayList(10, 2, 4, 2);
 
- 	for (int i = 0; i < 10; ++i)
+ 	for (size_t i = 0; i < 10; ++i)
 	{
                 list.add(i);
 		ASSERT_EQ(i+1, list.getSize());
-        	ASSERT_EQ(10, list.getCapacity());
+        	ASSERT_EQ(10U, list.getCapacity());
         }
 
         ArrayListTest_checkContents(list);
@@ -132,21 +132,21 @@ TEST(ArrayList, TestAddOneReallocation)
 {
 	ArrayList list = ArrayList(10, 2, 4, 2);
 
-	int i = 0;
+	size_t i = 0;
 	for (; i < 10; ++i)
 	{
 		list.add(i);
 	}
 
-	ASSERT_EQ(10, list.getSize());
+	ASSERT_EQ(10U, list.getSize());
         ASSERT_EQ(list.getSize(), list.getCapacity());
 	ArrayListTest_checkContents(list);
 
 	list.add(i++); 
 
 	ASSERT_NE(list.getCapacity(), list.getSize());
-	ASSERT_EQ(11, list.getSize());
-	ASSERT_EQ(20, list.getCapacity());
+	ASSERT_EQ(11U, list.getSize());
+	ASSERT_EQ(20U, list.getCapacity());
 	ArrayListTest_checkContents(list);
 
 	for (; i < list.getCapacity(); ++i)
@@ -154,7 +154,7 @@ TEST(ArrayList, TestAddOneReallocation)
 		list.add(i);
 	}
 
-	ASSERT_EQ(20, list.getSize());
+	ASSERT_EQ(20U, list.getSize());
 	ASSERT_EQ(list.getSize(), list.getCapacity());
 	ArrayListTest_checkContents(list);
 }
@@ -170,7 +170,7 @@ TEST(ArrayList, TestAddStressTest)
 			list.add(i);
 		}
 
-		int expectedCapacity = 10 * pow(2, iteration);
+		size_t expectedCapacity = 10 * pow(2, iteration);
 		ASSERT_EQ(expectedCapacity, list.getCapacity());
 		ASSERT_EQ(list.getCapacity(), list.getSize());	
 		ASSERT_EQ(i, list.getSize());
@@ -200,10 +200,10 @@ TEST(ArrayList, TestIterator)
 	size_t i = 0;
 	for(; iter->hasNext(); ++i)
 	{
-		ASSERT_EQ(i, iter->peekNext());
-		ASSERT_EQ(i, iter->next());
+		ASSERT_EQ((int)i, iter->peekNext());
+		ASSERT_EQ((int)i, iter->next());
 	}
-	ASSERT_EQ(50, i);
+	ASSERT_EQ(50U, i);
 	
 	delete iter;
 }
@@ -212,62 +212,61 @@ TEST(ArrayList, TestRemoveNoReallocation)
 {
 	ArrayList list = ArrayList(10, 2, 4, 2);
 
-	for (int i = 0; i < list.getCapacity(); ++i)
+	for (size_t i = 0; i < list.getCapacity(); ++i)
 	{
 		list.add(i);
 	}
 
-	ASSERT_EQ(10, list.getSize());
+	ASSERT_EQ(10U, list.getSize());
 	ASSERT_EQ(list.getSize(), list.getCapacity());
 
-	int oldSize = list.getSize();
-	for (int i = 0; i < oldSize;)
+	size_t oldSize = list.getSize();
+	for (size_t i = 0; i < oldSize;)
 	{
-		ASSERT_EQ(i++, list.remove(0));
+		ASSERT_EQ((int)i++, list.remove(0));
 		ASSERT_EQ(oldSize-i, list.getSize());
 		ASSERT_EQ(oldSize, list.getCapacity());
 		ArrayListTest_checkContents(list, i);
 	}
 
-	ASSERT_EQ(0, list.getSize());
+	ASSERT_EQ(0U, list.getSize());
 }
 
 TEST(ArrayList, TestRemoveOneReallocation)
 {
 	ArrayList list = ArrayList(10, 2, 4, 2);
 
-	int i = 0;
-	int currCapacity = list.getCapacity();
-	for (int i = 0; i < currCapacity + 1; ++i)
+	size_t currCapacity = list.getCapacity();
+	for (size_t i = 0; i < currCapacity + 1; ++i)
 	{
 		list.add(i);
 	}
 
-	int oldSize = list.getSize();
+	size_t oldSize = list.getSize();
 	for (int i = 0; i < 6;)
 	{
 		ASSERT_EQ(i++, list.remove(0));
 		ASSERT_EQ(oldSize-i, list.getSize());
-		ASSERT_EQ(20, list.getCapacity());
+		ASSERT_EQ(20U, list.getCapacity());
 		ArrayListTest_checkContents(list, i);
 	}
 	
-	int oldCapacity = list.getCapacity();
+	size_t oldCapacity = list.getCapacity();
 	list.remove(0);
 
 	ASSERT_NE(oldCapacity, list.getCapacity());
-	ASSERT_EQ(10, list.getCapacity());
-	ASSERT_EQ(4, list.getSize());
+	ASSERT_EQ(10U, list.getCapacity());
+	ASSERT_EQ(4U, list.getSize());
 	ArrayListTest_checkContents(list, 7);
 }
 
 TEST(ArrayList, TestRemoveMultipleReallocation)
 {
 	int reallocations = 8;
-	int initialCapacity = 10;
+	size_t initialCapacity = 10;
 	int removeThreshold = 4;
 	int addRemoveMultiplier = 2;
-	int maxSize = 10 * pow(2, reallocations);
+	size_t maxSize = 10 * pow(2, reallocations);
 	ArrayList list = ArrayList(
 		initialCapacity,
 		addRemoveMultiplier,
@@ -275,7 +274,7 @@ TEST(ArrayList, TestRemoveMultipleReallocation)
 		addRemoveMultiplier
 	);
 	
-	for (int i = 0; i < maxSize; ++i)
+	for (size_t i = 0; i < maxSize; ++i)
 	{
 		list.add(i);
 	}
