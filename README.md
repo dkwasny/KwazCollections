@@ -8,3 +8,5 @@ I only ask (but not require) that if someone manages to actually look at this co
 
 This is currently being coded on a 32 bit LXDE Fedora VM running on Windows 7 64.
 I'm only using a 32 bit VM to keep down on memory usage.
+
+I am using [Google Test](https://code.google.com/p/googletest/) to unit test both the C and C++ codebases.
