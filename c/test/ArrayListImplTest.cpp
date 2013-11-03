@@ -432,6 +432,19 @@ TEST(ArrayListImpl, TestIteratorEmptyList)
 	ASSERT_EQ(NULL, ArrayListImplIterator_next(iter));
 	ASSERT_EQ(0U, iter->nextIndex);
 	
+	/*
+ 	* Many calls to remove on an "empty" iterator
+ 	* should have no effect on the list.
+ 	*/
+	ArrayListImplIterator_remove(iter);
+	ArrayListImplIterator_remove(iter);
+	ArrayListImplIterator_remove(iter);
+
+	ASSERT_FALSE(ArrayListImplIterator_hasNext(iter));
+	ASSERT_EQ(NULL, ArrayListImplIterator_peekNext(iter));
+	ASSERT_EQ(NULL, ArrayListImplIterator_next(iter));
+	ASSERT_EQ(0U, iter->nextIndex);
+	
 	ArrayListImplIterator_destroy(iter);
 	ArrayListImpl_destroy(list);
 }
@@ -444,13 +457,85 @@ TEST(ArrayListImpl, TestIteratorCreatedBeforeListModification)
 	);
 	ArrayListImplIterator* iter = ArrayListImpl_iterator(list);
 
-	const int expectedSize = 50;	
-	for (int i = 0; i < expectedSize; ++i)
+	const size_t expectedSize = 50;	
+	for (size_t i = 0; i < expectedSize; ++i)
 	{
 		ArrayListImpl_add(list, &i);
 	}
 
 	ArrayListTest_smokeTestIterator(iter, expectedSize);
+
+	ArrayListImplIterator_destroy(iter);
+	ArrayListImpl_destroy(list);
+}
+
+TEST(ArrayListImpl, TestIteratorRemoveFirstElementRepeated)
+{
+	ArrayListImpl* list = ArrayListImpl_create(
+		sizeof(size_t),
+		10, 2, 4, 2
+	);
+
+	const size_t listSize = 50;	
+	for (size_t i = 0; i < listSize; ++i)
+	{
+		ArrayListImpl_add(list, &i);
+	}
+
+	ArrayListImplIterator* iter = ArrayListImpl_iterator(list);
+	for (size_t i = 0; i < listSize; ++i)
+	{
+		ASSERT_EQ(listSize - i, list->size);
+		ArrayListImplTest_checkContents(list, i);
+
+		ArrayListImplIterator_next(iter);
+		ArrayListImplIterator_remove(iter);
+
+		ASSERT_EQ(listSize - i - 1, list->size);
+		ArrayListImplTest_checkContents(list, i + 1);
+	}
+
+	ASSERT_EQ(0U, list->size);
+	ASSERT_EQ(10U, list->capacity);
+
+	ArrayListImplIterator_destroy(iter);
+	ArrayListImpl_destroy(list);
+}
+
+TEST(ArrayListImpl, TestIteratorRemoveLastElementRepeated)
+{
+	ArrayListImpl* list = ArrayListImpl_create(
+		sizeof(size_t),
+		10, 2, 4, 2
+	);
+
+	const size_t listSize = 50;	
+	for (size_t i = 0; i < listSize; ++i)
+	{
+		ArrayListImpl_add(list, &i);
+	}
+
+	ArrayListImplIterator* iter = ArrayListImpl_iterator(list);
+	while (ArrayListImplIterator_hasNext(iter))
+	{
+		ArrayListImplIterator_next(iter);
+	}
+
+	for (size_t i = 0; i < listSize; ++i)
+	{
+		ASSERT_FALSE(ArrayListImplIterator_hasNext(iter));
+		
+		ASSERT_EQ(listSize - i, list->size);
+		ArrayListImplTest_checkContents(list);
+
+		ArrayListImplIterator_remove(iter);
+
+		ASSERT_EQ(listSize - i - 1, list->size);
+		ArrayListImplTest_checkContents(list);
+	}
+
+	ASSERT_EQ(0U, list->size);
+	ASSERT_EQ(10U, list->capacity);
 
 	ArrayListImplIterator_destroy(iter);
 	ArrayListImpl_destroy(list);

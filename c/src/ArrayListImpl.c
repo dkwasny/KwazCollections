@@ -207,6 +207,17 @@ void* ArrayListImplIterator_next(ArrayListImplIterator* pIter)
 	return retVal;
 }
 
+void ArrayListImplIterator_remove(ArrayListImplIterator* pIter)
+{
+	if (pIter->nextIndex > 0)
+	{
+		size_t removeIndex = pIter->nextIndex - 1;
+		ArrayListImpl_remove(pIter->list, removeIndex);
+		--pIter->nextIndex;
+	}
+	/* TODO: Report a bad remove attempt if condition fails */
+}
+
 void ArrayListImplIterator_destroy(ArrayListImplIterator* pIter)
 {
 	/* Do NOT free the list pointer within the iterator!

@@ -38,6 +38,11 @@ static void ArrayListTest_smokeTestIterator(IIterator* iter, size_t expectedElem
 	ASSERT_EQ(NULL, iter->peekNext(iter));
 	ASSERT_EQ(NULL, iter->next(iter));
 	ASSERT_EQ(expectedElements, i);
+
+	for (size_t i = 0; i < expectedElements; ++i)
+	{
+		iter->remove(iter);
+	}
 }
 
 // Actual Tests
@@ -175,6 +180,10 @@ TEST(ArrayList, ArrayList_TestIterator)
 
 	IIterator* iter = list->iterator(list);
 	ArrayListTest_smokeTestIterator(iter, 50);
+
+	// Smoke test should clear the list with remove ops
+	ASSERT_EQ(0U, list->impl->size);
+	ASSERT_EQ(10U, list->impl->capacity);
 
 	iter->destroy(iter);
 	list->destroy(list);

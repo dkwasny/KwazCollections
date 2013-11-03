@@ -52,6 +52,7 @@ ArrayListImplIterator* ArrayListImpl_iterator(ArrayListImpl* pList);
 Boolean ArrayListImplIterator_hasNext(ArrayListImplIterator* pIter);
 void* ArrayListImplIterator_peekNext(ArrayListImplIterator* pIter);
 void* ArrayListImplIterator_next(ArrayListImplIterator* pIter);
+void ArrayListImplIterator_remove(ArrayListImplIterator* pIter);
 
 void ArrayListImplIterator_destroy(ArrayListImplIterator* pIter);
 

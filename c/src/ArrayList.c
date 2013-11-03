@@ -115,6 +115,11 @@ static void* _ArrayList_IIterator_next(IIterator* pIter)
 	return ArrayListImplIterator_next(pIter->impl);
 }
 
+static void _ArrayList_IIterator_remove(IIterator* pIter)
+{
+	ArrayListImplIterator_remove(pIter->impl);
+}
+
 static void _ArrayList_IIterator_destroy(IIterator* pIter)
 {
 	ArrayListImplIterator_destroy(pIter->impl);
@@ -128,6 +133,7 @@ static IIterator* _ArrayList_ArrayList_iterator(ArrayList* pList)
 		_ArrayList_IIterator_hasNext,
 		_ArrayList_IIterator_peekNext,
 		_ArrayList_IIterator_next,
+		_ArrayList_IIterator_remove,
 		_ArrayList_IIterator_destroy,
 		NULL
 	};
