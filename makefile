@@ -63,6 +63,8 @@ CLANGPP := clang++ -Wall -Wextra -Werror -pedantic-errors -ansi -I $(CPP_INCLUDE
 GCC := gcc -Wall -Wextra -Werror -pedantic-errors -ansi -I $(C_INCLUDE_DIR) -c
 GPP := g++ -Wall -Wextra -Werror -pedantic-errors -ansi -I $(CPP_INCLUDE_DIR) -c
 
+VALGRIND := valgrind --tool=memcheck --leak-check=full --error-exitcode=1
+
 # Special compilation commands used to compile test code.
 # I do not want to have to worry about my test code and google test
 # passing the goofy ansi/pedantic crap I set for the main source.
@@ -199,7 +201,22 @@ clang: clangtestrun clangpptestrun
 .PHONY: all
 all: c cpp
 
+# Valgrind Tasks
+.PHONY: cvalgrind
+cvalgrind: c
+	$(VALGRIND) $(GCC_TEST_EXEC);
+	$(VALGRIND) $(CLANG_TEST_EXEC);
+
+.PHONY: cppvalgrind
+cppvalgrind: cpp
+	$(VALGRIND) $(GPP_TEST_EXEC);
+	$(VALGRIND) $(CLANGPP_TEST_EXEC);
+
+# Run all possible make tasks
+.PHONY: complete
+complete: cvalgrind cppvalgrind
+
 # Obligatory clean task
 .PHONY: clean
 clean:
-	rm -r $(BUILD_DIR);
+	if [ -d $(BUILD_DIR) ]; then rm -r $(BUILD_DIR); fi;
