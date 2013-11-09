@@ -3,17 +3,19 @@ static const unsigned int DEFAULT_ADD_REALLOCATION_MULTIPLIER = 2;
 static const unsigned int DEFAULT_REMOVE_REALLOCATION_THRESHOLD = 4;
 static const unsigned int DEFAULT_REMOVE_REALLOCATION_DIVISOR = 2;
 
-ArrayList::ArrayList() :
+template <typename T>
+ArrayList<T>::ArrayList() :
 	initialCapacity(DEFAULT_CAPACITY),
 	addReallocationMultiplier(DEFAULT_ADD_REALLOCATION_MULTIPLIER),
 	removeReallocationThreshold(DEFAULT_REMOVE_REALLOCATION_THRESHOLD),
 	removeReallocationDivisor(DEFAULT_REMOVE_REALLOCATION_DIVISOR),
-	values(new int[DEFAULT_CAPACITY]),
+	values(new T[DEFAULT_CAPACITY]),
 	size(0),
 	capacity(DEFAULT_CAPACITY)
 {}
 
-ArrayList::ArrayList(
+template <typename T>
+ArrayList<T>::ArrayList(
 	const size_t pCapacity,
 	const unsigned int pAddReallocationMultiplier,
 	const unsigned int pRemoveReallocationThreshold,
@@ -32,12 +34,13 @@ ArrayList::ArrayList(
 			: pRemoveReallocationThreshold
 	),
 	removeReallocationDivisor(pRemoveReallocationDivisor),
-	values(new int[pCapacity]),
+	values(new T[pCapacity]),
 	size(0),
 	capacity(pCapacity)
 {}
 
-ArrayList::ArrayList(const ArrayList& pOther) :
+template <typename T>
+ArrayList<T>::ArrayList(const ArrayList<T>& pOther) :
 	initialCapacity(pOther.capacity),
 	addReallocationMultiplier(pOther.addReallocationMultiplier),
 	removeReallocationThreshold(pOther.removeReallocationThreshold),
@@ -67,12 +70,13 @@ ArrayList::ArrayList(const ArrayList& pOther) :
  *         Manually doing the declarations appears to of cleared up the error
  *         even though it is less 'maintainable'.
  */
-ArrayList::ArrayList(const IList& pOther) :
+template <typename T>
+ArrayList<T>::ArrayList(const IList<T>& pOther) :
 	initialCapacity(pOther.getSize() * addReallocationMultiplier),
 	addReallocationMultiplier(DEFAULT_ADD_REALLOCATION_MULTIPLIER),
 	removeReallocationThreshold(DEFAULT_REMOVE_REALLOCATION_THRESHOLD),
 	removeReallocationDivisor(DEFAULT_REMOVE_REALLOCATION_DIVISOR),
-	values(new int[pOther.getSize() * addReallocationMultiplier]),
+	values(new T[pOther.getSize() * addReallocationMultiplier]),
 	size(0),
 	capacity(pOther.getSize() * addReallocationMultiplier)
 {
@@ -82,12 +86,14 @@ ArrayList::ArrayList(const IList& pOther) :
 	}
 }
 
-ArrayList::~ArrayList()
+template <typename T>
+ArrayList<T>::~ArrayList()
 {
 	delete[] values;
 }
 
-ArrayList& ArrayList::operator=(const ArrayList& pOther)
+template <typename T>
+ArrayList<T>& ArrayList<T>::operator=(const ArrayList<T>& pOther)
 {
 	if (this != &pOther)
 	{
@@ -103,17 +109,20 @@ ArrayList& ArrayList::operator=(const ArrayList& pOther)
 	return *this;
 }
 
-size_t ArrayList::getSize() const
+template <typename T>
+size_t ArrayList<T>::getSize() const
 {
 	return size;	
 }
 
-size_t ArrayList::getCapacity() const
+template <typename T>
+size_t ArrayList<T>::getCapacity() const
 {
 	return capacity;
 }
 
-void ArrayList::add(const int pValue)
+template <typename T>
+void ArrayList<T>::add(const T pValue)
 {
 	// Expand the array if we pass a specified threshold
 	if (capacity == size)
@@ -133,12 +142,14 @@ void ArrayList::add(const int pValue)
 	values[size++] = pValue;
 }
 
-IIterator* ArrayList::iterator()
+template <typename T>
+IIterator<T>* ArrayList<T>::iterator()
 {
 	return new Iterator(*this);
 }
 
-int ArrayList::remove(const size_t pIndex)
+template <typename T>
+T ArrayList<T>::remove(const size_t pIndex)
 {
 	if (pIndex >= size)
 	{
@@ -147,7 +158,7 @@ int ArrayList::remove(const size_t pIndex)
 		throw IndexOutOfBoundsError(msg);
 	}
 
-	int removedVal = values[pIndex];
+	T removedVal = values[pIndex];
 	
 	--size;
 	for (size_t i = pIndex; i < size; ++i)
@@ -164,7 +175,7 @@ int ArrayList::remove(const size_t pIndex)
 	size_t newCapacity = capacity / removeReallocationDivisor;
 	if (newCapacity >= initialCapacity && (size * removeReallocationThreshold) < capacity)
 	{
-		int* newValues = allocateArray(values, size, newCapacity);
+		T* newValues = allocateArray(values, size, newCapacity);
 		delete[] values;
 		values = newValues;
 		capacity = newCapacity;
@@ -173,7 +184,8 @@ int ArrayList::remove(const size_t pIndex)
 	return removedVal;	
 }
 
-int& ArrayList::get(size_t pIndex) const
+template <typename T>
+T& ArrayList<T>::get(size_t pIndex) const
 {
 	if (pIndex >= size)
 	{
@@ -185,8 +197,9 @@ int& ArrayList::get(size_t pIndex) const
 	return values[pIndex];
 }
 
-int* ArrayList::allocateArray(
-	const int* pOrigValues,
+template <typename T>
+T* ArrayList<T>::allocateArray(
+	const T* pOrigValues,
 	const size_t pOrigValuesSize,
 	const size_t pNewCapacity) const
 {
@@ -194,19 +207,21 @@ int* ArrayList::allocateArray(
 		// TODO: Throw reallocation error or something
 	}
 
-	int* retVal = new int[pNewCapacity];
+	T* retVal = new T[pNewCapacity];
 	size_t origValuesBytes = sizeof(int) * pOrigValuesSize;
 	memcpy(retVal, pOrigValues, origValuesBytes);	
 
 	return retVal;
 }
 
-ArrayList::Iterator::Iterator(const ArrayList& pImpl) :
+template <typename T>
+ArrayList<T>::Iterator::Iterator(const ArrayList<T>& pImpl) :
 	nextIndex(0),
 	impl(pImpl)
 {}
 
-bool ArrayList::Iterator::hasNext()
+template <typename T>
+bool ArrayList<T>::Iterator::hasNext()
 {
 	bool retVal = false;
 
@@ -218,7 +233,8 @@ bool ArrayList::Iterator::hasNext()
 	return retVal;
 }
 
-int& ArrayList::Iterator::peekNext()
+template <typename T>
+T& ArrayList<T>::Iterator::peekNext()
 {
 	if (!hasNext())
 	{
@@ -229,7 +245,8 @@ int& ArrayList::Iterator::peekNext()
 	return impl.get(nextIndex);
 }
 
-int& ArrayList::Iterator::next()
+template <typename T>
+T& ArrayList<T>::Iterator::next()
 {
 	if (!hasNext())
 	{

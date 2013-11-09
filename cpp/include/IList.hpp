@@ -6,7 +6,8 @@
 
 namespace KwazCollections
 {
-	class IList : public ICollection
+	template <typename T>
+	class IList : public ICollection<T>
 	{
 		public:
 			virtual ~IList() {};
@@ -14,7 +15,7 @@ namespace KwazCollections
 			virtual int& get(const size_t pIndex) const = 0;
 			virtual int remove(const size_t pIndex) = 0;
 
-			int& operator[](const size_t pIndex) const
+			T& operator[](const size_t pIndex) const
 			{
 				return get(pIndex);
 			};

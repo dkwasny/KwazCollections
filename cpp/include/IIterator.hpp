@@ -3,14 +3,15 @@
 
 namespace KwazCollections
 {
+	template <typename T>
 	class IIterator
 	{
 		public:
 			virtual ~IIterator() {};
 			
 			virtual bool hasNext() = 0;
-			virtual int& peekNext() = 0;
-			virtual int& next() = 0;
+			virtual T& peekNext() = 0;
+			virtual T& next() = 0;
 	};
 }
 
