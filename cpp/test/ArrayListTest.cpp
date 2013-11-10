@@ -8,32 +8,32 @@ using KwazCollections::ArrayList;
 using KwazCollections::IIterator;
 
 // Helper methods
-static void ArrayListTest_checkContents(IList& list, size_t offset)
+static void ArrayListTest_checkContents(IList<size_t>& list, size_t offset)
 {
 	for(size_t i = 0; i < list.getSize(); ++i)
 	{
-		ASSERT_EQ((int)(offset + i), list[i]);
+		ASSERT_EQ((size_t)(offset + i), list[i]);
 	}
 }
 
-static void ArrayListTest_checkContents(IList& list)
+static void ArrayListTest_checkContents(IList<size_t>& list)
 {
 	ArrayListTest_checkContents(list, 0);	
 }
 
-static void ArrayListTest_smokeTestAdd(IList& list)
+static void ArrayListTest_smokeTestAdd(IList<size_t>& list)
 {
-	for (int i = 0; i < 20; ++i)
+	for (size_t i = 0; i < 20; ++i)
 	{
 		list.add(i);
 	}
 	ArrayListTest_checkContents(list);
 }
 
-static void ArrayListTest_smokeTestAddRemove(IList& list)
+static void ArrayListTest_smokeTestAddRemove(IList<size_t>& list)
 {
 	ArrayListTest_smokeTestAdd(list);
-	for (int i = 0; i < 20; ++i)
+	for (size_t i = 0; i < 20; ++i)
 	{
 		list.remove(0);
 	}
@@ -42,13 +42,13 @@ static void ArrayListTest_smokeTestAddRemove(IList& list)
 // Actual Tests
 TEST(ArrayList, TestIListCopyConstructor)
 {
-	IList* list = new ArrayList(10, 2, 4, 2);
+	IList<size_t>* list = new ArrayList<size_t>(10, 2, 4, 2);
 	ArrayListTest_smokeTestAdd(*list);
 
-	ArrayList* other = new ArrayList(*list);
+	ArrayList<size_t>* other = new ArrayList<size_t>(*list);
 
 	//I have no idea if this is a valid assertion...
-	ASSERT_NE(((ArrayList*)list), other);
+	ASSERT_NE(((ArrayList<size_t>*)list), other);
 
 	ASSERT_EQ(list->getSize(), other->getSize());
 	for (size_t i = 0; i < list->getSize(); ++i)
@@ -62,7 +62,7 @@ TEST(ArrayList, TestIListCopyConstructor)
 
 TEST(ArrayList, TestDefaultConstructor)
 {
-	ArrayList list = ArrayList();
+	ArrayList<size_t> list = ArrayList<size_t>();
 	ASSERT_EQ(10U, list.getCapacity());
 	ASSERT_EQ(0U, list.getSize());
 	ArrayListTest_smokeTestAddRemove(list);
@@ -70,7 +70,7 @@ TEST(ArrayList, TestDefaultConstructor)
 
 TEST(ArrayList, TestCustomConstructor)
 {
-	ArrayList list = ArrayList(1,4,3,2);
+	ArrayList<size_t> list = ArrayList<size_t>(1,4,3,2);
 	ASSERT_EQ(1U, list.getCapacity());
 	ASSERT_EQ(0U, list.getSize());
 	ArrayListTest_smokeTestAddRemove(list);
@@ -78,7 +78,7 @@ TEST(ArrayList, TestCustomConstructor)
 
 TEST(ArrayList, TestCustomConstructorZeroCapacity)
 {
-	ArrayList list = ArrayList(0,4,3,2);
+	ArrayList<size_t> list = ArrayList<size_t>(0,4,3,2);
 	ASSERT_EQ(0U, list.getCapacity());
 	ASSERT_EQ(0U, list.getSize());
 	ArrayListTest_smokeTestAddRemove(list);
@@ -86,10 +86,10 @@ TEST(ArrayList, TestCustomConstructorZeroCapacity)
 
 TEST(ArrayList, TestCopyConstructor)
 {
-	ArrayList list = ArrayList(10, 2, 4, 2);
+	ArrayList<size_t> list = ArrayList<size_t>(10, 2, 4, 2);
 	ArrayListTest_smokeTestAdd(list);
 
-	ArrayList other = ArrayList(list);
+	ArrayList<size_t> other = ArrayList<size_t>(list);
 	ASSERT_NE(&list, &other);	
 
 	ASSERT_EQ(list.getSize(), other.getSize());
@@ -101,11 +101,11 @@ TEST(ArrayList, TestCopyConstructor)
 
 TEST(ArrayList, TestAssignmentOperator)
 {
-	ArrayList list = ArrayList(10, 2, 4, 2);
+	ArrayList<size_t> list = ArrayList<size_t>(10, 2, 4, 2);
 	ArrayListTest_smokeTestAdd(list);
 
-	ArrayList other = list;
-	ASSERT_NE(&list, &other);	
+	ArrayList<size_t> other = list;
+	ASSERT_NE(&list, &other);
 
 	ASSERT_EQ(list.getSize(), other.getSize());
 	for (size_t i = 0; i < list.getSize(); ++i)
@@ -116,7 +116,7 @@ TEST(ArrayList, TestAssignmentOperator)
 
 TEST(ArrayList, TestAddNoReallocation)
 {
-	ArrayList list = ArrayList(10, 2, 4, 2);
+	ArrayList<size_t> list = ArrayList<size_t>(10, 2, 4, 2);
 
  	for (size_t i = 0; i < 10; ++i)
 	{
@@ -130,7 +130,7 @@ TEST(ArrayList, TestAddNoReallocation)
 
 TEST(ArrayList, TestAddOneReallocation)
 {
-	ArrayList list = ArrayList(10, 2, 4, 2);
+	ArrayList<size_t> list = ArrayList<size_t>(10, 2, 4, 2);
 
 	size_t i = 0;
 	for (; i < 10; ++i)
@@ -161,7 +161,7 @@ TEST(ArrayList, TestAddOneReallocation)
 
 TEST(ArrayList, TestAddStressTest)
 {
-	ArrayList list = ArrayList(10, 2, 4, 2);
+	ArrayList<size_t> list = ArrayList<size_t>(10, 2, 4, 2);
 	unsigned int i = 0;
 	for (int iteration = 0; iteration < 10; ++iteration)
 	{
@@ -183,25 +183,24 @@ TEST(ArrayList, TestAddStressTest)
 		ASSERT_NE(list.getCapacity(), list.getSize());	
 		ASSERT_EQ(i, list.getSize());
 		ArrayListTest_checkContents(list);
-
 	}
 }
 
 TEST(ArrayList, TestIterator)
 {
-	ArrayList list = ArrayList(10, 2, 4, 2);
+	ArrayList<size_t> list = ArrayList<size_t>(10, 2, 4, 2);
 	for (size_t i = 0; i < 50; ++i)
 	{
 		list.add(i);
 	}
 
-	IIterator* iter = list.iterator();
+	IIterator<size_t>* iter = list.iterator();
 	
 	size_t i = 0;
 	for(; iter->hasNext(); ++i)
 	{
-		ASSERT_EQ((int)i, iter->peekNext());
-		ASSERT_EQ((int)i, iter->next());
+		ASSERT_EQ(i, iter->peekNext());
+		ASSERT_EQ(i, iter->next());
 	}
 	ASSERT_EQ(50U, i);
 	
@@ -210,7 +209,7 @@ TEST(ArrayList, TestIterator)
 
 TEST(ArrayList, TestRemoveNoReallocation)
 {
-	ArrayList list = ArrayList(10, 2, 4, 2);
+	ArrayList<size_t> list = ArrayList<size_t>(10, 2, 4, 2);
 
 	for (size_t i = 0; i < list.getCapacity(); ++i)
 	{
@@ -223,7 +222,7 @@ TEST(ArrayList, TestRemoveNoReallocation)
 	size_t oldSize = list.getSize();
 	for (size_t i = 0; i < oldSize;)
 	{
-		ASSERT_EQ((int)i++, list.remove(0));
+		ASSERT_EQ(i++, list.remove(0));
 		ASSERT_EQ(oldSize-i, list.getSize());
 		ASSERT_EQ(oldSize, list.getCapacity());
 		ArrayListTest_checkContents(list, i);
@@ -234,7 +233,7 @@ TEST(ArrayList, TestRemoveNoReallocation)
 
 TEST(ArrayList, TestRemoveOneReallocation)
 {
-	ArrayList list = ArrayList(10, 2, 4, 2);
+	ArrayList<size_t> list = ArrayList<size_t>(10, 2, 4, 2);
 
 	size_t currCapacity = list.getCapacity();
 	for (size_t i = 0; i < currCapacity + 1; ++i)
@@ -243,7 +242,7 @@ TEST(ArrayList, TestRemoveOneReallocation)
 	}
 
 	size_t oldSize = list.getSize();
-	for (int i = 0; i < 6;)
+	for (size_t i = 0; i < 6;)
 	{
 		ASSERT_EQ(i++, list.remove(0));
 		ASSERT_EQ(oldSize-i, list.getSize());
@@ -267,7 +266,7 @@ TEST(ArrayList, TestRemoveMultipleReallocation)
 	int removeThreshold = 4;
 	int addRemoveMultiplier = 2;
 	size_t maxSize = 10 * pow(2, reallocations);
-	ArrayList list = ArrayList(
+	ArrayList<size_t> list = ArrayList<size_t>(
 		initialCapacity,
 		addRemoveMultiplier,
 		removeThreshold,
@@ -279,12 +278,12 @@ TEST(ArrayList, TestRemoveMultipleReallocation)
 		list.add(i);
 	}
 	
-	int currOffset = 0;
+	size_t currOffset = 0;
 	int iteration = 0;
 	while (list.getSize() != 0)
 	{
-		int numToRemove = list.getSize() - (list.getCapacity() / removeThreshold);
-		for (int i = 0; i < numToRemove; ++i)
+		size_t numToRemove = list.getSize() - (list.getCapacity() / removeThreshold);
+		for (size_t i = 0; i < numToRemove; ++i)
 		{
 			ASSERT_EQ(currOffset++, list.remove(0));
 		}

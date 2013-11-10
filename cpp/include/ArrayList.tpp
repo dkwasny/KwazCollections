@@ -133,7 +133,7 @@ void ArrayList<T>::add(const T pValue)
 		{
 			newCapacity++;
 		}
-		int* newValues = allocateArray(values, size, newCapacity);
+		T* newValues = allocateArray(values, size, newCapacity);
 		delete[] values;
 		values = newValues;
 		capacity = newCapacity;
@@ -208,7 +208,7 @@ T* ArrayList<T>::allocateArray(
 	}
 
 	T* retVal = new T[pNewCapacity];
-	size_t origValuesBytes = sizeof(int) * pOrigValuesSize;
+	size_t origValuesBytes = sizeof(T) * pOrigValuesSize;
 	memcpy(retVal, pOrigValues, origValuesBytes);	
 
 	return retVal;
