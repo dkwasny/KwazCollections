@@ -159,7 +159,7 @@ TEST(ArrayList, TestAddOneReallocation)
 	ArrayListTest_checkContents(list);
 }
 
-TEST(ArrayList, TestAddStressTest)
+TEST(ArrayList, TestAddMultipleReallocation)
 {
 	ArrayList<size_t> list = ArrayList<size_t>(10, 2, 4, 2);
 	unsigned int i = 0;
@@ -261,55 +261,100 @@ TEST(ArrayList, TestRemoveOneReallocation)
 
 TEST(ArrayList, TestRemoveMultipleReallocation)
 {
-	int reallocations = 8;
 	size_t initialCapacity = 10;
-	int removeThreshold = 4;
-	int addRemoveMultiplier = 2;
-	size_t maxSize = 10 * pow(2, reallocations);
+	unsigned int removeThreshold = 4;
+	unsigned int addRemoveMultiplier = 2;
+	size_t maxSize = 160; // 4 reallocations of size 10 with a multiplier of 2
+	
 	ArrayList<size_t> list = ArrayList<size_t>(
 		initialCapacity,
 		addRemoveMultiplier,
 		removeThreshold,
 		addRemoveMultiplier
 	);
-	
+
+	// Fill the list
 	for (size_t i = 0; i < maxSize; ++i)
 	{
 		list.add(i);
 	}
-	
-	size_t currOffset = 0;
-	int iteration = 0;
-	while (list.getSize() != 0)
-	{
-		size_t numToRemove = list.getSize() - (list.getCapacity() / removeThreshold);
-		for (size_t i = 0; i < numToRemove; ++i)
-		{
-			ASSERT_EQ(currOffset++, list.remove(0));
-		}
-		
-		ArrayListTest_checkContents(list, currOffset);
-		ASSERT_EQ(maxSize - currOffset, list.getSize());
-		// Do not forget that ArrayLists do not resize below their initial capacity...
-		if (list.getCapacity() != initialCapacity)
-		{
-			ASSERT_EQ(
-				initialCapacity * pow(addRemoveMultiplier, reallocations - iteration),
-				list.getCapacity()
-			);
-		}
 
-		ASSERT_EQ(currOffset++, list.remove(0));
-		
-		ArrayListTest_checkContents(list, currOffset);
-		ASSERT_EQ(maxSize - currOffset, list.getSize());
-		// Do not forget that ArrayLists do not resize below their initial capacity...
-		if (list.getCapacity() != initialCapacity)
-		{
-			ASSERT_EQ(
-				initialCapacity * pow(addRemoveMultiplier, reallocations - ++iteration),
-				list.getCapacity()
-			);
-		}
+	ArrayListTest_checkContents(list, 0);
+	ASSERT_EQ(maxSize, list.getSize());
+	ASSERT_EQ(maxSize, list.getCapacity());
+
+	// Remove elements up until the next reallocation (160 / 4 = 40)
+	size_t i = 0;
+	while (list.getSize() > 40)
+	{
+		list.remove(0);
+		ArrayListTest_checkContents(list, ++i);
+		ASSERT_EQ(maxSize - i, list.getSize());
+		ASSERT_EQ(maxSize, list.getCapacity());
 	}
+
+	// The following remove should reduce capacity to 80
+	list.remove(0);
+	ArrayListTest_checkContents(list, ++i);
+	ASSERT_EQ(maxSize - i, list.getSize());
+	ASSERT_EQ(80U, list.getCapacity());
+
+	// Remove elements up until the next reallocation (80 / 4 = 20)
+	while (list.getSize() > 20)
+	{
+		list.remove(0);
+		ArrayListTest_checkContents(list, ++i);
+		ASSERT_EQ(maxSize - i, list.getSize());
+		ASSERT_EQ(80U, list.getCapacity());
+	}
+	
+	// The following remove should reduce capacity to 40
+	list.remove(0);
+	ArrayListTest_checkContents(list, ++i);
+	ASSERT_EQ(maxSize - i, list.getSize());
+	ASSERT_EQ(40U, list.getCapacity());
+	
+	// Remove elements up until the next reallocation (40 / 4 = 10)
+	while (list.getSize() > 10)
+	{
+		list.remove(0);
+		ArrayListTest_checkContents(list, ++i);
+		ASSERT_EQ(maxSize - i, list.getSize());
+		ASSERT_EQ(40U, list.getCapacity());
+	}
+	
+	// The following remove should reduce capacity to 20
+	list.remove(0);
+	ArrayListTest_checkContents(list, ++i);
+	ASSERT_EQ(maxSize - i, list.getSize());
+	ASSERT_EQ(20U, list.getCapacity());
+	
+	// Remove elements up until the next reallocation (20 / 4 = 5)
+	while (list.getSize() > 5)
+	{
+		list.remove(0);
+		ArrayListTest_checkContents(list, ++i);
+		ASSERT_EQ(maxSize - i, list.getSize());
+		ASSERT_EQ(20U, list.getCapacity());
+	}
+	
+	// The following remove should reduce capacity to 10
+	list.remove(0);
+	ArrayListTest_checkContents(list, ++i);
+	ASSERT_EQ(maxSize - i, list.getSize());
+	ASSERT_EQ(10U, list.getCapacity());
+	
+	// Remove the remaining elements
+	while (list.getSize() > 0)
+	{
+		list.remove(0);
+		ArrayListTest_checkContents(list, ++i);
+		ASSERT_EQ(maxSize - i, list.getSize());
+		ASSERT_EQ(10U, list.getCapacity());
+	}
+	
+	// The size should be 0, but the capacity should remain 10
+	ArrayListTest_checkContents(list, ++i);
+	ASSERT_EQ(0U, list.getSize());
+	ASSERT_EQ(10U, list.getCapacity());
 }
