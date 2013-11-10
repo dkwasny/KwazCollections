@@ -13,7 +13,7 @@ namespace KwazCollections
 			virtual ~IList() {};
 
 			virtual T& get(const size_t pIndex) const = 0;
-			virtual T remove(const size_t pIndex) = 0;
+			virtual void remove(const size_t pIndex) = 0;
 
 			T& operator[](const size_t pIndex) const
 			{

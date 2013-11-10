@@ -122,7 +122,7 @@ size_t ArrayList<T>::getCapacity() const
 }
 
 template <typename T>
-void ArrayList<T>::add(const T pValue)
+void ArrayList<T>::add(const T& pValue)
 {
 	// Expand the array if we pass a specified threshold
 	if (capacity == size)
@@ -139,7 +139,8 @@ void ArrayList<T>::add(const T pValue)
 		capacity = newCapacity;
 	}
 	
-	values[size++] = pValue;
+	memcpy(values + size, &pValue, sizeof(T)); 
+	++size;
 }
 
 template <typename T>
@@ -149,7 +150,7 @@ IIterator<T>* ArrayList<T>::iterator()
 }
 
 template <typename T>
-T ArrayList<T>::remove(const size_t pIndex)
+void ArrayList<T>::remove(const size_t pIndex)
 {
 	if (pIndex >= size)
 	{
@@ -157,8 +158,6 @@ T ArrayList<T>::remove(const size_t pIndex)
 		string msg = "Exception during ArrayList remove";
 		throw IndexOutOfBoundsError(msg);
 	}
-
-	T removedVal = values[pIndex];
 	
 	--size;
 	for (size_t i = pIndex; i < size; ++i)
@@ -180,8 +179,6 @@ T ArrayList<T>::remove(const size_t pIndex)
 		values = newValues;
 		capacity = newCapacity;
 	}
-
-	return removedVal;	
 }
 
 template <typename T>

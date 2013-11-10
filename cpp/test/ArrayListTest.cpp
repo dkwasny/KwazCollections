@@ -222,7 +222,8 @@ TEST(ArrayList, TestRemoveNoReallocation)
 	size_t oldSize = list.getSize();
 	for (size_t i = 0; i < oldSize;)
 	{
-		ASSERT_EQ(i++, list.remove(0));
+		list.remove(0);
+		++i;
 		ASSERT_EQ(oldSize-i, list.getSize());
 		ASSERT_EQ(oldSize, list.getCapacity());
 		ArrayListTest_checkContents(list, i);
@@ -244,7 +245,8 @@ TEST(ArrayList, TestRemoveOneReallocation)
 	size_t oldSize = list.getSize();
 	for (size_t i = 0; i < 6;)
 	{
-		ASSERT_EQ(i++, list.remove(0));
+		list.remove(0);
+		++i;
 		ASSERT_EQ(oldSize-i, list.getSize());
 		ASSERT_EQ(20U, list.getCapacity());
 		ArrayListTest_checkContents(list, i);

@@ -27,12 +27,12 @@ namespace KwazCollections
 		
 			// ICollection Methods
 			size_t getSize() const;
-			void add(const T pValue);
+			void add(const T& pValue);
 			IIterator<T>* iterator();
 			
 			// IList Methods
 			T& get(const size_t pIndex) const;
-			T remove(const size_t pIndex);
+			void remove(const size_t pIndex);
 			
 			// ArrayList Methods
 			size_t getCapacity() const;
