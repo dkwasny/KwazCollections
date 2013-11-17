@@ -72,7 +72,7 @@ ArrayList<T>::ArrayList(const ArrayList<T>& pOther) :
  */
 template <typename T>
 ArrayList<T>::ArrayList(const IList<T>& pOther) :
-	initialCapacity(pOther.getSize() * addReallocationMultiplier),
+	initialCapacity(pOther.getSize() * DEFAULT_ADD_REALLOCATION_MULTIPLIER),
 	addReallocationMultiplier(DEFAULT_ADD_REALLOCATION_MULTIPLIER),
 	removeReallocationThreshold(DEFAULT_REMOVE_REALLOCATION_THRESHOLD),
 	removeReallocationDivisor(DEFAULT_REMOVE_REALLOCATION_DIVISOR),
