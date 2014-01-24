@@ -53,7 +53,7 @@ CPP_TEST_SUITE := $(CPP_TEST_DIR)/TestSuite.cpp
 
 # Google Test stuff
 GTEST_BUILD_DIR := $(BUILD_DIR)/gtest
-GTEST_DIR := ./lib/gtest-1.6.0
+GTEST_DIR := ./lib/gtest-1.7.0
 GTEST_INCLUDE_DIR := $(GTEST_DIR)/include
 GTEST_LIB := $(GTEST_BUILD_DIR)/libgtest.a
 
@@ -70,18 +70,13 @@ VALGRIND := valgrind --tool=memcheck --leak-check=full --error-exitcode=1
 # passing the goofy ansi/pedantic crap I set for the main source.
 GPP_TEST_COMPILE := g++ -Wall -Wextra -Werror
 CLANGPP_TEST_COMPILE := clang++ -Wall -Wextra -Werror
+GTEST_COMPILE := g++
 
 # Generated variables to assist in C compilation
 C_SOURCE_FILES := $(wildcard $(C_SOURCE_DIR)/*.c)
 C_OBJECT_NAMES := $(basename $(notdir $(C_SOURCE_FILES)))
 GCC_COMPILE := $(foreach object, $(C_OBJECT_NAMES), $(GCC) -o $(GCC_BUILD_DIR)/$(object).o $(C_SOURCE_DIR)/$(object).c;)
 CLANG_COMPILE := $(foreach object, $(C_OBJECT_NAMES), $(CLANG) -o $(CLANG_BUILD_DIR)/$(object).o $(C_SOURCE_DIR)/$(object).c;)
-
-# Generated variables to assist in C++ compilation
-#CPP_SOURCE_FILES := $(wildcard $(CPP_SOURCE_DIR)/*.cpp)
-#CPP_OBJECT_NAMES := $(basename $(notdir $(CPP_SOURCE_FILES)))
-#GPP_COMPILE := $(foreach object, $(CPP_OBJECT_NAMES), $(GPP) -o $(GPP_BUILD_DIR)/$(object).o $(CPP_SOURCE_DIR)/$(object).cpp;)
-#CLANGPP_COMPILE := $(foreach object, $(CPP_OBJECT_NAMES), $(CLANGPP) -o $(CLANGPP_BUILD_DIR)/$(object).o $(CPP_SOURCE_DIR)/$(object).cpp;)
 
 # Generated variables to assist in make target declaration
 C_HEADER_FILES := $(wildcard $(C_INCLUDE_DIR)/*.h)
@@ -114,30 +109,20 @@ $(GTEST_BUILD_DIR): | $(BUILD_DIR)
 	mkdir $@;
 
 # 2) Source Compilation
+# C only since the C++ code is all templates (headers)
 $(GCC_OUTPUT_FILES): $(C_SOURCE_FILES) $(C_HEADER_FILES) | $(GCC_BUILD_DIR)
 	$(GCC_COMPILE)
-
-#$(GPP_OUTPUT_FILES): $(CPP_SOURCE_FILES) $(CPP_HEADER_FILES) | $(GPP_BUILD_DIR)
-#	$(GPP_COMPILE)
 
 $(CLANG_OUTPUT_FILES): $(C_SOURCE_FILES) $(C_HEADER_FILES) | $(CLANG_BUILD_DIR)
 	$(CLANG_COMPILE)
 
-#$(CLANGPP_OUTPUT_FILES): $(CPP_SOURCE_FILES) $(CPP_HEADER_FILES) | $(CLANGPP_BUILD_DIR)
-#	$(CLANGPP_COMPILE)
-
 # 3) Library Generation
+# C only since the C++ code is all templates (headers)
 $(GCC_LIB): $(GCC_OUTPUT_FILES)
 	ar -crs $@ $(GCC_BUILD_DIR)/*.o;
 
-#$(GPP_LIB): $(GPP_OUTPUT_FILES)
-#	ar -crs $@ $(GPP_BUILD_DIR)/*.o;
-
 $(CLANG_LIB): $(CLANG_OUTPUT_FILES)
 	ar -crs $@ $(CLANG_BUILD_DIR)/*.o;
-
-#$(CLANGPP_LIB): $(CLANGPP_OUTPUT_FILES)
-#	ar -crs $@ $(CLANGPP_BUILD_DIR)/*.o;
 
 # 4) Test Compilation
 # 
@@ -149,15 +134,14 @@ $(CLANG_LIB): $(CLANG_OUTPUT_FILES)
 #
 # Google test itself is only compiled once via g++.
 $(GTEST_LIB): | $(GTEST_BUILD_DIR)
-	$(GPP_TEST_COMPILE) -pthread -I $(GTEST_INCLUDE_DIR) -I $(GTEST_DIR) -o $(GTEST_BUILD_DIR)/gtest-all.o -c $(GTEST_DIR)/src/gtest-all.cc;
-	$(GPP_TEST_COMPILE) -pthread -I $(GTEST_INCLUDE_DIR) -I $(GTEST_DIR) -o $(GTEST_BUILD_DIR)/gtest_main.o -c $(GTEST_DIR)/src/gtest_main.cc;
+	$(GTEST_COMPILE) -pthread -I $(GTEST_INCLUDE_DIR) -I $(GTEST_DIR) -o $(GTEST_BUILD_DIR)/gtest-all.o -c $(GTEST_DIR)/src/gtest-all.cc;
+	$(GTEST_COMPILE) -pthread -I $(GTEST_INCLUDE_DIR) -I $(GTEST_DIR) -o $(GTEST_BUILD_DIR)/gtest_main.o -c $(GTEST_DIR)/src/gtest_main.cc;
 	ar -crs $@ $(GTEST_BUILD_DIR)/*.o;
 
 $(GCC_TEST_EXEC): $(GCC_LIB) $(GTEST_LIB) $(C_TEST_FILES)
 	$(GPP_TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(C_INCLUDE_DIR) -o $@ -pthread $(C_TEST_SUITE) $< $(word 2, $^);
 
 
-#$(GPP_TEST_EXEC): $(GPP_LIB) $(GTEST_LIB) $(CPP_TEST_FILES)
 $(GPP_TEST_EXEC): $(GTEST_LIB) $(CPP_TEST_FILES) $(CPP_HEADER_FILES) | $(GPP_BUILD_DIR)
 	$(GPP_TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(CPP_INCLUDE_DIR) -o $@ -pthread $(CPP_TEST_SUITE) $<;
 
@@ -166,7 +150,6 @@ $(CLANG_TEST_EXEC): $(CLANG_LIB) $(GTEST_LIB) $(C_TEST_FILES)
 	$(CLANGPP_TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(C_INCLUDE_DIR) -o $@ -pthread $(C_TEST_SUITE) $< $(word 2, $^);
 
 
-#$(CLANGPP_TEST_EXEC): $(CLANGPP_LIB) $(GTEST_LIB) $(CPP_TEST_FILES)
 $(CLANGPP_TEST_EXEC): $(GTEST_LIB) $(CPP_TEST_FILES) $(CPP_HEADER_FILES) | $(CLANGPP_BUILD_DIR)
 	$(CLANGPP_TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(CPP_INCLUDE_DIR) -o $@ -pthread $(CPP_TEST_SUITE) $<;
 
