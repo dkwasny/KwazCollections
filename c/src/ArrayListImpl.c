@@ -23,6 +23,7 @@ static void** _ArrayListImpl_allocateArray(
 
 	return retVal;
 }
+
 static void _ArrayListImpl_expandArray(ArrayListImpl* pList, const size_t newCapacity)
 {
 	size_t adjustedCapacity = newCapacity;
@@ -37,7 +38,6 @@ static void _ArrayListImpl_expandArray(ArrayListImpl* pList, const size_t newCap
 	pList->values = newValues;
 	pList->capacity = adjustedCapacity;
 }
-
 
 /* Public Methods */
 ArrayListImpl* ArrayListImpl_createDefault(const size_t pTypeSize)
