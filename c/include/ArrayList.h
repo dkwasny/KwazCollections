@@ -17,6 +17,7 @@ struct ArrayList
 	size_t (* const getSize)(const ArrayList* pList);
 	void (* const destroy)(ArrayList* pList);
 	void (* const add)(ArrayList* pList, const void* pValue);
+	void (* const addAll)(ArrayList* pList, ICollection* pOtherCollection);
 	IIterator* (* const iterator)(ArrayList* pList);
 
 	/* IList Methods */

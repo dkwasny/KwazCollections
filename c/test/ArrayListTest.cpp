@@ -45,6 +45,20 @@ static void ArrayListTest_smokeTestIterator(IIterator* iter, size_t expectedElem
 	}
 }
 
+static ArrayList* ArrayListTest_createArrayList(size_t items)
+{
+	ArrayList* list = ArrayList_create(
+		sizeof(size_t), 10, 2, 4, 2
+	);
+
+	for (size_t i = 0; i < items; ++i)
+	{
+		list->add(list, &i);
+	}
+
+	return list;
+}
+
 // Actual Tests
 TEST(ArrayList, ICollection_TestAdd)
 {
@@ -59,6 +73,18 @@ TEST(ArrayList, ICollection_TestAdd)
 	}
 
 	collection->destroy(collection);
+}
+
+TEST(ArrayList, ICollection_TestAddAll)
+{
+	ICollection* list = ArrayListTest_createArrayList(30)->superType->superType;
+	ICollection* other = ArrayListTest_createArrayList(30)->superType->superType;
+
+	list->addAll(list, other);
+	ASSERT_EQ(60U, list->getSize(list));
+
+	list->destroy(list);
+	other->destroy(other);
 }
 
 TEST(ArrayList, ICollection_TestIterator)
@@ -95,17 +121,23 @@ TEST(ArrayList, IList_TestAdd)
 	list->destroy(list);
 }
 
+TEST(ArrayList, IList_TestAddAll)
+{
+	IList* list = ArrayListTest_createArrayList(30)->superType;
+	ICollection* other = ArrayListTest_createArrayList(30)->superType->superType;
+
+	list->addAll(list, other);
+
+	ASSERT_EQ(60U, list->getSize(list));
+
+	list->destroy(list);
+	other->destroy(other);
+}
+
 TEST(ArrayList, IList_TestGet)
 {
-	IList* list = ArrayList_create(
-		sizeof(size_t), 10, 2, 4, 2
-	)->superType;
+	IList* list = ArrayListTest_createArrayList(30)->superType;
 	
-	for (size_t i = 0; i < 30; ++i)
-	{
-		list->add(list, &i);
-	}
-
 	for (size_t i = 0; i < 30; ++i)
 	{
 		ASSERT_EQ(i, *((size_t*)(list->get(list, i))));
@@ -116,15 +148,8 @@ TEST(ArrayList, IList_TestGet)
 
 TEST(ArrayList, IList_TestRemove)
 {
-	IList* list = ArrayList_create(
-		sizeof(size_t), 10, 2, 4, 2
-	)->superType;
+	IList* list = ArrayListTest_createArrayList(30)->superType;
 	
-	for (size_t i = 0; i < 30; ++i)
-	{
-		list->add(list, &i);
-	}
-
 	for (size_t i = 0; i < 30; ++i)
 	{
 		list->remove(list,0);
@@ -136,14 +161,7 @@ TEST(ArrayList, IList_TestRemove)
 
 TEST(ArrayList, IList_TestIterator)
 {
-	IList* list = ArrayList_create(
-		sizeof(size_t), 10, 2, 4, 2
-	)->superType;
-
-	for (size_t i = 0; i < 50; ++i)
-	{
-		list->add(list, &i);
-	}
+	IList* list = ArrayListTest_createArrayList(50)->superType;
 
 	IIterator* iter = list->iterator(list);
 	ArrayListTest_smokeTestIterator(iter, 50);
@@ -167,16 +185,23 @@ TEST(ArrayList, ArrayList_TestAdd)
 	list->destroy(list);
 }
 
+TEST(ArrayList, ArrayList_TestAddAll)
+{
+	ArrayList* list = ArrayListTest_createArrayList(30);
+	ICollection* other = ArrayListTest_createArrayList(30)->superType->superType;
+
+	list->addAll(list, other);
+
+	ASSERT_EQ(60U, list->getSize(list));
+	ASSERT_EQ(80U, list->getCapacity(list));
+
+	list->destroy(list);
+	other->destroy(other);
+}
+
 TEST(ArrayList, ArrayList_TestIterator)
 {
-	ArrayList* list = ArrayList_create(
-		sizeof(size_t), 10, 2, 4, 2
-	);
-
-	for (size_t i = 0; i < 50; ++i)
-	{
-		list->add(list, &i);
-	}
+	ArrayList* list = ArrayListTest_createArrayList(50);
 
 	IIterator* iter = list->iterator(list);
 	ArrayListTest_smokeTestIterator(iter, 50);
@@ -191,14 +216,7 @@ TEST(ArrayList, ArrayList_TestIterator)
 
 TEST(ArrayList, ArrayList_TestGet)
 {
-	ArrayList* list = ArrayList_create(
-		sizeof(size_t), 10, 2, 4, 2
-	);
-	
-	for (size_t i = 0; i < 30; ++i)
-	{
-		list->add(list, &i);
-	}
+	ArrayList* list = ArrayListTest_createArrayList(30);
 
 	for (size_t i = 0; i < 30; ++i)
 	{
@@ -210,14 +228,7 @@ TEST(ArrayList, ArrayList_TestGet)
 
 TEST(ArrayList, ArrayList_TestRemove)
 {
-	ArrayList* list = ArrayList_create(
-		sizeof(size_t), 10, 2, 4, 2
-	);
-	
-	for (size_t i = 0; i < 30; ++i)
-	{
-		list->add(list, &i);
-	}
+	ArrayList* list = ArrayListTest_createArrayList(30);
 
 	for (size_t i = 0; i < 30; ++i)
 	{

@@ -11,6 +11,7 @@ struct IList
 	size_t (* const getSize)(const IList* pList);
 	void (* const destroy)(IList* pList);
 	void (* const add)(IList* pList, const void* pValue);
+	void (* const addAll)(IList* pList, ICollection* pOtherCollection);
 	IIterator* (* const iterator)(IList* pList);
 
 	/* IList Methods */

@@ -44,6 +44,7 @@ ArrayListImpl* ArrayListImpl_create(
 /* ArrayList Methods */
 void ArrayListImpl_destroy(ArrayListImpl* pList);
 void ArrayListImpl_add(ArrayListImpl* pList, const void* pValue);
+void ArrayListImpl_addAll(ArrayListImpl* pList, const ArrayListImpl* pOtherList);
 void ArrayListImpl_remove(ArrayListImpl* pList, const size_t pIndex);
 void* ArrayListImpl_get(const ArrayListImpl* pList, const size_t pIndex);
 ArrayListImplIterator* ArrayListImpl_iterator(ArrayListImpl* pList);

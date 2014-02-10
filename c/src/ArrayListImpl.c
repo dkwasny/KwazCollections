@@ -23,6 +23,21 @@ static void** _ArrayListImpl_allocateArray(
 
 	return retVal;
 }
+static void _ArrayListImpl_expandArray(ArrayListImpl* pList, const size_t newCapacity)
+{
+	size_t adjustedCapacity = newCapacity;
+	void** newValues;
+	if (adjustedCapacity == 0) { adjustedCapacity++; }  /* Gotta handle 0... */
+	newValues = _ArrayListImpl_allocateArray(
+		pList->values,
+		pList->size,
+		adjustedCapacity
+	);
+	free(pList->values);
+	pList->values = newValues;
+	pList->capacity = adjustedCapacity;
+}
+
 
 /* Public Methods */
 ArrayListImpl* ArrayListImpl_createDefault(const size_t pTypeSize)
@@ -85,21 +100,29 @@ void ArrayListImpl_add(ArrayListImpl* pList, const void* pValue)
 	if (pList->capacity == pList->size)
 	{
 		size_t newCapacity = pList->capacity * pList->addReallocationMultiplier;
-		void** newValues;
-		if (newCapacity == 0) { newCapacity++; }  /* Gotta handle 0... */
-		newValues = _ArrayListImpl_allocateArray(
-			pList->values,
-			pList->size,
-			newCapacity
-		);
-		free(pList->values);
-		pList->values = newValues;
-		pList->capacity = newCapacity;
+		_ArrayListImpl_expandArray(pList, newCapacity);
 	}
 
 	copiedValue = malloc(pList->typeSize);
 	memcpy(copiedValue, pValue, pList->typeSize);
 	pList->values[pList->size++] = copiedValue;
+}
+
+void ArrayListImpl_addAll(ArrayListImpl* pList, const ArrayListImpl* pOtherList)
+{
+	size_t availableSpots = pList->capacity - pList->size;
+	size_t i = 0;
+
+	if (pOtherList->size > availableSpots)
+	{
+		size_t combinedSize = pList->size + pOtherList->size;
+		_ArrayListImpl_expandArray(pList, combinedSize);
+	}
+
+	for (i = 0; i < pOtherList->size; ++i)
+	{
+		ArrayListImpl_add(pList, ArrayListImpl_get(pOtherList, i));	
+	}
 }
 
 void ArrayListImpl_remove(ArrayListImpl* pList, const size_t pIndex)

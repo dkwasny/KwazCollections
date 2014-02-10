@@ -71,6 +71,23 @@ static void _ArrayList_ICollection_add(ICollection* pCollection, const void* pVa
 	_ArrayList_IList_add(pCollection->subType, pValue);
 }
 
+/* AddAll Methods */
+/* Is this needed?!?!?
+static void _ArrayList_ICollection_addAll(ICollection* pCollection, const ICollection* pOtherCollection)
+{
+	ICollection_addAll(pCollection, pOtherCollection);
+}*/
+
+static void _ArrayList_IList_addAll(IList* pList, ICollection* pOtherCollection)
+{
+	ICollection_addAll(pList->superType, pOtherCollection);
+}
+
+static void _ArrayList_ArrayList_addAll(ArrayList* pList, ICollection* pOtherCollection)
+{
+	_ArrayList_IList_addAll(pList->superType, pOtherCollection);
+}
+
 /* Remove Methods */
 static void _ArrayList_ArrayList_remove(ArrayList* pList, const size_t pIndex)
 {
@@ -163,6 +180,7 @@ static ICollection* _ArrayList_ICollection_create(IList* pSubType)
 		_ArrayList_ICollection_getSize,
 		_ArrayList_ICollection_destroy,
 		_ArrayList_ICollection_add,
+		ICollection_addAll,
 		_ArrayList_ICollection_iterator,
 		NULL
 	};
@@ -181,6 +199,7 @@ static IList* _ArrayList_IList_create(ArrayList* pSubType)
 		_ArrayList_IList_getSize,
 		_ArrayList_IList_destroyDelegate,
 		_ArrayList_IList_add,
+		_ArrayList_IList_addAll,
 		_ArrayList_IList_iterator,
 		_ArrayList_IList_get,
 		_ArrayList_IList_remove,
@@ -203,6 +222,7 @@ static ArrayList* _ArrayList_createInternal(ArrayListImpl* pImpl)
 		_ArrayList_ArrayList_getSize,
 		_ArrayList_ArrayList_destroyDelegate,
 		_ArrayList_ArrayList_add,
+		_ArrayList_ArrayList_addAll,
 		_ArrayList_ArrayList_iterator,
 		_ArrayList_ArrayList_get,
 		_ArrayList_ArrayList_remove,

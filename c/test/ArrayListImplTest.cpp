@@ -184,6 +184,119 @@ TEST(ArrayListImpl, TestAddMultipleReallocation)
 	ArrayListImpl_destroy(list);
 }
 
+TEST(ArrayListImpl, TestAddAllTwoEmptyLists)
+{
+	ArrayListImpl* list1 = ArrayListImpl_create(
+		sizeof(size_t),
+		10, 2, 4, 2
+	);
+
+	ArrayListImpl* list2 = ArrayListImpl_create(
+		sizeof(size_t),
+		10, 2, 4, 2
+	);
+
+	ArrayListImpl_addAll(list1, list2);
+
+	ASSERT_EQ(0U, list1->size);
+	ArrayListImplTest_checkContents(list1);
+	ASSERT_EQ(0U, list2->size);
+	ArrayListImplTest_checkContents(list2);
+
+	ArrayListImpl_destroy(list1);
+	ArrayListImpl_destroy(list2);
+}
+
+TEST(ArrayListImpl, TestAddAllFullListToEmptyList)
+{
+	ArrayListImpl* list1 = ArrayListImpl_create(
+		sizeof(size_t),
+		10, 2, 4, 2
+	);
+
+	ArrayListImpl* list2 = ArrayListImpl_create(
+		sizeof(size_t),
+		10, 2, 4, 2
+	);
+
+	for (size_t i = 0; i < 20; ++i)
+	{
+		ArrayListImpl_add(list2, &i);
+	}
+
+	ArrayListImpl_addAll(list1, list2);
+
+	ASSERT_EQ(20U, list1->size);
+	ArrayListImplTest_checkContents(list1);
+	ASSERT_EQ(20U, list2->size);
+	ArrayListImplTest_checkContents(list2);
+	
+	ArrayListImpl_destroy(list1);
+	ArrayListImpl_destroy(list2);
+}
+
+TEST(ArrayListImpl, TestAddAllEmptyListToFullList)
+{
+	ArrayListImpl* list1 = ArrayListImpl_create(
+		sizeof(size_t),
+		10, 2, 4, 2
+	);
+
+	ArrayListImpl* list2 = ArrayListImpl_create(
+		sizeof(size_t),
+		10, 2, 4, 2
+	);
+
+	for (size_t i = 0; i < 20; ++i)
+	{
+		ArrayListImpl_add(list1, &i);
+	}
+
+	ArrayListImpl_addAll(list1, list2);
+
+	ASSERT_EQ(20U, list1->size);
+	ArrayListImplTest_checkContents(list1);
+	ASSERT_EQ(0U, list2->size);
+	ArrayListImplTest_checkContents(list2);
+	
+	ArrayListImpl_destroy(list1);
+	ArrayListImpl_destroy(list2);
+}
+
+TEST(ArrayListImpl, TestAddAllFullListToFullList)
+{
+	ArrayListImpl* list1 = ArrayListImpl_create(
+		sizeof(size_t),
+		10, 2, 4, 2
+	);
+
+	ArrayListImpl* list2 = ArrayListImpl_create(
+		sizeof(size_t),
+		10, 2, 4, 2
+	);
+
+	for (size_t i = 0; i < 20; ++i)
+	{
+		ArrayListImpl_add(list1, &i);
+		ArrayListImpl_add(list2, &i);
+	}
+
+	ArrayListImpl_addAll(list1, list2);
+
+	ASSERT_EQ(40U, list1->size);
+	for (size_t i = 0; i < 40; ++i)
+	{
+		size_t expected = i % 20;
+		ASSERT_EQ(expected, *((size_t*)(ArrayListImpl_get(list1, i))));
+	}	
+
+	ASSERT_EQ(20U, list2->size);
+	ArrayListImplTest_checkContents(list2);
+	
+	ArrayListImpl_destroy(list1);
+	ArrayListImpl_destroy(list2);
+}
+
 TEST(ArrayListImpl, TestRemoveNoReallocation)
 {
 	ArrayListImpl* list = ArrayListImpl_create(
