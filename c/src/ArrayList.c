@@ -72,12 +72,6 @@ static void _ArrayList_ICollection_add(ICollection* pCollection, const void* pVa
 }
 
 /* AddAll Methods */
-/* Is this needed?!?!?
-static void _ArrayList_ICollection_addAll(ICollection* pCollection, const ICollection* pOtherCollection)
-{
-	ICollection_addAll(pCollection, pOtherCollection);
-}*/
-
 static void _ArrayList_IList_addAll(IList* pList, ICollection* pOtherCollection)
 {
 	ICollection_addAll(pList->superType, pOtherCollection);
