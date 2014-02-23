@@ -14,7 +14,11 @@ namespace KwazCollections
 			virtual size_t getSize() const = 0;
 			virtual void add(const T& pValue) = 0;
 			virtual IIterator<T>* iterator() = 0;
+
+			virtual void addAll(ICollection<T>& pCollection);
 	};
+
+	#include "ICollection.tpp"
 }
 
 #endif

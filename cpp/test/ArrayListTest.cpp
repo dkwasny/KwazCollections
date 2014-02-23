@@ -186,6 +186,22 @@ TEST(ArrayList, TestAddMultipleReallocation)
 	}
 }
 
+TEST(ArrayList, TestAddAll)
+{
+	ArrayList<size_t> list = ArrayList<size_t>();
+	
+	ArrayList<size_t> otherList = ArrayList<size_t>();
+	for (size_t i = 0; i < 50; ++i)
+	{
+		otherList.add(i);
+	}
+
+	list.addAll(otherList);
+	ASSERT_EQ(otherList.getSize(), list.getSize());
+
+	ArrayListTest_checkContents(list);
+}
+
 TEST(ArrayList, TestIterator)
 {
 	ArrayList<size_t> list = ArrayList<size_t>(10, 2, 4, 2);
