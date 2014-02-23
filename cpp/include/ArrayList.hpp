@@ -60,15 +60,16 @@ namespace KwazCollections
 			class Iterator : public IIterator<T>
 			{
 				public:
-					Iterator(const ArrayList<T>& pImpl);
+					Iterator(ArrayList<T>& pImpl);
 					
 					bool hasNext();
 					T& peekNext();
 					T& next();
+					void remove();
 
 				private:
 					size_t nextIndex;
-					const ArrayList<T>& impl;
+					ArrayList<T>& impl;
 			};
 	};
 	

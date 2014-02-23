@@ -212,7 +212,7 @@ T* ArrayList<T>::allocateArray(
 }
 
 template <typename T>
-ArrayList<T>::Iterator::Iterator(const ArrayList<T>& pImpl) :
+ArrayList<T>::Iterator::Iterator(ArrayList<T>& pImpl) :
 	nextIndex(0),
 	impl(pImpl)
 {}
@@ -252,4 +252,17 @@ T& ArrayList<T>::Iterator::next()
 	}
 
 	return impl.get(nextIndex++);
+}
+
+template <typename T>
+void ArrayList<T>::Iterator::remove()
+{
+	if (nextIndex <= 0)
+	{
+		// TODO: throw something
+	}
+
+	size_t indexToRemove = nextIndex - 1;
+	impl.remove(indexToRemove);
+	--nextIndex;
 }

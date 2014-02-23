@@ -202,7 +202,7 @@ TEST(ArrayList, TestAddAll)
 	ArrayListTest_checkContents(list);
 }
 
-TEST(ArrayList, TestIterator)
+TEST(ArrayList, TestIteratorPeekAndNext)
 {
 	ArrayList<size_t> list = ArrayList<size_t>(10, 2, 4, 2);
 	for (size_t i = 0; i < 50; ++i)
@@ -220,6 +220,32 @@ TEST(ArrayList, TestIterator)
 	}
 	ASSERT_EQ(50U, i);
 	
+	delete iter;
+}
+
+TEST(ArrayList, TestIteratorRemove)
+{
+	ArrayList<size_t> list = ArrayList<size_t>();
+	for (size_t i = 0; i < 5; ++i)
+	{
+		list.add(i);
+	}
+
+	IIterator<size_t>* iter = list.iterator();
+	iter->next();
+	iter->remove();
+	iter->next();
+	iter->next();
+	iter->remove();
+	iter->next();
+	iter->next();
+	iter->remove();
+
+	ASSERT_FALSE(iter->hasNext());
+	ASSERT_EQ(2U, list.getSize());
+	ASSERT_EQ(1U, list[0U]);
+	ASSERT_EQ(3U, list[1U]);
+
 	delete iter;
 }
 
