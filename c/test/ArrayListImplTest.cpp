@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "ArrayListImpl.h"
+#include "Boolean.h"
 
 static void ArrayListImplTest_checkContents(ArrayListImpl* list, size_t offset)
 {
@@ -651,5 +652,51 @@ TEST(ArrayListImpl, TestIteratorRemoveLastElementRepeated)
 	ASSERT_EQ(10U, list->capacity);
 
 	ArrayListImplIterator_destroy(iter);
+	ArrayListImpl_destroy(list);
+}
+
+TEST(ArrayListImpl, TestContainsDefaultEmptyList)
+{
+	ArrayListImpl* list = ArrayListImpl_createDefault(sizeof(int));
+
+	int val = 0;
+	ASSERT_EQ(FALSE, ArrayListImpl_contains(list, &val));
+
+	ArrayListImpl_destroy(list);
+}
+
+TEST(ArrayListImpl, TestContainsDefaultSingletonList)
+{
+	ArrayListImpl* list = ArrayListImpl_createDefault(sizeof(int));
+
+	int val = 1;
+	ArrayListImpl_add(list, &val);
+	ASSERT_EQ(TRUE, ArrayListImpl_contains(list, &val));
+
+	val = 2;
+	ASSERT_EQ(FALSE, ArrayListImpl_contains(list, &val));
+
+	ArrayListImpl_destroy(list);
+}
+
+TEST(ArrayListImpl, TestContainsDefault)
+{
+	ArrayListImpl* list = ArrayListImpl_createDefault(sizeof(int));
+
+	for (int i = 0; i <= 10; ++i)
+	{
+		ArrayListImpl_add(list, &i);
+	}
+
+	for (int i = -5; i < 15; ++i)
+	{
+		if (i >= 0 && i <= 10) {
+			ASSERT_EQ(TRUE, ArrayListImpl_contains(list, &i));
+		}
+		else {
+			ASSERT_EQ(FALSE, ArrayListImpl_contains(list, &i));
+		}
+	}
+
 	ArrayListImpl_destroy(list);
 }

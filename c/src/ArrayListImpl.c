@@ -1,4 +1,5 @@
 #include "ArrayListImpl.h"
+#include <string.h>
 
 /* Utility Methods */
 static void** _ArrayListImpl_allocateArray(
@@ -52,6 +53,24 @@ ArrayListImpl* ArrayListImpl_create(
 	const unsigned int pRemoveReallocationThreshold,
 	const unsigned int pRemoveReallocationDivisor)
 {
+	return ArrayListImpl_createCompare(
+		pTypeSize,
+		pCapacity,
+		pAddReallocationMultiplier,
+		pRemoveReallocationThreshold,
+		pRemoveReallocationDivisor,
+		memcmp
+	);
+}
+
+ArrayListImpl* ArrayListImpl_createCompare(
+	const size_t pTypeSize,
+	const size_t pCapacity,
+	const unsigned int pAddReallocationMultiplier,
+	const unsigned int pRemoveReallocationThreshold,
+	const unsigned int pRemoveReallocationDivisor,
+	int (* pCompare)(const void* first, const void* second, size_t size))
+{
 	ArrayListImpl* retVal = malloc(sizeof(ArrayListImpl));
 	
 	void** values = malloc(sizeof(void*) * pCapacity);
@@ -76,6 +95,7 @@ ArrayListImpl* ArrayListImpl_create(
 	retVal->addReallocationMultiplier = pAddReallocationMultiplier;
 	retVal->removeReallocationThreshold = removeReallocationThreshold;
 	retVal->removeReallocationDivisor = pRemoveReallocationDivisor;
+	retVal->compare = pCompare;
 
 	return retVal;
 }
@@ -175,6 +195,29 @@ void* ArrayListImpl_get(const ArrayListImpl* pList, const size_t pIndex)
 	}
 
 	return retVal;
+}
+
+Boolean ArrayListImpl_contains(const ArrayListImpl* pList, const void* pValue)
+{
+	Boolean found = FALSE;
+
+	int compare = 0;
+	size_t index = 0;
+	for (; index < pList->size && found == FALSE; ++index)
+	{
+		compare = pList->compare(
+			ArrayListImpl_get(pList, index),
+			pValue,
+			pList->typeSize
+		);
+
+		if (compare == 0)
+		{
+			found = TRUE;
+		}	
+	}
+
+	return found;
 }
 
 ArrayListImplIterator* ArrayListImpl_iterator(ArrayListImpl* pList)

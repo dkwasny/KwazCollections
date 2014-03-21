@@ -2,7 +2,6 @@
 #define _C_KWAZ_ARRAY_LIST_IMPL_
 
 #include <stdlib.h>
-#include <string.h>
 #include "Boolean.h"
 
 typedef struct ArrayListImpl ArrayListImpl;
@@ -19,6 +18,8 @@ struct ArrayListImpl
 	unsigned int addReallocationMultiplier;
 	unsigned int removeReallocationThreshold;
 	unsigned int removeReallocationDivisor;
+
+	int (* compare)(const void* first, const void* second, size_t size);
 };
 
 struct ArrayListImplIterator
@@ -40,6 +41,14 @@ ArrayListImpl* ArrayListImpl_create(
 	const unsigned int pRemoveReallocationThreshold,
 	const unsigned int pRemoveReallocationDivisor
 );
+ArrayListImpl* ArrayListImpl_createCompare(
+	const size_t pTypeSize,
+	const size_t pCapacity,
+	const unsigned int pAddReallocationMultiplier,
+	const unsigned int pRemoveReallocationThreshold,
+	const unsigned int pRemoveReallocationDivisor,
+	int (* pCompare)(const void* first, const void* second, size_t size)
+);
 
 /* ArrayList Methods */
 void ArrayListImpl_destroy(ArrayListImpl* pList);
@@ -47,6 +56,7 @@ void ArrayListImpl_add(ArrayListImpl* pList, const void* pValue);
 void ArrayListImpl_addAll(ArrayListImpl* pList, const ArrayListImpl* pOtherList);
 void ArrayListImpl_remove(ArrayListImpl* pList, const size_t pIndex);
 void* ArrayListImpl_get(const ArrayListImpl* pList, const size_t pIndex);
+Boolean ArrayListImpl_contains(const ArrayListImpl* pList, const void* pValue);
 ArrayListImplIterator* ArrayListImpl_iterator(ArrayListImpl* pList);
 
 /* Iterator Methods */
