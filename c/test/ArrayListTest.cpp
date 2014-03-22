@@ -87,6 +87,19 @@ TEST(ArrayList, ICollection_TestAddAll)
 	other->destroy(other);
 }
 
+TEST(ArrayList, ICollection_TestContains)
+{
+	ICollection* list = ArrayListTest_createArrayList(10)->superType->superType;
+
+	size_t val = 5;
+	ASSERT_EQ(TRUE, list->contains(list, &val));
+	
+	val = 1000;
+	ASSERT_EQ(FALSE, list->contains(list, &val));
+
+	list->destroy(list);
+}
+
 TEST(ArrayList, ICollection_TestIterator)
 {
 	ICollection* collection = ArrayList_create(
@@ -132,6 +145,19 @@ TEST(ArrayList, IList_TestAddAll)
 
 	list->destroy(list);
 	other->destroy(other);
+}
+
+TEST(ArrayList, IList_TestContains)
+{
+	IList* list = ArrayListTest_createArrayList(10)->superType;
+
+	size_t value = 5;
+	ASSERT_EQ(TRUE, list->contains(list, &value));
+
+	value = 1000;
+	ASSERT_EQ(FALSE, list->contains(list, &value));
+
+	list->destroy(list);
 }
 
 TEST(ArrayList, IList_TestGet)
@@ -197,6 +223,19 @@ TEST(ArrayList, ArrayList_TestAddAll)
 
 	list->destroy(list);
 	other->destroy(other);
+}
+
+TEST(ArrayList, ArrayList_TestContains)
+{
+	ArrayList* list = ArrayListTest_createArrayList(10);
+
+	size_t val = 5;
+	ASSERT_EQ(TRUE, list->contains(list, &val));
+
+	val = 1000;
+	ASSERT_EQ(FALSE, list->contains(list, &val));
+
+	list->destroy(list);
 }
 
 TEST(ArrayList, ArrayList_TestIterator)

@@ -82,6 +82,22 @@ static void _ArrayList_ArrayList_addAll(ArrayList* pList, ICollection* pOtherCol
 	_ArrayList_IList_addAll(pList->superType, pOtherCollection);
 }
 
+/* Contains Methods */
+static Boolean _ArrayList_ArrayList_contains(ArrayList* pList, const void* pValue)
+{
+	return ArrayListImpl_contains(pList->impl, pValue);
+}
+
+static Boolean _ArrayList_IList_contains(IList* pList, const void* pValue)
+{
+	return _ArrayList_ArrayList_contains(pList->subType, pValue);
+}
+
+static Boolean _ArrayList_ICollection_contains(ICollection* pList, const void* pValue)
+{
+	return _ArrayList_IList_contains(pList->subType, pValue);
+}
+
 /* Remove Methods */
 static void _ArrayList_ArrayList_remove(ArrayList* pList, const size_t pIndex)
 {
@@ -175,6 +191,7 @@ static ICollection* _ArrayList_ICollection_create(IList* pSubType)
 		_ArrayList_ICollection_destroy,
 		_ArrayList_ICollection_add,
 		ICollection_addAll,
+		_ArrayList_ICollection_contains,
 		_ArrayList_ICollection_iterator,
 		NULL
 	};
@@ -194,6 +211,7 @@ static IList* _ArrayList_IList_create(ArrayList* pSubType)
 		_ArrayList_IList_destroyDelegate,
 		_ArrayList_IList_add,
 		_ArrayList_IList_addAll,
+		_ArrayList_IList_contains,
 		_ArrayList_IList_iterator,
 		_ArrayList_IList_get,
 		_ArrayList_IList_remove,
@@ -217,6 +235,7 @@ static ArrayList* _ArrayList_createInternal(ArrayListImpl* pImpl)
 		_ArrayList_ArrayList_destroyDelegate,
 		_ArrayList_ArrayList_add,
 		_ArrayList_ArrayList_addAll,
+		_ArrayList_ArrayList_contains,
 		_ArrayList_ArrayList_iterator,
 		_ArrayList_ArrayList_get,
 		_ArrayList_ArrayList_remove,
@@ -235,6 +254,13 @@ static ArrayList* _ArrayList_createInternal(ArrayListImpl* pImpl)
 }
 
 /* Public methods */
+ArrayList* ArrayList_createDefault(const size_t pTypeSize)
+{
+	return _ArrayList_createInternal(
+		ArrayListImpl_createDefault(pTypeSize)
+	);
+}
+
 ArrayList* ArrayList_create(
 	const size_t pTypeSize,
 	const size_t pCapacity,
@@ -253,9 +279,22 @@ ArrayList* ArrayList_create(
 	);
 }
 
-ArrayList* ArrayList_createDefault(const size_t pTypeSize)
+ArrayList* ArrayList_createCompare(
+	const size_t pTypeSize,
+	const size_t pCapacity,
+	const unsigned int pAddReallocationMultiplier,
+	const unsigned int pRemoveReallocationThreshold,
+	const unsigned int pRemoveReallocationDivisor,
+	int (* pCompare)(const void* first, const void* second, size_t size))
 {
 	return _ArrayList_createInternal(
-		ArrayListImpl_createDefault(pTypeSize)
+		ArrayListImpl_createCompare(
+			pTypeSize,
+			pCapacity,
+			pAddReallocationMultiplier,
+			pRemoveReallocationThreshold,
+			pRemoveReallocationDivisor,
+			pCompare
+		)
 	);
 }

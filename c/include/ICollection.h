@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include "IIterator.h"
+#include "Boolean.h"
 
 typedef struct ICollection ICollection;
 
@@ -13,6 +14,7 @@ struct ICollection
 	void (* const destroy)(ICollection* pCollection);
 	void (* const add)(ICollection* pCollection, const void* pValue);
 	void (* const addAll)(ICollection* pCollection, ICollection* pOtherCollection);
+	Boolean (* const contains)(ICollection* pCollection, const void* pValue);
 	IIterator* (* const iterator)(ICollection* pCollection);
 
 	/* Internal References */

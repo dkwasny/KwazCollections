@@ -6,6 +6,7 @@
 #include "IList.h"
 #include "ArrayListImpl.h"
 #include "IIterator.h"
+#include "Boolean.h"
 
 /* The public interface structure.
  */
@@ -18,6 +19,7 @@ struct ArrayList
 	void (* const destroy)(ArrayList* pList);
 	void (* const add)(ArrayList* pList, const void* pValue);
 	void (* const addAll)(ArrayList* pList, ICollection* pOtherCollection);
+	Boolean (* const contains)(ArrayList* pList, const void* pValue);
 	IIterator* (* const iterator)(ArrayList* pList);
 
 	/* IList Methods */
@@ -44,6 +46,14 @@ ArrayList* ArrayList_create(
 	const unsigned int pAddReallocationMultiplier,
 	const unsigned int pRemoveReallocationThreshold,
 	const unsigned int pRemoveReallocationDivisor
+);
+ArrayList* ArrayList_createCompare(
+	const size_t pTypeSize,
+	const size_t pCapacity,
+	const unsigned int pAddReallocationMultiplier,
+	const unsigned int pRemoveReallocationThreshold,
+	const unsigned int pRemoveReallocationDivisor,
+	int (* pCompare)(const void* first, const void* second, size_t size)
 );
 
 /* Close c++ extern */

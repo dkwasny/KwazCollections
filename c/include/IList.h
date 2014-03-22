@@ -1,7 +1,9 @@
 #ifndef _C_KWAZ_ILIST_
 #define _C_KWAZ_ILIST_
 
+#include <stdlib.h>
 #include "ICollection.h"
+#include "Boolean.h"
 
 typedef struct IList IList;
 
@@ -12,6 +14,7 @@ struct IList
 	void (* const destroy)(IList* pList);
 	void (* const add)(IList* pList, const void* pValue);
 	void (* const addAll)(IList* pList, ICollection* pOtherCollection);
+	Boolean (* const contains)(IList* pList, const void* pValue);
 	IIterator* (* const iterator)(IList* pList);
 
 	/* IList Methods */
