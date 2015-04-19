@@ -826,3 +826,37 @@ TEST(ArrayList, TestAddAllSameList)
 	ASSERT_EQ(NULL, ArrayList_addAll(list, list));
 	ArrayList_destroy(list);
 }
+
+TEST(ArrayList, TestCopyList)
+{
+	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+	for (size_t i = 0; i < 100; ++i)
+	{
+		ArrayList_add(list, &i);
+	}
+	
+	ArrayList* otherList = ArrayList_consumeIterator(
+		ArrayList_createDefault(sizeof(size_t)),
+		ArrayList_iterator(list)
+	);
+	
+	ASSERT_EQ(list->size, otherList->size);
+	
+	Iterator* iter = ArrayList_iterator(list);
+	Iterator* otherIter = ArrayList_iterator(otherList);
+	
+	while (iter->hasNext(iter))
+	{
+		ASSERT_EQ(
+			*(size_t*)iter->next(iter),
+			*(size_t*)otherIter->next(otherIter)
+		);
+	}
+	
+	ASSERT_FALSE(otherIter->hasNext(otherIter));
+	
+	iter->destroy(iter);
+	otherIter->destroy(otherIter);
+	ArrayList_destroy(list);
+	ArrayList_destroy(otherList);
+}
