@@ -60,23 +60,25 @@ ArrayList* ArrayList_create(
 	const unsigned int pRemoveReallocationThreshold,
 	const unsigned int pRemoveReallocationDivisor)
 {
-	return ArrayList_createCompare(
+	return ArrayList_createFull(
 		pTypeSize,
 		pCapacity,
 		pAddReallocationMultiplier,
 		pRemoveReallocationThreshold,
 		pRemoveReallocationDivisor,
-		memcmp
+		memcmp,
+		memcpy
 	);
 }
 
-ArrayList* ArrayList_createCompare(
+ArrayList* ArrayList_createFull(
 	const size_t pTypeSize,
 	const size_t pCapacity,
 	const unsigned int pAddReallocationMultiplier,
 	const unsigned int pRemoveReallocationThreshold,
 	const unsigned int pRemoveReallocationDivisor,
-	int (* pCompare)(const void* first, const void* second, size_t size))
+	int (* pCompare)(const void* first, const void* second, size_t size),
+	void* (* pCopy)(void * dest, const void * src, size_t size))
 {
 	ArrayList* retVal = malloc(sizeof(ArrayList));
 	
@@ -103,6 +105,7 @@ ArrayList* ArrayList_createCompare(
 	retVal->removeReallocationThreshold = removeReallocationThreshold;
 	retVal->removeReallocationDivisor = pRemoveReallocationDivisor;
 	retVal->compare = pCompare;
+	retVal->copy = pCopy;
 
 	return retVal;
 }
@@ -131,8 +134,8 @@ void ArrayList_add(ArrayList* pList, const void* pValue)
 	}
 
 	copiedValue = malloc(pList->typeSize);
-	memcpy(copiedValue, pValue, pList->typeSize);
-	pList->values[pList->size++] = copiedValue;
+	pList->values[pList->size++]
+		= pList->copy(copiedValue, pValue, pList->typeSize);
 }
 
 void ArrayList_addAll(ArrayList* pList, const ArrayList* pOtherList)

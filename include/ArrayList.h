@@ -11,13 +11,16 @@ typedef struct ArrayList
 	size_t size;
 	size_t capacity;
 
+	/* TODO: Const these? */
 	size_t typeSize;
 	size_t initialCapacity;
 	unsigned int addReallocationMultiplier;
 	unsigned int removeReallocationThreshold;
 	unsigned int removeReallocationDivisor;
 
+	/* TODO: Const these function pointers? */
 	int (* compare)(const void* first, const void* second, size_t size);
+	void* (* copy)(void * dest, const void * src, size_t size);
 } ArrayList;
 
 /* Start extern for c++ */
@@ -33,13 +36,14 @@ ArrayList* ArrayList_create(
 	const unsigned int pRemoveReallocationThreshold,
 	const unsigned int pRemoveReallocationDivisor
 );
-ArrayList* ArrayList_createCompare(
+ArrayList* ArrayList_createFull(
 	const size_t pTypeSize,
 	const size_t pCapacity,
 	const unsigned int pAddReallocationMultiplier,
 	const unsigned int pRemoveReallocationThreshold,
 	const unsigned int pRemoveReallocationDivisor,
-	int (* pCompare)(const void* first, const void* second, size_t size)
+	int (* pCompare)(const void* first, const void* second, size_t size),
+	void* (* pCopy)(void * dest, const void * src, size_t size)
 );
 
 /* ArrayList Methods */
