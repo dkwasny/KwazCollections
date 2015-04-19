@@ -1,2 +1,2 @@
-#include "ArrayListImplTest.cpp"
-#include "IntArrayListImplTest.cpp"
+#include "ArrayListTest.cpp"
+#include "IntArrayListTest.cpp"

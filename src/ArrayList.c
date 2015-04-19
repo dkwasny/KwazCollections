@@ -1,8 +1,15 @@
-#include "ArrayListImpl.h"
+#include "ArrayList.h"
 #include <string.h>
 
+/* Internal Iterator Struct */
+typedef struct ArrayListIterator
+{
+	size_t nextIndex;
+	ArrayList* list;
+} ArrayListIterator;
+
 /* Utility Methods */
-static void** _ArrayListImpl_allocateArray(
+static void** _ArrayList_allocateArray(
 	const void* pOrigValues,
 	const size_t pOrigValuesSize,
 	const size_t pNewCapacity)
@@ -25,12 +32,12 @@ static void** _ArrayListImpl_allocateArray(
 	return retVal;
 }
 
-static void _ArrayListImpl_expandArray(ArrayListImpl* pList, const size_t newCapacity)
+static void _ArrayList_expandArray(ArrayList* pList, const size_t newCapacity)
 {
 	size_t adjustedCapacity = newCapacity;
 	void** newValues;
 	if (adjustedCapacity == 0) { adjustedCapacity++; }  /* Gotta handle 0... */
-	newValues = _ArrayListImpl_allocateArray(
+	newValues = _ArrayList_allocateArray(
 		pList->values,
 		pList->size,
 		adjustedCapacity
@@ -41,19 +48,19 @@ static void _ArrayListImpl_expandArray(ArrayListImpl* pList, const size_t newCap
 }
 
 /* Public Methods */
-ArrayListImpl* ArrayListImpl_createDefault(const size_t pTypeSize)
+ArrayList* ArrayList_createDefault(const size_t pTypeSize)
 {
-	return ArrayListImpl_create(pTypeSize, 10, 2, 4, 2);
+	return ArrayList_create(pTypeSize, 10, 2, 4, 2);
 }
 
-ArrayListImpl* ArrayListImpl_create(
+ArrayList* ArrayList_create(
 	const size_t pTypeSize,
 	const size_t pCapacity,
 	const unsigned int pAddReallocationMultiplier,
 	const unsigned int pRemoveReallocationThreshold,
 	const unsigned int pRemoveReallocationDivisor)
 {
-	return ArrayListImpl_createCompare(
+	return ArrayList_createCompare(
 		pTypeSize,
 		pCapacity,
 		pAddReallocationMultiplier,
@@ -63,7 +70,7 @@ ArrayListImpl* ArrayListImpl_create(
 	);
 }
 
-ArrayListImpl* ArrayListImpl_createCompare(
+ArrayList* ArrayList_createCompare(
 	const size_t pTypeSize,
 	const size_t pCapacity,
 	const unsigned int pAddReallocationMultiplier,
@@ -71,7 +78,7 @@ ArrayListImpl* ArrayListImpl_createCompare(
 	const unsigned int pRemoveReallocationDivisor,
 	int (* pCompare)(const void* first, const void* second, size_t size))
 {
-	ArrayListImpl* retVal = malloc(sizeof(ArrayListImpl));
+	ArrayList* retVal = malloc(sizeof(ArrayList));
 	
 	void** values = malloc(sizeof(void*) * pCapacity);
 
@@ -100,19 +107,19 @@ ArrayListImpl* ArrayListImpl_createCompare(
 	return retVal;
 }
 
-void ArrayListImpl_destroy(ArrayListImpl* pList)
+void ArrayList_destroy(ArrayList* pList)
 {
-	ArrayListImplIterator* iter = ArrayListImpl_iterator(pList);
-	while (ArrayListImplIterator_hasNext(iter))
+	Iterator* iter = ArrayList_iterator(pList);
+	while (iter->hasNext(iter))
 	{
-		free(ArrayListImplIterator_next(iter));
+		free(iter->next(iter));
 	}
-	ArrayListImplIterator_destroy(iter);
+	iter->destroy(iter);
 	free(pList->values);
 	free(pList);
 }
 
-void ArrayListImpl_add(ArrayListImpl* pList, const void* pValue)
+void ArrayList_add(ArrayList* pList, const void* pValue)
 {
 	void* copiedValue = NULL;
 
@@ -120,7 +127,7 @@ void ArrayListImpl_add(ArrayListImpl* pList, const void* pValue)
 	if (pList->capacity == pList->size)
 	{
 		size_t newCapacity = pList->capacity * pList->addReallocationMultiplier;
-		_ArrayListImpl_expandArray(pList, newCapacity);
+		_ArrayList_expandArray(pList, newCapacity);
 	}
 
 	copiedValue = malloc(pList->typeSize);
@@ -128,7 +135,7 @@ void ArrayListImpl_add(ArrayListImpl* pList, const void* pValue)
 	pList->values[pList->size++] = copiedValue;
 }
 
-void ArrayListImpl_addAll(ArrayListImpl* pList, const ArrayListImpl* pOtherList)
+void ArrayList_addAll(ArrayList* pList, const ArrayList* pOtherList)
 {
 	size_t availableSpots = pList->capacity - pList->size;
 	size_t i = 0;
@@ -136,16 +143,16 @@ void ArrayListImpl_addAll(ArrayListImpl* pList, const ArrayListImpl* pOtherList)
 	if (pOtherList->size > availableSpots)
 	{
 		size_t combinedSize = pList->size + pOtherList->size;
-		_ArrayListImpl_expandArray(pList, combinedSize);
+		_ArrayList_expandArray(pList, combinedSize);
 	}
 
 	for (i = 0; i < pOtherList->size; ++i)
 	{
-		ArrayListImpl_add(pList, ArrayListImpl_get(pOtherList, i));	
+		ArrayList_add(pList, ArrayList_get(pOtherList, i));	
 	}
 }
 
-void ArrayListImpl_remove(ArrayListImpl* pList, const size_t pIndex)
+void ArrayList_remove(ArrayList* pList, const size_t pIndex)
 {
 	size_t i = 0;
 	size_t newCapacity = 0;
@@ -174,7 +181,7 @@ void ArrayListImpl_remove(ArrayListImpl* pList, const size_t pIndex)
 	if (newCapacity >= pList->initialCapacity
 		&& (pList->size * pList->removeReallocationThreshold) < pList->capacity)
 	{
-		void** newValues = _ArrayListImpl_allocateArray(
+		void** newValues = _ArrayList_allocateArray(
 			pList->values,
 			pList->size,
 			newCapacity
@@ -185,7 +192,7 @@ void ArrayListImpl_remove(ArrayListImpl* pList, const size_t pIndex)
 	}
 }
 
-void* ArrayListImpl_get(const ArrayListImpl* pList, const size_t pIndex)
+void* ArrayList_get(const ArrayList* pList, const size_t pIndex)
 {
 	void* retVal = NULL;
 	
@@ -197,7 +204,7 @@ void* ArrayListImpl_get(const ArrayListImpl* pList, const size_t pIndex)
 	return retVal;
 }
 
-Boolean ArrayListImpl_contains(const ArrayListImpl* pList, const void* pValue)
+Boolean ArrayList_contains(const ArrayList* pList, const void* pValue)
 {
 	Boolean found = FALSE;
 
@@ -206,7 +213,7 @@ Boolean ArrayListImpl_contains(const ArrayListImpl* pList, const void* pValue)
 	for (; index < pList->size && found == FALSE; ++index)
 	{
 		compare = pList->compare(
-			ArrayListImpl_get(pList, index),
+			ArrayList_get(pList, index),
 			pValue,
 			pList->typeSize
 		);
@@ -220,21 +227,13 @@ Boolean ArrayListImpl_contains(const ArrayListImpl* pList, const void* pValue)
 	return found;
 }
 
-ArrayListImplIterator* ArrayListImpl_iterator(ArrayListImpl* pList)
-{
-	ArrayListImplIterator* retVal = malloc(sizeof(ArrayListImplIterator));
-
-	retVal->nextIndex = 0;
-	retVal->list = pList;
-
-	return retVal;
-}
-
-Boolean ArrayListImplIterator_hasNext(ArrayListImplIterator* pIter)
+/* Internal Iterator Methods */
+static Boolean _ArrayListIterator_hasNext(Iterator* pIter)
 {
 	Boolean retVal = FALSE;
-
-	if (pIter->nextIndex < pIter->list->size)
+	ArrayListIterator* iter = pIter->impl;
+	
+	if (iter->nextIndex < iter->list->size)
 	{
 		retVal = TRUE;
 	}
@@ -242,51 +241,80 @@ Boolean ArrayListImplIterator_hasNext(ArrayListImplIterator* pIter)
 	return retVal;
 }
 
-void* ArrayListImplIterator_peekNext(ArrayListImplIterator* pIter)
+static void* _ArrayListIterator_peekNext(Iterator* pIter)
 {
 	void* retVal = NULL;
+	ArrayListIterator* iter = pIter->impl;
 	
-	if (ArrayListImplIterator_hasNext(pIter))
+	if (_ArrayListIterator_hasNext(pIter))
 	{
-		retVal = ArrayListImpl_get(
-			pIter->list,
-			pIter->nextIndex
+		retVal = ArrayList_get(
+			iter->list,
+			iter->nextIndex
 		);
 	}
 
 	return retVal;
 }
 
-void* ArrayListImplIterator_next(ArrayListImplIterator* pIter)
+static void* _ArrayListIterator_next(Iterator* pIter)
 {
 	void* retVal = NULL;
+	ArrayListIterator* iter = pIter->impl;
 	
-	if (ArrayListImplIterator_hasNext(pIter))
+	if (_ArrayListIterator_hasNext(pIter))
 	{
-		retVal = ArrayListImpl_get(
-			pIter->list, 
-			pIter->nextIndex
+		retVal = ArrayList_get(
+			iter->list, 
+			iter->nextIndex
 		);
-		++pIter->nextIndex;
+		++iter->nextIndex;
 	}
 
 	return retVal;
 }
 
-void ArrayListImplIterator_remove(ArrayListImplIterator* pIter)
+static void _ArrayListIterator_remove(Iterator* pIter)
 {
-	if (pIter->nextIndex > 0)
+	ArrayListIterator* iter = pIter->impl;
+
+	if (iter->nextIndex > 0)
 	{
-		size_t removeIndex = pIter->nextIndex - 1;
-		ArrayListImpl_remove(pIter->list, removeIndex);
-		--pIter->nextIndex;
+		size_t removeIndex = iter->nextIndex - 1;
+		ArrayList_remove(iter->list, removeIndex);
+		--iter->nextIndex;
 	}
 	/* TODO: Report a bad remove attempt if condition fails */
 }
 
-void ArrayListImplIterator_destroy(ArrayListImplIterator* pIter)
+static void _ArrayListIterator_destroy(Iterator* pIter)
 {
 	/* Do NOT free the list pointer within the iterator!
 	 */
+	free(pIter->impl);
 	free(pIter);
+}
+
+Iterator* ArrayList_iterator(ArrayList* pList)
+{
+	Iterator* retVal = malloc(sizeof(Iterator));
+	
+	Iterator tmpVal = {
+		_ArrayListIterator_hasNext,
+		_ArrayListIterator_peekNext,
+		_ArrayListIterator_next,
+		_ArrayListIterator_remove,
+		_ArrayListIterator_destroy,
+		NULL
+	};
+
+	ArrayListIterator* iter = malloc(sizeof(ArrayListIterator));	
+	iter->nextIndex = 0;
+	iter->list = pList;
+	
+	memcpy(retVal, &tmpVal, sizeof(Iterator));
+
+	retVal->impl = iter;
+	
+	return retVal;
 }
