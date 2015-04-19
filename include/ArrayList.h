@@ -11,14 +11,12 @@ typedef struct ArrayList
 	size_t size;
 	size_t capacity;
 
-	/* TODO: Const these? */
 	size_t typeSize;
 	size_t initialCapacity;
 	unsigned int addReallocationMultiplier;
 	unsigned int removeReallocationThreshold;
 	unsigned int removeReallocationDivisor;
 
-	/* TODO: Const these function pointers? */
 	int (* compare)(const void* first, const void* second, size_t size);
 	void* (* copy)(void * dest, const void * src, size_t size);
 } ArrayList;
