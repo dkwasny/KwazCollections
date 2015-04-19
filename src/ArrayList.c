@@ -50,24 +50,26 @@ static void _ArrayList_expandArray(ArrayList* pList, const size_t newCapacity)
 /* Public Methods */
 ArrayList* ArrayList_createDefault(const size_t pTypeSize)
 {
-	return ArrayList_create(pTypeSize, 10, 2, 4, 2);
+	return ArrayList_create(
+		pTypeSize,
+		memcmp,
+		memcpy
+	);
 }
 
 ArrayList* ArrayList_create(
 	const size_t pTypeSize,
-	const size_t pCapacity,
-	const unsigned int pAddReallocationMultiplier,
-	const unsigned int pRemoveReallocationThreshold,
-	const unsigned int pRemoveReallocationDivisor)
+	int (* pCompare)(const void* first, const void* second, size_t size),
+	void* (* pCopy)(void * dest, const void * src, size_t size))
 {
 	return ArrayList_createFull(
 		pTypeSize,
-		pCapacity,
-		pAddReallocationMultiplier,
-		pRemoveReallocationThreshold,
-		pRemoveReallocationDivisor,
-		memcmp,
-		memcpy
+		10,
+		2,
+		4,
+		2,
+		pCompare,
+		pCopy
 	);
 }
 

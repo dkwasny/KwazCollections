@@ -29,10 +29,8 @@ extern "C" {
 ArrayList* ArrayList_createDefault(const size_t pTypeSize);
 ArrayList* ArrayList_create(
 	const size_t pTypeSize,
-	const size_t pCapacity,
-	const unsigned int pAddReallocationMultiplier,
-	const unsigned int pRemoveReallocationThreshold,
-	const unsigned int pRemoveReallocationDivisor
+	int (* pCompare)(const void* first, const void* second, size_t size),
+	void* (* pCopy)(void * dest, const void * src, size_t size)
 );
 ArrayList* ArrayList_createFull(
 	const size_t pTypeSize,

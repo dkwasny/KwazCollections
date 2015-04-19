@@ -2,6 +2,7 @@
 #include "ArrayList.h"
 #include "Boolean.h"
 #include <math.h>
+#include <string.h>
 
 static void ArrayListTest_checkContents(ArrayList* list, size_t offset)
 {
@@ -56,9 +57,11 @@ TEST(ArrayList, TestDefaultConstructor)
 
 TEST(ArrayList, TestCustomConstructor)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		1, 5, 10, 5
+		1, 5, 10, 5,
+		memcmp,
+		memcpy
 	);
 	ASSERT_EQ(1U, list->capacity);
 	ASSERT_EQ(0U, list->size);
@@ -71,9 +74,11 @@ TEST(ArrayList, TestCustomConstructor)
 
 TEST(ArrayList, TestCustomConstructorZeroCapacity)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		0, 2, 7, 4
+		0, 2, 7, 4,
+		memcmp,
+		memcpy
 	);
 	ASSERT_EQ(0U, list->capacity);
 	ASSERT_EQ(0U, list->size);
@@ -86,9 +91,11 @@ TEST(ArrayList, TestCustomConstructorZeroCapacity)
 
 TEST(ArrayList, TestCustomConstructorRemoveThresholdLowerThanDivisor)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 100
+		10, 2, 4, 100,
+		memcmp,
+		memcpy
 	);
 	ASSERT_EQ(10U, list->capacity);
 	ASSERT_EQ(0U, list->size);
@@ -101,9 +108,11 @@ TEST(ArrayList, TestCustomConstructorRemoveThresholdLowerThanDivisor)
 
 TEST(ArrayList, TestAddNoReallocation)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
 	for (size_t i = 0; i < list->capacity; ++i)
@@ -119,9 +128,11 @@ TEST(ArrayList, TestAddNoReallocation)
 
 TEST(ArrayList, TestAddOneReallocation)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
 	size_t i = 0;
@@ -155,9 +166,11 @@ TEST(ArrayList, TestAddOneReallocation)
 
 TEST(ArrayList, TestAddMultipleReallocation)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 	
 	size_t i = 0;
@@ -188,14 +201,18 @@ TEST(ArrayList, TestAddMultipleReallocation)
 
 TEST(ArrayList, TestAddAllTwoEmptyLists)
 {
-	ArrayList* list1 = ArrayList_create(
+	ArrayList* list1 = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
-	ArrayList* list2 = ArrayList_create(
+	ArrayList* list2 = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
 	ArrayList_addAll(list1, list2);
@@ -211,14 +228,18 @@ TEST(ArrayList, TestAddAllTwoEmptyLists)
 
 TEST(ArrayList, TestAddAllFullListToEmptyList)
 {
-	ArrayList* list1 = ArrayList_create(
+	ArrayList* list1 = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
-	ArrayList* list2 = ArrayList_create(
+	ArrayList* list2 = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
 	for (size_t i = 0; i < 20; ++i)
@@ -239,14 +260,18 @@ TEST(ArrayList, TestAddAllFullListToEmptyList)
 
 TEST(ArrayList, TestAddAllEmptyListToFullList)
 {
-	ArrayList* list1 = ArrayList_create(
+	ArrayList* list1 = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
-	ArrayList* list2 = ArrayList_create(
+	ArrayList* list2 = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
 	for (size_t i = 0; i < 20; ++i)
@@ -267,14 +292,18 @@ TEST(ArrayList, TestAddAllEmptyListToFullList)
 
 TEST(ArrayList, TestAddAllFullListToFullList)
 {
-	ArrayList* list1 = ArrayList_create(
+	ArrayList* list1 = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
-	ArrayList* list2 = ArrayList_create(
+	ArrayList* list2 = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
 	for (size_t i = 0; i < 20; ++i)
@@ -301,9 +330,11 @@ TEST(ArrayList, TestAddAllFullListToFullList)
 
 TEST(ArrayList, TestRemoveNoReallocation)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
 	for (size_t i = 0; i < list->capacity; ++i)
@@ -331,9 +362,11 @@ TEST(ArrayList, TestRemoveNoReallocation)
 
 TEST(ArrayList, TestRemoveNoReallocationFromEndOfList)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
 	for (size_t i = 0; i < list->capacity; ++i)
@@ -361,9 +394,11 @@ TEST(ArrayList, TestRemoveNoReallocationFromEndOfList)
 
 TEST(ArrayList, TestRemoveOneReallocation)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
 	size_t currCapacity = list->capacity;
@@ -401,12 +436,14 @@ TEST(ArrayList, TestRemoveMultipleReallocation)
 	unsigned int addRemoveMultiplier = 2;
 	size_t maxSize = 160; // 4 reallocations of size 10 with a multiplier of 2
 	
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
 		initialCapacity,
 		addRemoveMultiplier,
 		removeThreshold,
-		addRemoveMultiplier
+		addRemoveMultiplier,
+		memcmp,
+		memcpy
 	);
 
 	// Fill the list
@@ -500,9 +537,11 @@ TEST(ArrayList, TestRemoveMultipleReallocation)
 
 TEST(ArrayList, TestIteratorNextOperations)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
 	const size_t expectedSize = 50;	
@@ -534,9 +573,11 @@ TEST(ArrayList, TestIteratorNextOperations)
 
 TEST(ArrayList, TestIteratorEmptyList)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 	Iterator* iter = ArrayList_iterator(list);
 	
@@ -562,9 +603,11 @@ TEST(ArrayList, TestIteratorEmptyList)
 
 TEST(ArrayList, TestIteratorCreatedBeforeListModification)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 	Iterator* iter = ArrayList_iterator(list);
 
@@ -582,9 +625,11 @@ TEST(ArrayList, TestIteratorCreatedBeforeListModification)
 
 TEST(ArrayList, TestIteratorRemoveFirstElementRepeated)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
 	const size_t listSize = 50;	
@@ -615,9 +660,11 @@ TEST(ArrayList, TestIteratorRemoveFirstElementRepeated)
 
 TEST(ArrayList, TestIteratorRemoveLastElementRepeated)
 {
-	ArrayList* list = ArrayList_create(
+	ArrayList* list = ArrayList_createFull(
 		sizeof(size_t),
-		10, 2, 4, 2
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
 	);
 
 	const size_t listSize = 50;	
