@@ -29,8 +29,8 @@ extern "C" {
 ArrayList* ArrayList_createDefault(const size_t pTypeSize);
 ArrayList* ArrayList_create(
 	const size_t pTypeSize,
-	int (* pCompare)(const void* first, const void* second, size_t size),
-	void* (* pCopy)(void * dest, const void * src, size_t size)
+	int (* const pCompare)(const void* first, const void* second, size_t size),
+	void* (* const pCopy)(void * dest, const void * src, size_t size)
 );
 ArrayList* ArrayList_createFull(
 	const size_t pTypeSize,
@@ -38,15 +38,16 @@ ArrayList* ArrayList_createFull(
 	const unsigned int pAddReallocationMultiplier,
 	const unsigned int pRemoveReallocationThreshold,
 	const unsigned int pRemoveReallocationDivisor,
-	int (* pCompare)(const void* first, const void* second, size_t size),
-	void* (* pCopy)(void * dest, const void * src, size_t size)
+	int (* const pCompare)(const void* first, const void* second, size_t size),
+	void* (* const pCopy)(void * dest, const void * src, size_t size)
 );
 
 /* ArrayList Methods */
 void ArrayList_destroy(ArrayList* pList);
-void ArrayList_add(ArrayList* pList, const void* pValue);
-void ArrayList_addAll(ArrayList* pList, const ArrayList* pOtherList);
-void ArrayList_remove(ArrayList* pList, const size_t pIndex);
+ArrayList* ArrayList_add(ArrayList* pList, const void* pValue);
+ArrayList* ArrayList_addAll(ArrayList* pList, const ArrayList* pOtherList);
+ArrayList* ArrayList_consumeIterator(ArrayList* pList, Iterator* pIter);
+ArrayList* ArrayList_remove(ArrayList* pList, const size_t pIndex);
 void* ArrayList_get(const ArrayList* pList, const size_t pIndex);
 Boolean ArrayList_contains(const ArrayList* pList, const void* pValue);
 Iterator* ArrayList_iterator(ArrayList* pList);

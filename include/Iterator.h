@@ -8,8 +8,8 @@ typedef struct Iterator Iterator;
 struct Iterator
 {
 	/* Methods */
-	Boolean (* const hasNext)(Iterator* pIter);
-	void* (* const peekNext)(Iterator* pIter);	
+	Boolean (* const hasNext)(const Iterator* pIter);
+	void* (* const peekNext)(const Iterator* pIter);	
 	void* (* const next)(Iterator* pIter);
 
 	void (* const remove)(Iterator* pIter);

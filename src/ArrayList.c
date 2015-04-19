@@ -59,8 +59,8 @@ ArrayList* ArrayList_createDefault(const size_t pTypeSize)
 
 ArrayList* ArrayList_create(
 	const size_t pTypeSize,
-	int (* pCompare)(const void* first, const void* second, size_t size),
-	void* (* pCopy)(void * dest, const void * src, size_t size))
+	int (* const pCompare)(const void* first, const void* second, size_t size),
+	void* (* const pCopy)(void * dest, const void * src, size_t size))
 {
 	return ArrayList_createFull(
 		pTypeSize,
@@ -79,8 +79,8 @@ ArrayList* ArrayList_createFull(
 	const unsigned int pAddReallocationMultiplier,
 	const unsigned int pRemoveReallocationThreshold,
 	const unsigned int pRemoveReallocationDivisor,
-	int (* pCompare)(const void* first, const void* second, size_t size),
-	void* (* pCopy)(void * dest, const void * src, size_t size))
+	int (* const pCompare)(const void* first, const void* second, size_t size),
+	void* (* const pCopy)(void * dest, const void * src, size_t size))
 {
 	ArrayList* retVal = malloc(sizeof(ArrayList));
 	
@@ -124,7 +124,7 @@ void ArrayList_destroy(ArrayList* pList)
 	free(pList);
 }
 
-void ArrayList_add(ArrayList* pList, const void* pValue)
+ArrayList* ArrayList_add(ArrayList* pList, const void* pValue)
 {
 	void* copiedValue = NULL;
 
@@ -138,12 +138,20 @@ void ArrayList_add(ArrayList* pList, const void* pValue)
 	copiedValue = malloc(pList->typeSize);
 	pList->values[pList->size++]
 		= pList->copy(copiedValue, pValue, pList->typeSize);
+		
+	return pList;
 }
 
-void ArrayList_addAll(ArrayList* pList, const ArrayList* pOtherList)
+ArrayList* ArrayList_addAll(ArrayList* pList, const ArrayList* pOtherList)
 {
 	size_t availableSpots = pList->capacity - pList->size;
 	size_t i = 0;
+	
+	/* Explode if user attempts to add a list to itself. */
+	if (pList == pOtherList)
+	{
+		return NULL;
+	}
 
 	if (pOtherList->size > availableSpots)
 	{
@@ -155,9 +163,22 @@ void ArrayList_addAll(ArrayList* pList, const ArrayList* pOtherList)
 	{
 		ArrayList_add(pList, ArrayList_get(pOtherList, i));	
 	}
+	
+	return pList;
 }
 
-void ArrayList_remove(ArrayList* pList, const size_t pIndex)
+ArrayList* ArrayList_consumeIterator(ArrayList* pList, Iterator* pIter)
+{
+	while (pIter->hasNext(pIter))
+	{
+		ArrayList_add(pList, pIter->next(pIter));
+	}
+	pIter->destroy(pIter);
+	
+	return pList;
+}
+
+ArrayList* ArrayList_remove(ArrayList* pList, const size_t pIndex)
 {
 	size_t i = 0;
 	size_t newCapacity = 0;
@@ -165,7 +186,7 @@ void ArrayList_remove(ArrayList* pList, const size_t pIndex)
 	if (pIndex >= pList->size)
 	{
 		/*TODO: Need some sort of return code to prevent this */
-		return;
+		return pList;
 	}
 		
 	free(pList->values[pIndex]);
@@ -195,6 +216,8 @@ void ArrayList_remove(ArrayList* pList, const size_t pIndex)
 		pList->values = newValues;
 		pList->capacity = newCapacity;
 	}
+	
+	return pList;
 }
 
 void* ArrayList_get(const ArrayList* pList, const size_t pIndex)
@@ -233,7 +256,7 @@ Boolean ArrayList_contains(const ArrayList* pList, const void* pValue)
 }
 
 /* Internal Iterator Methods */
-static Boolean _ArrayListIterator_hasNext(Iterator* pIter)
+static Boolean _ArrayListIterator_hasNext(const Iterator* pIter)
 {
 	Boolean retVal = FALSE;
 	ArrayListIterator* iter = pIter->impl;
@@ -246,7 +269,7 @@ static Boolean _ArrayListIterator_hasNext(Iterator* pIter)
 	return retVal;
 }
 
-static void* _ArrayListIterator_peekNext(Iterator* pIter)
+static void* _ArrayListIterator_peekNext(const Iterator* pIter)
 {
 	void* retVal = NULL;
 	ArrayListIterator* iter = pIter->impl;

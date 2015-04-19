@@ -328,6 +328,44 @@ TEST(ArrayList, TestAddAllFullListToFullList)
 	ArrayList_destroy(list2);
 }
 
+TEST(ArrayList, TestAddIterator)
+{
+	ArrayList* list1 = ArrayList_createFull(
+		sizeof(size_t),
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
+	);
+	for (size_t i = 0; i < 10; ++i)
+	{
+		ArrayList_add(list1, &i);
+	}
+
+	ArrayList* list2 = ArrayList_createFull(
+		sizeof(size_t),
+		10, 2, 4, 2,
+		memcmp,
+		memcpy
+	);
+	for (size_t i = 10; i < 20; ++i)
+	{
+		ArrayList_add(list2, &i);
+	}
+	
+	ArrayList_consumeIterator(list1, ArrayList_iterator(list2));
+	ASSERT_EQ(20U, list1->size);
+	
+	Iterator* iter = ArrayList_iterator(list1);
+	for (size_t i = 0; iter->hasNext(iter); ++i)
+	{
+		ASSERT_EQ(i, *((size_t*)iter->next(iter)));
+	}
+	iter->destroy(iter);
+	
+	ArrayList_destroy(list1);
+	ArrayList_destroy(list2);
+}
+
 TEST(ArrayList, TestRemoveNoReallocation)
 {
 	ArrayList* list = ArrayList_createFull(
@@ -742,5 +780,49 @@ TEST(ArrayList, TestContainsDefault)
 		}
 	}
 
+	ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestMethodChaining)
+{
+	size_t val = 1;
+	ArrayList* otherList = ArrayList_createDefault(sizeof(size_t));
+	ArrayList_add(otherList, &val);
+	ArrayList_add(otherList, &val);
+
+	/* This just feels dumb...also sad I cannot use literals */
+	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+	ArrayList_add(
+		ArrayList_add(
+			ArrayList_addAll(
+				ArrayList_remove(
+					ArrayList_add(
+						ArrayList_add(
+							list,
+							&val
+						),
+						&val
+					),
+					0U
+				),
+				otherList
+			),
+			&val
+		),
+		&val
+	);
+	
+	ASSERT_EQ(5U, list->size);
+	
+	ArrayList_destroy(list);
+	ArrayList_destroy(otherList);
+}
+
+TEST(ArrayList, TestAddAllSameList)
+{
+	size_t val = 1;
+	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+	ArrayList_add(list, &val);
+	ASSERT_EQ(NULL, ArrayList_addAll(list, list));
 	ArrayList_destroy(list);
 }
