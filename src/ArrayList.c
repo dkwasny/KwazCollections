@@ -186,7 +186,7 @@ ArrayList* ArrayList_remove(ArrayList* pList, const size_t pIndex)
 	if (pIndex >= pList->size)
 	{
 		/*TODO: Need some sort of return code to prevent this */
-		return pList;
+		return NULL;
 	}
 		
 	free(pList->values[pIndex]);
