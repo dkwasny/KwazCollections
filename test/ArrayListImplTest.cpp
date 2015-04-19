@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "ArrayListImpl.h"
 #include "Boolean.h"
+#include <math.h>
 
 static void ArrayListImplTest_checkContents(ArrayListImpl* list, size_t offset)
 {
