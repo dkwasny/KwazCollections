@@ -29,18 +29,17 @@ TEST_DIR = test
 TEST_SUITE = $(TEST_DIR)/TestSuite.cpp
 
 # Google Test stuff
-GTEST_BUILD_DIR = $(BUILD_DIR)/gtest
-GTEST_DIR = ./lib/gtest-1.7.0
+GTEST_DIR = lib/gtest-1.7.0
 GTEST_INCLUDE_DIR = $(GTEST_DIR)/include
-GTEST_LIB = $(GTEST_BUILD_DIR)/libgtest.a
+GTEST_LIB = $(BUILD_DIR)/gtest_main.a
 
 # Compilation commands
-# I do not want to have to worry about my test code and google test
+# I do not want to have to worry about my test code
 # passing the goofy ansi/pedantic crap I set for the main source.
 CFLAGS += -Wall -Wextra -Werror -pedantic-errors -ansi
 COMPILE = $(CC) $(CFLAGS) $(CPPFLAGS) -I $(INCLUDE_DIR) -c
-TEST_COMPILE = $(CXX) $(CXXFLAGS) $(CPPFLAGS) -Wall -Wextra -Werror
-GTEST_COMPILE = $(CXX) $(CXXFLAGS) $(CPPFLAGS)
+CXX_FLAGS += -Wall -Wextra -Werror
+TEST_COMPILE = $(CXX) $(CXXFLAGS) $(CPPFLAGS)
 
 # Generated variables to assist in compilation
 SOURCE_FILES = $(wildcard $(SOURCE_DIR)/*.c)
@@ -54,9 +53,6 @@ OUTPUT_FILES = $(foreach object, $(OBJECT_NAMES), $(BUILD_DIR)/$(object).o)
 # Build Phases
 # 1) Build directory structure creation
 $(BUILD_DIR):
-	mkdir $@;
-
-$(GTEST_BUILD_DIR): | $(BUILD_DIR)
 	mkdir $@;
 
 # 2) Source Compilation
@@ -74,12 +70,9 @@ $(LIB): $(OUTPUT_FILES)
 # 
 # Right now this makes sense because the full lib paths are
 # convieniently defined as variables in the prequisite lists.
-#
-# Google test itself is only compiled once via g++.
-$(GTEST_LIB): | $(GTEST_BUILD_DIR)
-	$(GTEST_COMPILE) -pthread -I $(GTEST_INCLUDE_DIR) -I $(GTEST_DIR) -o $(GTEST_BUILD_DIR)/gtest-all.o -c $(GTEST_DIR)/src/gtest-all.cc;
-	$(GTEST_COMPILE) -pthread -I $(GTEST_INCLUDE_DIR) -I $(GTEST_DIR) -o $(GTEST_BUILD_DIR)/gtest_main.o -c $(GTEST_DIR)/src/gtest_main.cc;
-	$(AR) $(ARFLAGS) $@ $(GTEST_BUILD_DIR)/*.o;
+$(GTEST_LIB):
+	(cd $(GTEST_DIR)/make && make);
+	cp $(GTEST_DIR)/make/gtest_main.a $(GTEST_LIB);
 
 $(TEST_EXEC): $(LIB) $(GTEST_LIB) $(TEST_FILES)
 	$(TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(INCLUDE_DIR) -o $@ -pthread $(TEST_SUITE) $< $(word 2, $^);
