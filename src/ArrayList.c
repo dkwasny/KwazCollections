@@ -303,7 +303,6 @@ static void _ArrayList_mergeSortSublist(
 		pList->copy
 	);
 	
-	/* Cut list in half and merge sort both halves */
 	_ArrayList_mergeSortSublist(pList, firstHalfStart, firstHalfEnd);
 	_ArrayList_mergeSortSublist(pList, secondHalfStart, secondHalfEnd);
 
