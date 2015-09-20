@@ -10,49 +10,46 @@
 #
 # -David Kwasny
 
-# Compiler (can be changed to gcc/g++)
-C := clang
-CPP := clang++
-
 # Build directories
-BUILD_DIR := build
+BUILD_DIR = build
 
 # Test executable
-TEST_EXEC := $(BUILD_DIR)/tests.run
+TEST_EXEC = $(BUILD_DIR)/tests.run
 
 # KwazCollections C library info
-LIB_FILENAME := libckwazcoll.a
-LIB := $(BUILD_DIR)/$(LIB_FILENAME)
+LIB_FILENAME = libckwazcoll.a
+LIB = $(BUILD_DIR)/$(LIB_FILENAME)
 
 # Source directories
-SOURCE_DIR := src
-INCLUDE_DIR := include
+SOURCE_DIR = src
+INCLUDE_DIR = include
 
 # Test source directories and suites
-TEST_DIR := test
-TEST_SUITE := $(TEST_DIR)/TestSuite.cpp
+TEST_DIR = test
+TEST_SUITE = $(TEST_DIR)/TestSuite.cpp
 
 # Google Test stuff
-GTEST_BUILD_DIR := $(BUILD_DIR)/gtest
-GTEST_DIR := ./lib/gtest-1.7.0
-GTEST_INCLUDE_DIR := $(GTEST_DIR)/include
-GTEST_LIB := $(GTEST_BUILD_DIR)/libgtest.a
+GTEST_BUILD_DIR = $(BUILD_DIR)/gtest
+GTEST_DIR = ./lib/gtest-1.7.0
+GTEST_INCLUDE_DIR = $(GTEST_DIR)/include
+GTEST_LIB = $(GTEST_BUILD_DIR)/libgtest.a
 
 # Compilation commands
 # I do not want to have to worry about my test code and google test
 # passing the goofy ansi/pedantic crap I set for the main source.
-COMPILE := $(C) -Wall -Wextra -Werror -pedantic-errors -ansi -I $(INCLUDE_DIR) -c
-TEST_COMPILE := $(CPP) -Wall -Wextra -Werror
-GTEST_COMPILE := $(CPP)
+CFLAGS += -Wall -Wextra -Werror -pedantic-errors -ansi
+COMPILE = $(CC) $(CFLAGS) $(CPPFLAGS) -I $(INCLUDE_DIR) -c
+TEST_COMPILE = $(CXX) $(CXXFLAGS) $(CPPFLAGS) -Wall -Wextra -Werror
+GTEST_COMPILE = $(CXX) $(CXXFLAGS) $(CPPFLAGS)
 
 # Generated variables to assist in compilation
-SOURCE_FILES := $(wildcard $(SOURCE_DIR)/*.c)
-OBJECT_NAMES := $(basename $(notdir $(SOURCE_FILES)))
+SOURCE_FILES = $(wildcard $(SOURCE_DIR)/*.c)
+OBJECT_NAMES = $(basename $(notdir $(SOURCE_FILES)))
 
 # Generated variables to assist in make target declaration
-HEADER_FILES := $(wildcard $(INCLUDE_DIR)/*.h)
-TEST_FILES := $(wildcard $(TEST_DIR)/*.cpp)
-OUTPUT_FILES := $(foreach object, $(OBJECT_NAMES), $(BUILD_DIR)/$(object).o)
+HEADER_FILES = $(wildcard $(INCLUDE_DIR)/*.h)
+TEST_FILES = $(wildcard $(TEST_DIR)/*.cpp)
+OUTPUT_FILES = $(foreach object, $(OBJECT_NAMES), $(BUILD_DIR)/$(object).o)
 
 # Build Phases
 # 1) Build directory structure creation
@@ -68,7 +65,7 @@ $(OUTPUT_FILES): $(SOURCE_FILES) $(HEADER_FILES) | $(BUILD_DIR)
 
 # 3) Library Generation
 $(LIB): $(OUTPUT_FILES)
-	ar -crs $@ $(BUILD_DIR)/*.o;
+	$(AR) $(ARFLAGS) $@ $(BUILD_DIR)/*.o;
 
 # 4) Test Compilation
 # 
@@ -82,13 +79,13 @@ $(LIB): $(OUTPUT_FILES)
 $(GTEST_LIB): | $(GTEST_BUILD_DIR)
 	$(GTEST_COMPILE) -pthread -I $(GTEST_INCLUDE_DIR) -I $(GTEST_DIR) -o $(GTEST_BUILD_DIR)/gtest-all.o -c $(GTEST_DIR)/src/gtest-all.cc;
 	$(GTEST_COMPILE) -pthread -I $(GTEST_INCLUDE_DIR) -I $(GTEST_DIR) -o $(GTEST_BUILD_DIR)/gtest_main.o -c $(GTEST_DIR)/src/gtest_main.cc;
-	ar -crs $@ $(GTEST_BUILD_DIR)/*.o;
+	$(AR) $(ARFLAGS) $@ $(GTEST_BUILD_DIR)/*.o;
 
 $(TEST_EXEC): $(LIB) $(GTEST_LIB) $(TEST_FILES)
 	$(TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(INCLUDE_DIR) -o $@ -pthread $(TEST_SUITE) $< $(word 2, $^);
 
 # 5) Test Execution
-.DEFAULT_GOAL := test
+.DEFAULT_GOAL = test
 .PHONY: test
 test: $(TEST_EXEC)
 	$<;
