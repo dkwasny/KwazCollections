@@ -46,11 +46,14 @@ ArrayList* ArrayList_createFull(
 void ArrayList_destroy(ArrayList* pList);
 ArrayList* ArrayList_add(ArrayList* pList, const void* pValue);
 ArrayList* ArrayList_addAll(ArrayList* pList, const ArrayList* pOtherList);
-ArrayList* ArrayList_consumeIterator(ArrayList* pList, Iterator* pIter);
+ArrayList* ArrayList_addIterator(ArrayList* pList, Iterator* pIter);
 ArrayList* ArrayList_remove(ArrayList* pList, const size_t pIndex);
 void* ArrayList_get(const ArrayList* pList, const size_t pIndex);
+ArrayList* ArrayList_set(ArrayList* pList, const void* value, const size_t pIndex);
 Boolean ArrayList_contains(const ArrayList* pList, const void* pValue);
+ArrayList* ArrayList_mergeSort(ArrayList* pList);
 Iterator* ArrayList_iterator(ArrayList* pList);
+
 
 /* Close c++ extern */
 #ifdef __cplusplus

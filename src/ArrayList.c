@@ -167,13 +167,12 @@ ArrayList* ArrayList_addAll(ArrayList* pList, const ArrayList* pOtherList)
 	return pList;
 }
 
-ArrayList* ArrayList_consumeIterator(ArrayList* pList, Iterator* pIter)
+ArrayList* ArrayList_addIterator(ArrayList* pList, Iterator* pIter)
 {
 	while (pIter->hasNext(pIter))
 	{
 		ArrayList_add(pList, pIter->next(pIter));
 	}
-	pIter->destroy(pIter);
 	
 	return pList;
 }
@@ -232,6 +231,22 @@ void* ArrayList_get(const ArrayList* pList, const size_t pIndex)
 	return retVal;
 }
 
+ArrayList* ArrayList_set(ArrayList* pList, const void* value, const size_t pIndex)
+{
+	if (pIndex < pList->size)
+	{
+		void* newValue = malloc(pList->typeSize);
+		free(pList->values[pIndex]);
+		pList->values[pIndex] = pList->copy(
+			newValue,
+			value,
+			pList->typeSize
+		);
+	}
+
+	return pList;
+}
+
 Boolean ArrayList_contains(const ArrayList* pList, const void* pValue)
 {
 	Boolean found = FALSE;
@@ -253,6 +268,112 @@ Boolean ArrayList_contains(const ArrayList* pList, const void* pValue)
 	}
 
 	return found;
+}
+
+static void _ArrayList_mergeSortSublist(
+	ArrayList* pList,
+	const size_t startIndex,
+	const size_t endIndex)
+{
+	const size_t size = endIndex - startIndex + 1;
+	const size_t halfSize = size / 2;
+	const size_t firstHalfStart = startIndex;
+	const size_t firstHalfEnd = startIndex + halfSize - 1;
+	const size_t secondHalfStart = firstHalfEnd + 1;
+	const size_t secondHalfEnd = endIndex;
+	size_t firstIndex = firstHalfStart;
+	size_t secondIndex = secondHalfStart;
+
+	Boolean firstListHasData = firstIndex <= firstHalfEnd;
+	Boolean secondListHasData = secondIndex <= secondHalfEnd;
+	int compare = 0;
+	size_t i = 0;
+
+	ArrayList* store = NULL;
+
+	/* Terminal condition */
+	if (startIndex >= endIndex)
+	{
+		return;
+	}
+	
+	store = ArrayList_create(
+		pList->typeSize,
+		pList->compare,
+		pList->copy
+	);
+	
+	/* Cut list in half and merge sort both halves */
+	_ArrayList_mergeSortSublist(pList, firstHalfStart, firstHalfEnd);
+	_ArrayList_mergeSortSublist(pList, secondHalfStart, secondHalfEnd);
+
+	while (firstListHasData || secondListHasData)
+	{
+		if (firstListHasData && !secondListHasData)
+		{
+			ArrayList_add(
+				store,
+				ArrayList_get(pList, firstIndex++)
+			);
+		}
+		else if (!firstListHasData)
+		{
+			ArrayList_add(
+				store,
+				ArrayList_get(pList, secondIndex++)
+			);
+		}
+		else
+		{
+			void* firstElement = ArrayList_get(pList, firstIndex);
+			void* secondElement = ArrayList_get(pList, secondIndex);
+			compare = pList->compare(
+				firstElement,
+				secondElement,
+				pList->typeSize
+			);
+			if (compare < 0)
+			{
+				ArrayList_add(store, firstElement);
+				++firstIndex;
+			}
+			else if (compare > 0)
+			{
+				ArrayList_add(store, secondElement);
+				++secondIndex;
+			}
+			else
+			{
+				ArrayList_add(store, firstElement);
+				++firstIndex;
+				ArrayList_add(store, secondElement);
+				++secondIndex;
+			}
+		}
+
+		firstListHasData = firstIndex <= firstHalfEnd;
+		secondListHasData = secondIndex <= secondHalfEnd;
+	}
+
+	for (i = 0; i < store->size; ++i)
+	{
+		ArrayList_set(
+			pList, 
+			ArrayList_get(store, i),
+			i + startIndex
+		);
+	}
+
+	ArrayList_destroy(store);
+}
+
+ArrayList* ArrayList_mergeSort(ArrayList* pList)
+{
+	if(pList->size > 1U)
+	{
+		_ArrayList_mergeSortSublist(pList, 0, pList->size - 1);
+	}
+	return pList;
 }
 
 /* Internal Iterator Methods */

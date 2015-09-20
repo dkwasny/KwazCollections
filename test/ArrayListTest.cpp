@@ -351,8 +351,10 @@ TEST(ArrayList, TestAddIterator)
 	{
 		ArrayList_add(list2, &i);
 	}
-	
-	ArrayList_consumeIterator(list1, ArrayList_iterator(list2));
+
+	Iterator* iter2 = ArrayList_iterator(list2);	
+	ArrayList_addIterator(list1, iter2);
+	iter2->destroy(iter2);
 	ASSERT_EQ(20U, list1->size);
 	
 	Iterator* iter = ArrayList_iterator(list1);
@@ -834,11 +836,13 @@ TEST(ArrayList, TestCopyList)
 	{
 		ArrayList_add(list, &i);
 	}
-	
-	ArrayList* otherList = ArrayList_consumeIterator(
+
+	Iterator* copyIter = ArrayList_iterator(list);	
+	ArrayList* otherList = ArrayList_addIterator(
 		ArrayList_createDefault(sizeof(size_t)),
-		ArrayList_iterator(list)
+		copyIter
 	);
+	copyIter->destroy(copyIter);
 	
 	ASSERT_EQ(list->size, otherList->size);
 	
@@ -859,4 +863,105 @@ TEST(ArrayList, TestCopyList)
 	otherIter->destroy(otherIter);
 	ArrayList_destroy(list);
 	ArrayList_destroy(otherList);
+}
+
+TEST(ArrayList, TestMergeSortEmpty)
+{
+	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+	ArrayList_mergeSort(list);
+	ASSERT_EQ(0U, list->size);
+	ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestMergeSortSingle)
+{
+	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+
+	size_t value = 0U;
+	ArrayList_add(list, &value);
+	
+	ArrayList_mergeSort(list);
+	ASSERT_EQ(1U, list->size);
+	ArrayListTest_checkContents(list);
+	ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestMergeSortEven)
+{
+	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+
+	size_t value = 3U;
+	ArrayList_add(list, &value);
+	value = 1U;
+	ArrayList_add(list, &value);
+	value = 2U;
+	ArrayList_add(list, &value);
+	value = 0U;
+	ArrayList_add(list, &value);
+	
+	ArrayList_mergeSort(list);
+	ASSERT_EQ(4U, list->size);
+	ArrayListTest_checkContents(list);
+	ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestMergeSortEvenAlreadySorted)
+{
+	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+
+	size_t value = 0U;
+	ArrayList_add(list, &value);
+	value = 1U;
+	ArrayList_add(list, &value);
+	value = 2U;
+	ArrayList_add(list, &value);
+	value = 3U;
+	ArrayList_add(list, &value);
+	
+	ArrayList_mergeSort(list);
+	ASSERT_EQ(4U, list->size);
+	ArrayListTest_checkContents(list);
+	ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestMergeSortOdd)
+{
+	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+
+	size_t value = 0U;
+	ArrayList_add(list, &value);
+	value = 1U;
+	ArrayList_add(list, &value);
+	value = 4U;
+	ArrayList_add(list, &value);
+	value = 2U;
+	ArrayList_add(list, &value);
+	value = 3U;
+	ArrayList_add(list, &value);
+	
+	ArrayList_mergeSort(list);
+	ASSERT_EQ(5U, list->size);
+	ArrayListTest_checkContents(list);
+	ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestMergeSortOddAlreadySorted)
+{
+	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+
+	size_t value = 0U;
+	ArrayList_add(list, &value);
+	value = 1U;
+	ArrayList_add(list, &value);
+	value = 2U;
+	ArrayList_add(list, &value);
+	value = 3U;
+	ArrayList_add(list, &value);
+	value = 4U;
+	ArrayList_add(list, &value);
+	
+	ArrayList_mergeSort(list);
+	ASSERT_EQ(5U, list->size);
+	ArrayListTest_checkContents(list);
+	ArrayList_destroy(list);
 }
