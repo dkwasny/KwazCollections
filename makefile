@@ -64,12 +64,6 @@ $(LIB): $(OUTPUT_FILES)
 	$(AR) $(ARFLAGS) $@ $(BUILD_DIR)/*.o;
 
 # 4) Test Compilation
-# 
-# I opted to not use -l and -L in the test compilation targets in favor
-# of directly referring to the gtest and kwazcoll libs.
-# 
-# Right now this makes sense because the full lib paths are
-# convieniently defined as variables in the prequisite lists.
 $(GTEST_LIB):
 	(cd $(GTEST_DIR)/make && make);
 	cp $(GTEST_DIR)/make/gtest_main.a $(GTEST_LIB);
