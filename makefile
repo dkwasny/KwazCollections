@@ -6,7 +6,7 @@
 # To get around c compiler restrictions of disallowing the use of -o with
 # multiple input files, I use make functions to generate a list of compile
 # commands into a set of variables. 
-# These variables are then referenced in each compilation task
+# These variables are then referenced in each compilation task.
 #
 # -David Kwasny
 
