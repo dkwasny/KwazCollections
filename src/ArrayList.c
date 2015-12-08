@@ -296,15 +296,15 @@ static void _ArrayList_mergeSortSublist(
 	{
 		return;
 	}
-	
+
+	_ArrayList_mergeSortSublist(pList, firstHalfStart, firstHalfEnd);
+	_ArrayList_mergeSortSublist(pList, secondHalfStart, secondHalfEnd);
+
 	store = ArrayList_create(
 		pList->typeSize,
 		pList->compare,
 		pList->copy
 	);
-	
-	_ArrayList_mergeSortSublist(pList, firstHalfStart, firstHalfEnd);
-	_ArrayList_mergeSortSublist(pList, secondHalfStart, secondHalfEnd);
 
 	while (firstListHasData || secondListHasData)
 	{
