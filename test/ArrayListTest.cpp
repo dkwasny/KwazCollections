@@ -8,7 +8,7 @@ static void ArrayListTest_checkContents(ArrayList* list, size_t offset)
 {
 	for(size_t i = 0; i < list->size; ++i)
 	{
-		ASSERT_EQ(offset + i, *((size_t*)ArrayList_get(list, i)));
+		ASSERT_EQ(int(offset + i), ArrayList_get(list, i));
 	}	
 }
 
@@ -21,7 +21,7 @@ static void ArrayListTest_smokeTest(ArrayList* list)
 {
 	for (size_t i = 0; i < 20; ++i)
 	{
-		ArrayList_add(list, &i);
+		ArrayList_add(list, i);
 	}
 	ArrayListTest_checkContents(list);
 	for (size_t i = 0; i < 20; ++i)
@@ -30,22 +30,9 @@ static void ArrayListTest_smokeTest(ArrayList* list)
 	}
 }
 
-static void ArrayListTest_smokeTestIterator(Iterator* iter, size_t expectedElements)
-{
-	size_t i = 0;
-	while (iter->hasNext(iter))
-	{
-		ASSERT_EQ(i, *((size_t*)iter->peekNext(iter)));
-		ASSERT_EQ(i, *((size_t*)iter->next(iter)));
-		++i;
-	}
-
-	ASSERT_EQ(expectedElements, i);
-}
-
 TEST(ArrayList, TestDefaultConstructor)
 {
-	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+	ArrayList* list = ArrayList_create();
 	ASSERT_EQ(10U, list->capacity);
 	ASSERT_EQ(0U, list->size);
 	ASSERT_EQ(2U, list->addReallocationMultiplier);
@@ -58,10 +45,7 @@ TEST(ArrayList, TestDefaultConstructor)
 TEST(ArrayList, TestCustomConstructor)
 {
 	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		1, 5, 10, 5,
-		memcmp,
-		memcpy
+		1, 5, 10, 5
 	);
 	ASSERT_EQ(1U, list->capacity);
 	ASSERT_EQ(0U, list->size);
@@ -75,10 +59,7 @@ TEST(ArrayList, TestCustomConstructor)
 TEST(ArrayList, TestCustomConstructorZeroCapacity)
 {
 	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		0, 2, 7, 4,
-		memcmp,
-		memcpy
+		0, 2, 7, 4
 	);
 	ASSERT_EQ(0U, list->capacity);
 	ASSERT_EQ(0U, list->size);
@@ -92,10 +73,7 @@ TEST(ArrayList, TestCustomConstructorZeroCapacity)
 TEST(ArrayList, TestCustomConstructorRemoveThresholdLowerThanDivisor)
 {
 	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 100,
-		memcmp,
-		memcpy
+		10, 2, 4, 100
 	);
 	ASSERT_EQ(10U, list->capacity);
 	ASSERT_EQ(0U, list->size);
@@ -109,15 +87,12 @@ TEST(ArrayList, TestCustomConstructorRemoveThresholdLowerThanDivisor)
 TEST(ArrayList, TestAddNoReallocation)
 {
 	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	for (size_t i = 0; i < list->capacity; ++i)
 	{
-		ArrayList_add(list, &i);
+		ArrayList_add(list, i);
 		ASSERT_EQ(i+1U, list->size);
 		ASSERT_EQ(10U, list->capacity);
 	}
@@ -129,23 +104,20 @@ TEST(ArrayList, TestAddNoReallocation)
 TEST(ArrayList, TestAddOneReallocation)
 {
 	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	size_t i = 0;
 	for (; i < list->capacity; ++i)
 	{
-		ArrayList_add(list, &i);
+		ArrayList_add(list, i);
 	}
 
 	ASSERT_EQ(10U, list->size);
 	ASSERT_EQ(list->size, list->capacity);
 	ArrayListTest_checkContents(list);
 	
-	ArrayList_add(list, &i);
+	ArrayList_add(list, i);
 	++i;
 
 	ASSERT_NE(list->capacity, list->size);
@@ -155,7 +127,7 @@ TEST(ArrayList, TestAddOneReallocation)
 
 	for (; i < list->capacity; ++i)
 	{
-		ArrayList_add(list, &i);
+		ArrayList_add(list, i);
 	}
 
 	ASSERT_EQ(20U, list->size);
@@ -167,10 +139,7 @@ TEST(ArrayList, TestAddOneReallocation)
 TEST(ArrayList, TestAddMultipleReallocation)
 {
 	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 	
 	size_t i = 0;
@@ -178,7 +147,7 @@ TEST(ArrayList, TestAddMultipleReallocation)
 	{
 		for (; i < list->capacity; ++i)
 		{
-			ArrayList_add(list, &i);
+			ArrayList_add(list, i);
 		}
 
 		size_t expectedCapacity = 10 * pow(2, iteration);
@@ -187,7 +156,7 @@ TEST(ArrayList, TestAddMultipleReallocation)
 		ASSERT_EQ(i, list->size);
 		ArrayListTest_checkContents(list);
 
-		ArrayList_add(list, &i);
+		ArrayList_add(list, i);
 		++i;
 
 		expectedCapacity = 10 * pow(2, iteration + 1);
@@ -202,17 +171,11 @@ TEST(ArrayList, TestAddMultipleReallocation)
 TEST(ArrayList, TestAddAllTwoEmptyLists)
 {
 	ArrayList* list1 = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	ArrayList* list2 = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	ArrayList_addAll(list1, list2);
@@ -229,22 +192,16 @@ TEST(ArrayList, TestAddAllTwoEmptyLists)
 TEST(ArrayList, TestAddAllFullListToEmptyList)
 {
 	ArrayList* list1 = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	ArrayList* list2 = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	for (size_t i = 0; i < 20; ++i)
 	{
-		ArrayList_add(list2, &i);
+		ArrayList_add(list2, i);
 	}
 
 	ArrayList_addAll(list1, list2);
@@ -261,22 +218,16 @@ TEST(ArrayList, TestAddAllFullListToEmptyList)
 TEST(ArrayList, TestAddAllEmptyListToFullList)
 {
 	ArrayList* list1 = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	ArrayList* list2 = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	for (size_t i = 0; i < 20; ++i)
 	{
-		ArrayList_add(list1, &i);
+		ArrayList_add(list1, i);
 	}
 
 	ArrayList_addAll(list1, list2);
@@ -293,23 +244,17 @@ TEST(ArrayList, TestAddAllEmptyListToFullList)
 TEST(ArrayList, TestAddAllFullListToFullList)
 {
 	ArrayList* list1 = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	ArrayList* list2 = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	for (size_t i = 0; i < 20; ++i)
 	{
-		ArrayList_add(list1, &i);
-		ArrayList_add(list2, &i);
+		ArrayList_add(list1, i);
+		ArrayList_add(list2, i);
 	}
 
 	ArrayList_addAll(list1, list2);
@@ -318,7 +263,7 @@ TEST(ArrayList, TestAddAllFullListToFullList)
 	for (size_t i = 0; i < 40; ++i)
 	{
 		size_t expected = i % 20;
-		ASSERT_EQ(expected, *((size_t*)(ArrayList_get(list1, i))));
+		ASSERT_EQ(expected, ArrayList_get(list1, i));
 	}	
 
 	ASSERT_EQ(20U, list2->size);
@@ -328,58 +273,15 @@ TEST(ArrayList, TestAddAllFullListToFullList)
 	ArrayList_destroy(list2);
 }
 
-TEST(ArrayList, TestAddIterator)
-{
-	ArrayList* list1 = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
-	);
-	for (size_t i = 0; i < 10; ++i)
-	{
-		ArrayList_add(list1, &i);
-	}
-
-	ArrayList* list2 = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
-	);
-	for (size_t i = 10; i < 20; ++i)
-	{
-		ArrayList_add(list2, &i);
-	}
-
-	Iterator* iter2 = ArrayList_iterator(list2);	
-	ArrayList_addIterator(list1, iter2);
-	iter2->destroy(iter2);
-	ASSERT_EQ(20U, list1->size);
-	
-	Iterator* iter = ArrayList_iterator(list1);
-	for (size_t i = 0; iter->hasNext(iter); ++i)
-	{
-		ASSERT_EQ(i, *((size_t*)iter->next(iter)));
-	}
-	iter->destroy(iter);
-	
-	ArrayList_destroy(list1);
-	ArrayList_destroy(list2);
-}
-
 TEST(ArrayList, TestRemoveNoReallocation)
 {
 	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	for (size_t i = 0; i < list->capacity; ++i)
 	{
-		ArrayList_add(list, &i);
+		ArrayList_add(list, i);
 	}
 
 	ASSERT_EQ(10U, list->size);
@@ -403,15 +305,12 @@ TEST(ArrayList, TestRemoveNoReallocation)
 TEST(ArrayList, TestRemoveNoReallocationFromEndOfList)
 {
 	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	for (size_t i = 0; i < list->capacity; ++i)
 	{
-		ArrayList_add(list, &i);
+		ArrayList_add(list, i);
 	}
 
 	ASSERT_EQ(10U, list->size);
@@ -435,23 +334,20 @@ TEST(ArrayList, TestRemoveNoReallocationFromEndOfList)
 TEST(ArrayList, TestRemoveOneReallocation)
 {
 	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
+		10, 2, 4, 2
 	);
 
 	size_t currCapacity = list->capacity;
 	for (size_t i = 0; i < currCapacity + 1; ++i)
 	{
-		ArrayList_add(list, &i);
+		ArrayList_add(list, i);
 	}
 
 	size_t oldSize = list->size;
 	for (size_t i = 0; i < 6;)
 	{
-		size_t* valToRemove = (size_t*)ArrayList_get(list, 0);
-		ASSERT_EQ(i++, *valToRemove);
+		int valToRemove = ArrayList_get(list, 0);
+		ASSERT_EQ(i++, valToRemove);
 		ArrayList_remove(list, 0);
 		ASSERT_EQ(oldSize-i, list->size);
 		ASSERT_EQ(20U, list->capacity);
@@ -477,19 +373,16 @@ TEST(ArrayList, TestRemoveMultipleReallocation)
 	size_t maxSize = 160; // 4 reallocations of size 10 with a multiplier of 2
 	
 	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
 		initialCapacity,
 		addRemoveMultiplier,
 		removeThreshold,
-		addRemoveMultiplier,
-		memcmp,
-		memcpy
+		addRemoveMultiplier
 	);
 
 	// Fill the list
 	for (size_t i = 0; i < maxSize; ++i)
 	{
-		ArrayList_add(list, &i);
+		ArrayList_add(list, i);
 	}
 
 	ArrayListTest_checkContents(list, 0);
@@ -575,210 +468,46 @@ TEST(ArrayList, TestRemoveMultipleReallocation)
 	ArrayList_destroy(list);
 }
 
-TEST(ArrayList, TestIteratorNextOperations)
-{
-	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
-	);
-
-	const size_t expectedSize = 50;	
-	for (size_t i = 0; i < expectedSize; ++i)
-	{
-		ArrayList_add(list, &i);
-	}
-
-	Iterator* iter = ArrayList_iterator(list);
-	ASSERT_TRUE(iter->hasNext(iter));
-	ASSERT_EQ(0U, *(size_t*)iter->peekNext(iter));
-
-	size_t times = 0;
-	while(iter->hasNext(iter))
-	{
-		ASSERT_EQ(times, *((size_t*)iter->peekNext(iter)));
-		ASSERT_EQ(times, *((size_t*)iter->next(iter)));
-		++times;
-	}
-
-	ASSERT_FALSE(iter->hasNext(iter));
-	ASSERT_EQ(NULL, iter->peekNext(iter));
-	ASSERT_EQ(NULL, iter->next(iter));
-	ASSERT_EQ(expectedSize, times);
-
-	iter->destroy(iter);
-	ArrayList_destroy(list);
-}
-
-TEST(ArrayList, TestIteratorEmptyList)
-{
-	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
-	);
-	Iterator* iter = ArrayList_iterator(list);
-	
-	ASSERT_FALSE(iter->hasNext(iter));
-	ASSERT_EQ(NULL, iter->peekNext(iter));
-	ASSERT_EQ(NULL, iter->next(iter));
-	
-	/*
- 	* Many calls to remove on an "empty" iterator
- 	* should have no effect on the list.
- 	*/
-	iter->remove(iter);
-	iter->remove(iter);
-	iter->remove(iter);
-
-	ASSERT_FALSE(iter->hasNext(iter));
-	ASSERT_EQ(NULL, iter->peekNext(iter));
-	ASSERT_EQ(NULL, iter->next(iter));
-	
-	iter->destroy(iter);
-	ArrayList_destroy(list);
-}
-
-TEST(ArrayList, TestIteratorCreatedBeforeListModification)
-{
-	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
-	);
-	Iterator* iter = ArrayList_iterator(list);
-
-	const size_t expectedSize = 50;	
-	for (size_t i = 0; i < expectedSize; ++i)
-	{
-		ArrayList_add(list, &i);
-	}
-
-	ArrayListTest_smokeTestIterator(iter, expectedSize);
-
-	iter->destroy(iter);
-	ArrayList_destroy(list);
-}
-
-TEST(ArrayList, TestIteratorRemoveFirstElementRepeated)
-{
-	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
-	);
-
-	const size_t listSize = 50;	
-	for (size_t i = 0; i < listSize; ++i)
-	{
-		ArrayList_add(list, &i);
-	}
-
-	Iterator* iter = ArrayList_iterator(list);
-	for (size_t i = 0; i < listSize; ++i)
-	{
-		ASSERT_EQ(listSize - i, list->size);
-		ArrayListTest_checkContents(list, i);
-
-		iter->next(iter);
-		iter->remove(iter);
-
-		ASSERT_EQ(listSize - i - 1, list->size);
-		ArrayListTest_checkContents(list, i + 1);
-	}
-
-	ASSERT_EQ(0U, list->size);
-	ASSERT_EQ(10U, list->capacity);
-
-	iter->destroy(iter);
-	ArrayList_destroy(list);
-}
-
-TEST(ArrayList, TestIteratorRemoveLastElementRepeated)
-{
-	ArrayList* list = ArrayList_createFull(
-		sizeof(size_t),
-		10, 2, 4, 2,
-		memcmp,
-		memcpy
-	);
-
-	const size_t listSize = 50;	
-	for (size_t i = 0; i < listSize; ++i)
-	{
-		ArrayList_add(list, &i);
-	}
-
-	Iterator* iter = ArrayList_iterator(list);
-	while (iter->hasNext(iter))
-	{
-		iter->next(iter);
-	}
-
-	for (size_t i = 0; i < listSize; ++i)
-	{
-		ASSERT_FALSE(iter->hasNext(iter));
-		
-		ASSERT_EQ(listSize - i, list->size);
-		ArrayListTest_checkContents(list);
-
-		iter->remove(iter);
-
-		ASSERT_EQ(listSize - i - 1, list->size);
-		ArrayListTest_checkContents(list);
-	}
-
-	ASSERT_EQ(0U, list->size);
-	ASSERT_EQ(10U, list->capacity);
-
-	iter->destroy(iter);
-	ArrayList_destroy(list);
-}
-
 TEST(ArrayList, TestContainsDefaultEmptyList)
 {
-	ArrayList* list = ArrayList_createDefault(sizeof(int));
+	ArrayList* list = ArrayList_create();
 
 	int val = 0;
-	ASSERT_EQ(FALSE, ArrayList_contains(list, &val));
+	ASSERT_EQ(FALSE, ArrayList_contains(list, val));
 
 	ArrayList_destroy(list);
 }
 
 TEST(ArrayList, TestContainsDefaultSingletonList)
 {
-	ArrayList* list = ArrayList_createDefault(sizeof(int));
+	ArrayList* list = ArrayList_create();
 
 	int val = 1;
-	ArrayList_add(list, &val);
-	ASSERT_EQ(TRUE, ArrayList_contains(list, &val));
+	ArrayList_add(list, val);
+	ASSERT_EQ(TRUE, ArrayList_contains(list, val));
 
 	val = 2;
-	ASSERT_EQ(FALSE, ArrayList_contains(list, &val));
+	ASSERT_EQ(FALSE, ArrayList_contains(list, val));
 
 	ArrayList_destroy(list);
 }
 
 TEST(ArrayList, TestContainsDefault)
 {
-	ArrayList* list = ArrayList_createDefault(sizeof(int));
+	ArrayList* list = ArrayList_create();
 
 	for (int i = 0; i <= 10; ++i)
 	{
-		ArrayList_add(list, &i);
+		ArrayList_add(list, i);
 	}
 
 	for (int i = -5; i < 15; ++i)
 	{
 		if (i >= 0 && i <= 10) {
-			ASSERT_EQ(TRUE, ArrayList_contains(list, &i));
+			ASSERT_EQ(TRUE, ArrayList_contains(list, i));
 		}
 		else {
-			ASSERT_EQ(FALSE, ArrayList_contains(list, &i));
+			ASSERT_EQ(FALSE, ArrayList_contains(list, i));
 		}
 	}
 
@@ -788,12 +517,12 @@ TEST(ArrayList, TestContainsDefault)
 TEST(ArrayList, TestMethodChaining)
 {
 	size_t val = 1;
-	ArrayList* otherList = ArrayList_createDefault(sizeof(size_t));
-	ArrayList_add(otherList, &val);
-	ArrayList_add(otherList, &val);
+	ArrayList* otherList = ArrayList_create();
+	ArrayList_add(otherList, val);
+	ArrayList_add(otherList, val);
 
 	/* This just feels dumb...also sad I cannot use literals */
-	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+	ArrayList* list = ArrayList_create();
 	ArrayList_add(
 		ArrayList_add(
 			ArrayList_addAll(
@@ -801,17 +530,17 @@ TEST(ArrayList, TestMethodChaining)
 					ArrayList_add(
 						ArrayList_add(
 							list,
-							&val
+							val
 						),
-						&val
+						val
 					),
 					0U
 				),
 				otherList
 			),
-			&val
+			val
 		),
-		&val
+		val
 	);
 	
 	ASSERT_EQ(5U, list->size);
@@ -823,51 +552,15 @@ TEST(ArrayList, TestMethodChaining)
 TEST(ArrayList, TestAddAllSameList)
 {
 	size_t val = 1;
-	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
-	ArrayList_add(list, &val);
+	ArrayList* list = ArrayList_create();
+	ArrayList_add(list, val);
 	ASSERT_EQ(NULL, ArrayList_addAll(list, list));
 	ArrayList_destroy(list);
 }
 
-TEST(ArrayList, TestCopyList)
-{
-	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
-	for (size_t i = 0; i < 100; ++i)
-	{
-		ArrayList_add(list, &i);
-	}
-
-	Iterator* copyIter = ArrayList_iterator(list);	
-	ArrayList* otherList = ArrayList_addIterator(
-		ArrayList_createDefault(sizeof(size_t)),
-		copyIter
-	);
-	copyIter->destroy(copyIter);
-	
-	ASSERT_EQ(list->size, otherList->size);
-	
-	Iterator* iter = ArrayList_iterator(list);
-	Iterator* otherIter = ArrayList_iterator(otherList);
-	
-	while (iter->hasNext(iter))
-	{
-		ASSERT_EQ(
-			*(size_t*)iter->next(iter),
-			*(size_t*)otherIter->next(otherIter)
-		);
-	}
-	
-	ASSERT_FALSE(otherIter->hasNext(otherIter));
-	
-	iter->destroy(iter);
-	otherIter->destroy(otherIter);
-	ArrayList_destroy(list);
-	ArrayList_destroy(otherList);
-}
-
 TEST(ArrayList, TestMergeSortEmpty)
 {
-	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+	ArrayList* list = ArrayList_create();
 	ArrayList_mergeSort(list);
 	ASSERT_EQ(0U, list->size);
 	ArrayList_destroy(list);
@@ -875,10 +568,10 @@ TEST(ArrayList, TestMergeSortEmpty)
 
 TEST(ArrayList, TestMergeSortSingle)
 {
-	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+	ArrayList* list = ArrayList_create();
 
 	size_t value = 0U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	
 	ArrayList_mergeSort(list);
 	ASSERT_EQ(1U, list->size);
@@ -888,16 +581,16 @@ TEST(ArrayList, TestMergeSortSingle)
 
 TEST(ArrayList, TestMergeSortEven)
 {
-	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+	ArrayList* list = ArrayList_create();
 
 	size_t value = 3U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 1U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 2U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 0U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	
 	ArrayList_mergeSort(list);
 	ASSERT_EQ(4U, list->size);
@@ -907,16 +600,16 @@ TEST(ArrayList, TestMergeSortEven)
 
 TEST(ArrayList, TestMergeSortEvenAlreadySorted)
 {
-	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+	ArrayList* list = ArrayList_create();
 
 	size_t value = 0U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 1U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 2U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 3U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	
 	ArrayList_mergeSort(list);
 	ASSERT_EQ(4U, list->size);
@@ -926,18 +619,18 @@ TEST(ArrayList, TestMergeSortEvenAlreadySorted)
 
 TEST(ArrayList, TestMergeSortOdd)
 {
-	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+	ArrayList* list = ArrayList_create();
 
 	size_t value = 0U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 1U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 4U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 2U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 3U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	
 	ArrayList_mergeSort(list);
 	ASSERT_EQ(5U, list->size);
@@ -947,18 +640,18 @@ TEST(ArrayList, TestMergeSortOdd)
 
 TEST(ArrayList, TestMergeSortOddAlreadySorted)
 {
-	ArrayList* list = ArrayList_createDefault(sizeof(size_t));
+	ArrayList* list = ArrayList_create();
 
 	size_t value = 0U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 1U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 2U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 3U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	value = 4U;
-	ArrayList_add(list, &value);
+	ArrayList_add(list, value);
 	
 	ArrayList_mergeSort(list);
 	ASSERT_EQ(5U, list->size);

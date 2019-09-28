@@ -12,6 +12,7 @@
 
 # Build directories
 BUILD_DIR = build
+LIB_DIR = lib
 
 # Test executable
 TEST_EXEC = $(BUILD_DIR)/tests.run
@@ -29,9 +30,12 @@ TEST_DIR = test
 TEST_SUITE = $(TEST_DIR)/TestSuite.cpp
 
 # Google Test stuff
-GTEST_DIR = lib/gtest-1.7.0
-GTEST_INCLUDE_DIR = $(GTEST_DIR)/include
-GTEST_LIB = $(BUILD_DIR)/gtest_main.a
+GTEST_DIR = $(LIB_DIR)/gtest
+GTEST_ARCHIVE = $(GTEST_DIR)/gtest.tar.gz
+GTEST_ARCHIVE_URL = https://github.com/google/googletest/archive/release-1.8.1.tar.gz
+GTEST_LIB = $(BUILD_DIR)/libgtest_main.a
+GTEST_MAIN_LIB = $(BUILD_DIR)/gtest_main.a
+GTEST_INCLUDE_DIR = $(GTEST_DIR)/googletest/include
 
 # Compilation commands
 # I do not want to have to worry about my test code
@@ -64,12 +68,20 @@ $(LIB): $(OUTPUT_FILES)
 	$(AR) $(ARFLAGS) $@ $(BUILD_DIR)/*.o;
 
 # 4) Test Compilation
-$(GTEST_LIB):
-	(cd $(GTEST_DIR)/make && make);
-	cp $(GTEST_DIR)/make/gtest_main.a $(GTEST_LIB);
+$(GTEST_DIR):
+	mkdir $@;
+	wget -O $(GTEST_ARCHIVE) $(GTEST_ARCHIVE_URL);
+	tar -x -C $@ -f $(GTEST_ARCHIVE) --strip-components 1;
+	(cd $@ && cmake . && make);
 
-$(TEST_EXEC): $(LIB) $(GTEST_LIB) $(TEST_FILES)
-	$(TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(INCLUDE_DIR) -o $@ -pthread $(TEST_SUITE) $< $(word 2, $^);
+$(GTEST_MAIN_LIB): $(GTEST_DIR)
+	cp $(GTEST_DIR)/googlemock/gtest/libgtest_main.a $@;
+
+$(GTEST_LIB): $(GTEST_DIR)
+	cp $(GTEST_DIR)/googlemock/gtest/libgtest.a $@;
+
+$(TEST_EXEC): $(LIB) $(GTEST_LIB) $(GTEST_MAIN_LIB) $(TEST_FILES)
+	$(TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(INCLUDE_DIR) -o $@ -pthread $(TEST_SUITE) $< $(word 2, $^) $(word 3, $^);
 
 # 5) Test Execution
 .DEFAULT_GOAL = test
