@@ -32,7 +32,7 @@ TEST_SUITE = $(TEST_DIR)/TestSuite.cpp
 # Google Test stuff
 GTEST_DIR = $(LIB_DIR)/gtest
 GTEST_ARCHIVE = $(GTEST_DIR)/gtest.tar.gz
-GTEST_ARCHIVE_URL = https://github.com/google/googletest/archive/release-1.8.1.tar.gz
+GTEST_ARCHIVE_URL = https://github.com/google/googletest/archive/release-1.11.0.tar.gz
 GTEST_LIB = $(BUILD_DIR)/libgtest_main.a
 GTEST_MAIN_LIB = $(BUILD_DIR)/gtest_main.a
 GTEST_INCLUDE_DIR = $(GTEST_DIR)/googletest/include
@@ -75,10 +75,10 @@ $(GTEST_DIR):
 	(cd $@ && cmake . && make);
 
 $(GTEST_MAIN_LIB): $(GTEST_DIR)
-	cp $(GTEST_DIR)/googlemock/gtest/libgtest_main.a $@;
+	cp $(GTEST_DIR)/lib/libgtest_main.a $@;
 
 $(GTEST_LIB): $(GTEST_DIR)
-	cp $(GTEST_DIR)/googlemock/gtest/libgtest.a $@;
+	cp $(GTEST_DIR)/lib/libgtest.a $@;
 
 $(TEST_EXEC): $(LIB) $(GTEST_LIB) $(GTEST_MAIN_LIB) $(TEST_FILES)
 	$(TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(INCLUDE_DIR) -o $@ -pthread $(TEST_SUITE) $< $(word 2, $^) $(word 3, $^);
