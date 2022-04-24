@@ -21,7 +21,7 @@ typedef struct ArrayList
 extern "C" {
 #endif
 
-ArrayList* ArrayList_create();
+ArrayList* ArrayList_create(void);
 ArrayList* ArrayList_createFull(
     const size_t pCapacity,
     const unsigned int pAddReallocationMultiplier,

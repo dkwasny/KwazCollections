@@ -41,7 +41,7 @@ static void _ArrayList_expandArray(ArrayList* pList, const size_t newCapacity)
 }
 
 /* Public Methods */
-ArrayList* ArrayList_create()
+ArrayList* ArrayList_create(void)
 {
     return ArrayList_createFull(
         10,
@@ -205,17 +205,18 @@ static void _ArrayList_mergeSortSublist(
     const size_t startIndex,
     const size_t endIndex)
 {
-    const size_t size = endIndex - startIndex + 1;
-    const size_t halfSize = size / 2;
-    const size_t firstHalfStart = startIndex;
-    const size_t firstHalfEnd = startIndex + halfSize - 1;
-    const size_t secondHalfStart = firstHalfEnd + 1;
-    const size_t secondHalfEnd = endIndex;
-    size_t firstIndex = firstHalfStart;
-    size_t secondIndex = secondHalfStart;
+    const size_t midpoint = (startIndex + endIndex) / 2;
 
-    Boolean firstListHasData = firstIndex <= firstHalfEnd;
-    Boolean secondListHasData = secondIndex <= secondHalfEnd;
+    const size_t leftStart = startIndex;
+    const size_t leftEnd = midpoint;
+    size_t leftIndex = leftStart;
+
+    const size_t rightStart = midpoint + 1;
+    const size_t rightEnd = endIndex;
+    size_t rightIndex = rightStart;
+
+    Boolean leftHasData = leftIndex <= leftEnd;
+    Boolean rightHasData = rightIndex <= rightEnd;
     size_t i = 0;
 
     ArrayList* store = NULL;
@@ -226,52 +227,52 @@ static void _ArrayList_mergeSortSublist(
         return;
     }
 
-    _ArrayList_mergeSortSublist(pList, firstHalfStart, firstHalfEnd);
-    _ArrayList_mergeSortSublist(pList, secondHalfStart, secondHalfEnd);
+    _ArrayList_mergeSortSublist(pList, leftStart, leftEnd);
+    _ArrayList_mergeSortSublist(pList, rightStart, rightEnd);
 
-    store = ArrayList_create();
+    store = ArrayList_createFull((endIndex - startIndex) + 1, 2, 4, 2);
 
-    while (firstListHasData || secondListHasData)
+    while (leftHasData || rightHasData)
     {
-        if (firstListHasData && !secondListHasData)
+        if (leftHasData && !rightHasData)
         {
             ArrayList_add(
                 store,
-                ArrayList_get(pList, firstIndex++)
+                ArrayList_get(pList, leftIndex++)
             );
         }
-        else if (!firstListHasData)
+        else if (!leftHasData)
         {
             ArrayList_add(
                 store,
-                ArrayList_get(pList, secondIndex++)
+                ArrayList_get(pList, rightIndex++)
             );
         }
         else
         {
-            int firstElement = ArrayList_get(pList, firstIndex);
-            int secondElement = ArrayList_get(pList, secondIndex);
+            int firstElement = ArrayList_get(pList, leftIndex);
+            int secondElement = ArrayList_get(pList, rightIndex);
             if (firstElement < secondElement)
             {
                 ArrayList_add(store, firstElement);
-                ++firstIndex;
+                ++leftIndex;
             }
             else if (firstElement > secondElement)
             {
                 ArrayList_add(store, secondElement);
-                ++secondIndex;
+                ++rightIndex;
             }
             else
             {
                 ArrayList_add(store, firstElement);
-                ++firstIndex;
+                ++leftIndex;
                 ArrayList_add(store, secondElement);
-                ++secondIndex;
+                ++rightIndex;
             }
         }
 
-        firstListHasData = firstIndex <= firstHalfEnd;
-        secondListHasData = secondIndex <= secondHalfEnd;
+        leftHasData = leftIndex <= leftEnd;
+        rightHasData = rightIndex <= rightEnd;
     }
 
     for (i = 0; i < store->size; ++i)

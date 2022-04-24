@@ -1,18 +1,8 @@
-# A makefile for compiling KwazCollections under both the
-# clang and/or gnu compilers
-#
-# The only special part of this file is the generated compilation commands.
-#
-# To get around c compiler restrictions of disallowing the use of -o with
-# multiple input files, I use make functions to generate a list of compile
-# commands into a set of variables. 
-# These variables are then referenced in each compilation task.
-#
-# -David Kwasny
-
-# Build directories
-BUILD_DIR = build
+# Directories
+SOURCE_DIR = src
+INCLUDE_DIR = include
 LIB_DIR = lib
+BUILD_DIR = build
 
 # Test executable
 TEST_EXEC = $(BUILD_DIR)/tests.run
@@ -20,10 +10,6 @@ TEST_EXEC = $(BUILD_DIR)/tests.run
 # KwazCollections C library info
 LIB_FILENAME = libckwazcoll.a
 LIB = $(BUILD_DIR)/$(LIB_FILENAME)
-
-# Source directories
-SOURCE_DIR = src
-INCLUDE_DIR = include
 
 # Test source directories and suites
 TEST_DIR = test
@@ -45,14 +31,11 @@ COMPILE = $(CC) $(CFLAGS) $(CPPFLAGS) -I $(INCLUDE_DIR) -c
 CXX_FLAGS += -Wall -Wextra -Werror
 TEST_COMPILE = $(CXX) $(CXXFLAGS) $(CPPFLAGS)
 
-# Generated variables to assist in compilation
+# Generated variables to assist in rule creation
 SOURCE_FILES = $(wildcard $(SOURCE_DIR)/*.c)
-OBJECT_NAMES = $(basename $(notdir $(SOURCE_FILES)))
-
-# Generated variables to assist in make target declaration
 HEADER_FILES = $(wildcard $(INCLUDE_DIR)/*.h)
 TEST_FILES = $(wildcard $(TEST_DIR)/*.cpp)
-OUTPUT_FILES = $(foreach object, $(OBJECT_NAMES), $(BUILD_DIR)/$(object).o)
+OUTPUT_FILES = $(foreach object, $(SOURCE_FILES), $(BUILD_DIR)/$(patsubst %.c,%.o,$(notdir $(object))))
 
 # Build Phases
 # 1) Build directory structure creation
@@ -61,7 +44,7 @@ $(BUILD_DIR):
 
 # 2) Source Compilation
 $(OUTPUT_FILES): $(SOURCE_FILES) $(HEADER_FILES) | $(BUILD_DIR)
-	$(foreach object, $(OBJECT_NAMES), $(COMPILE) -o $(BUILD_DIR)/$(object).o $(SOURCE_DIR)/$(object).c;)
+	$(COMPILE) -o $@ $(SOURCE_DIR)/$(patsubst %.o,%.c,$(notdir $@));
 
 # 3) Library Generation
 $(LIB): $(OUTPUT_FILES)
