@@ -6,14 +6,14 @@
 
 typedef struct ArrayList
 {
-	int* values;
-	size_t size;
-	size_t capacity;
+    int* values;
+    size_t size;
+    size_t capacity;
 
-	size_t initialCapacity;
-	unsigned int addReallocationMultiplier;
-	unsigned int removeReallocationThreshold;
-	unsigned int removeReallocationDivisor;
+    size_t initialCapacity;
+    unsigned int addReallocationMultiplier;
+    unsigned int removeReallocationThreshold;
+    unsigned int removeReallocationDivisor;
 } ArrayList;
 
 /* Start extern for c++ */
@@ -23,10 +23,10 @@ extern "C" {
 
 ArrayList* ArrayList_create();
 ArrayList* ArrayList_createFull(
-	const size_t pCapacity,
-	const unsigned int pAddReallocationMultiplier,
-	const unsigned int pRemoveReallocationThreshold,
-	const unsigned int pRemoveReallocationDivisor
+    const size_t pCapacity,
+    const unsigned int pAddReallocationMultiplier,
+    const unsigned int pRemoveReallocationThreshold,
+    const unsigned int pRemoveReallocationDivisor
 );
 
 /* ArrayList Methods */

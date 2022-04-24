@@ -7,18 +7,18 @@
 
 typedef struct GenericArrayList
 {
-	void** values;
-	size_t size;
-	size_t capacity;
+    void** values;
+    size_t size;
+    size_t capacity;
 
-	size_t typeSize;
-	size_t initialCapacity;
-	unsigned int addReallocationMultiplier;
-	unsigned int removeReallocationThreshold;
-	unsigned int removeReallocationDivisor;
+    size_t typeSize;
+    size_t initialCapacity;
+    unsigned int addReallocationMultiplier;
+    unsigned int removeReallocationThreshold;
+    unsigned int removeReallocationDivisor;
 
-	int (* compare)(const void* first, const void* second, size_t size);
-	void* (* copy)(void * dest, const void * src, size_t size);
+    int (* compare)(const void* first, const void* second, size_t size);
+    void* (* copy)(void * dest, const void * src, size_t size);
 } GenericArrayList;
 
 /* Start extern for c++ */
@@ -28,18 +28,18 @@ extern "C" {
 
 GenericArrayList* GenericArrayList_createDefault(const size_t pTypeSize);
 GenericArrayList* GenericArrayList_create(
-	const size_t pTypeSize,
-	int (* const pCompare)(const void* first, const void* second, size_t size),
-	void* (* const pCopy)(void * dest, const void * src, size_t size)
+    const size_t pTypeSize,
+    int (* const pCompare)(const void* first, const void* second, size_t size),
+    void* (* const pCopy)(void * dest, const void * src, size_t size)
 );
 GenericArrayList* GenericArrayList_createFull(
-	const size_t pTypeSize,
-	const size_t pCapacity,
-	const unsigned int pAddReallocationMultiplier,
-	const unsigned int pRemoveReallocationThreshold,
-	const unsigned int pRemoveReallocationDivisor,
-	int (* const pCompare)(const void* first, const void* second, size_t size),
-	void* (* const pCopy)(void * dest, const void * src, size_t size)
+    const size_t pTypeSize,
+    const size_t pCapacity,
+    const unsigned int pAddReallocationMultiplier,
+    const unsigned int pRemoveReallocationThreshold,
+    const unsigned int pRemoveReallocationDivisor,
+    int (* const pCompare)(const void* first, const void* second, size_t size),
+    void* (* const pCopy)(void * dest, const void * src, size_t size)
 );
 
 /* GenericArrayList Methods */

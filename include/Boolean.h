@@ -3,8 +3,8 @@
 
 typedef enum
 {
-	FALSE,
-	TRUE
+    FALSE,
+    TRUE
 } Boolean;
 
 #endif
