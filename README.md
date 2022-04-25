@@ -1,7 +1,7 @@
 KwazCollections
 ===============
 
-![Build](https://github.com/dkwasny/KwazCollections/actions/workflows/run-tests-and-valgrind.yml/badge.svg)
+![Build](https://github.com/dkwasny/KwazCollections/actions/workflows/build.yml/badge.svg)
 
 A small personal exercise for me to re-learn C and the rudimentary Data Structures I should of remembered from school.  Since I currently work in a Java environment, the resulting code may look funky.
 
