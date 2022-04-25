@@ -22,11 +22,18 @@ extern "C" {
 #endif
 
 ArrayList* ArrayList_create(void);
+ArrayList* ArrayList_createWithCapacity(
+    const size_t pCapacity
+);
 ArrayList* ArrayList_createFull(
     const size_t pCapacity,
     const unsigned int pAddReallocationMultiplier,
     const unsigned int pRemoveReallocationThreshold,
     const unsigned int pRemoveReallocationDivisor
+);
+ArrayList* ArrayList_createFromArray(
+    const int* values,
+    const size_t size
 );
 
 /* ArrayList Methods */
@@ -38,6 +45,7 @@ int ArrayList_get(const ArrayList* pList, const size_t pIndex);
 ArrayList* ArrayList_set(ArrayList* pList, const int pValue, const size_t pIndex);
 Boolean ArrayList_contains(const ArrayList* pList, const int pValue);
 ArrayList* ArrayList_mergeSort(ArrayList* pList);
+ArrayList* ArrayList_quickSort(ArrayList* pList);
 
 /* Close c++ extern */
 #ifdef __cplusplus

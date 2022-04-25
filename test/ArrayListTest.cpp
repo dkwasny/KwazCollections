@@ -3,12 +3,20 @@
 #include "Boolean.h"
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+static const size_t ARRAY_LIST_RANDOM_SIZE = 5000U;
+static const int ARRAY_LIST_MAX_RANDOM_VALUE = 1000;
+static const int NUM_RANDOM_SORT_RUNS = 100;
 
 static void ArrayListTest_checkContents(ArrayList* list, size_t offset)
 {
     for(size_t i = 0; i < list->size; ++i)
     {
-        ASSERT_EQ(int(offset + i), ArrayList_get(list, i));
+        int expected = int(offset + i);
+        int actual = ArrayList_get(list, i);
+        ASSERT_EQ(expected, actual);
     }
 }
 
@@ -27,6 +35,49 @@ static void ArrayListTest_smokeTest(ArrayList* list)
     for (size_t i = 0; i < 20; ++i)
     {
         ArrayList_remove(list, 0);
+    }
+}
+
+static void ArrayListTest_compareToArray(ArrayList* list, int* array)
+{
+    size_t i = 0;
+    for (; i < list->size; i++)
+    {
+        int expected = array[i];
+        int actual = ArrayList_get(list, i);
+        ASSERT_EQ(expected, actual);
+    }
+}
+
+static ArrayList* ArrayListTest_generateRandomList(size_t numValues)
+{
+    ArrayList* retVal = ArrayList_createWithCapacity(numValues);
+    for (size_t i = 0; i < numValues; i++)
+    {
+        int value = rand() % ARRAY_LIST_MAX_RANDOM_VALUE;
+        ArrayList_add(retVal, value);
+    }
+    return retVal;
+}
+
+static ArrayList* ArrayListTest_generateZeroList(size_t numValues)
+{
+    ArrayList* retVal = ArrayList_createWithCapacity(numValues);
+    for (size_t i = 0; i < numValues; i++)
+    {
+        ArrayList_add(retVal, 0);
+    }
+    return retVal;
+}
+
+static void ArrayListTest_verifySorted(ArrayList* pList)
+{
+    int previous = -1;
+    for (size_t i = 0; i < pList->size; i++)
+    {
+        int curr = ArrayList_get(pList, i);
+        ASSERT_TRUE(previous <= curr);
+        previous = curr;
     }
 }
 
@@ -81,6 +132,21 @@ TEST(ArrayList, TestCustomConstructorRemoveThresholdLowerThanDivisor)
     ASSERT_EQ(200U, list->removeReallocationThreshold);
     ASSERT_EQ(100U, list->removeReallocationDivisor);
     ArrayListTest_smokeTest(list);
+    ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestCreateFromArray)
+{
+    int values[5] = {0, 1, 2, 3, 4};
+    ArrayList* list = ArrayList_createFromArray(
+        values, 5
+    );
+    ASSERT_EQ(5U, list->capacity);
+    ASSERT_EQ(5U, list->size);
+    ASSERT_EQ(2U, list->addReallocationMultiplier);
+    ASSERT_EQ(4U, list->removeReallocationThreshold);
+    ASSERT_EQ(2U, list->removeReallocationDivisor);
+    ArrayListTest_compareToArray(list, values);
     ArrayList_destroy(list);
 }
 
@@ -170,13 +236,9 @@ TEST(ArrayList, TestAddMultipleReallocation)
 
 TEST(ArrayList, TestAddAllTwoEmptyLists)
 {
-    ArrayList* list1 = ArrayList_createFull(
-        10, 2, 4, 2
-    );
+    ArrayList* list1 = ArrayList_create();
 
-    ArrayList* list2 = ArrayList_createFull(
-        10, 2, 4, 2
-    );
+    ArrayList* list2 = ArrayList_create();
 
     ArrayList_addAll(list1, list2);
 
@@ -191,13 +253,8 @@ TEST(ArrayList, TestAddAllTwoEmptyLists)
 
 TEST(ArrayList, TestAddAllFullListToEmptyList)
 {
-    ArrayList* list1 = ArrayList_createFull(
-        10, 2, 4, 2
-    );
-
-    ArrayList* list2 = ArrayList_createFull(
-        10, 2, 4, 2
-    );
+    ArrayList* list1 = ArrayList_create();
+    ArrayList* list2 = ArrayList_create();
 
     for (size_t i = 0; i < 20; ++i)
     {
@@ -217,13 +274,9 @@ TEST(ArrayList, TestAddAllFullListToEmptyList)
 
 TEST(ArrayList, TestAddAllEmptyListToFullList)
 {
-    ArrayList* list1 = ArrayList_createFull(
-        10, 2, 4, 2
-    );
+    ArrayList* list1 = ArrayList_create();
 
-    ArrayList* list2 = ArrayList_createFull(
-        10, 2, 4, 2
-    );
+    ArrayList* list2 = ArrayList_create();
 
     for (size_t i = 0; i < 20; ++i)
     {
@@ -243,13 +296,8 @@ TEST(ArrayList, TestAddAllEmptyListToFullList)
 
 TEST(ArrayList, TestAddAllFullListToFullList)
 {
-    ArrayList* list1 = ArrayList_createFull(
-        10, 2, 4, 2
-    );
-
-    ArrayList* list2 = ArrayList_createFull(
-        10, 2, 4, 2
-    );
+    ArrayList* list1 = ArrayList_create();
+    ArrayList* list2 = ArrayList_create();
 
     for (size_t i = 0; i < 20; ++i)
     {
@@ -275,9 +323,7 @@ TEST(ArrayList, TestAddAllFullListToFullList)
 
 TEST(ArrayList, TestRemoveNoReallocation)
 {
-    ArrayList* list = ArrayList_createFull(
-        10, 2, 4, 2
-    );
+    ArrayList* list = ArrayList_create();
 
     for (size_t i = 0; i < list->capacity; ++i)
     {
@@ -304,9 +350,7 @@ TEST(ArrayList, TestRemoveNoReallocation)
 
 TEST(ArrayList, TestRemoveNoReallocationFromEndOfList)
 {
-    ArrayList* list = ArrayList_createFull(
-        10, 2, 4, 2
-    );
+    ArrayList* list = ArrayList_create();
 
     for (size_t i = 0; i < list->capacity; ++i)
     {
@@ -333,9 +377,7 @@ TEST(ArrayList, TestRemoveNoReallocationFromEndOfList)
 
 TEST(ArrayList, TestRemoveOneReallocation)
 {
-    ArrayList* list = ArrayList_createFull(
-        10, 2, 4, 2
-    );
+    ArrayList* list = ArrayList_create();
 
     size_t currCapacity = list->capacity;
     for (size_t i = 0; i < currCapacity + 1; ++i)
@@ -568,29 +610,21 @@ TEST(ArrayList, TestMergeSortEmpty)
 
 TEST(ArrayList, TestMergeSortSingle)
 {
-    ArrayList* list = ArrayList_create();
-
-    size_t value = 0U;
-    ArrayList_add(list, value);
+    size_t size = 1U;
+    int array[size] = {0};
+    ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_mergeSort(list);
-    ASSERT_EQ(1U, list->size);
+    ASSERT_EQ(size, list->size);
     ArrayListTest_checkContents(list);
     ArrayList_destroy(list);
 }
 
 TEST(ArrayList, TestMergeSortEven)
 {
-    ArrayList* list = ArrayList_create();
-
-    size_t value = 3U;
-    ArrayList_add(list, value);
-    value = 1U;
-    ArrayList_add(list, value);
-    value = 2U;
-    ArrayList_add(list, value);
-    value = 0U;
-    ArrayList_add(list, value);
+    size_t size = 4U;
+    int array[size] = {3, 1, 2, 0};
+    ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_mergeSort(list);
     ASSERT_EQ(4U, list->size);
@@ -600,16 +634,9 @@ TEST(ArrayList, TestMergeSortEven)
 
 TEST(ArrayList, TestMergeSortEvenAlreadySorted)
 {
-    ArrayList* list = ArrayList_create();
-
-    size_t value = 0U;
-    ArrayList_add(list, value);
-    value = 1U;
-    ArrayList_add(list, value);
-    value = 2U;
-    ArrayList_add(list, value);
-    value = 3U;
-    ArrayList_add(list, value);
+    size_t size = 4U;
+    int array[size] = {0, 1, 2, 3};
+    ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_mergeSort(list);
     ASSERT_EQ(4U, list->size);
@@ -619,18 +646,9 @@ TEST(ArrayList, TestMergeSortEvenAlreadySorted)
 
 TEST(ArrayList, TestMergeSortOdd)
 {
-    ArrayList* list = ArrayList_create();
-
-    size_t value = 0U;
-    ArrayList_add(list, value);
-    value = 1U;
-    ArrayList_add(list, value);
-    value = 4U;
-    ArrayList_add(list, value);
-    value = 2U;
-    ArrayList_add(list, value);
-    value = 3U;
-    ArrayList_add(list, value);
+    size_t size = 5U;
+    int array[size] = {0, 1, 4, 2, 3};
+    ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_mergeSort(list);
     ASSERT_EQ(5U, list->size);
@@ -640,21 +658,151 @@ TEST(ArrayList, TestMergeSortOdd)
 
 TEST(ArrayList, TestMergeSortOddAlreadySorted)
 {
-    ArrayList* list = ArrayList_create();
-
-    size_t value = 0U;
-    ArrayList_add(list, value);
-    value = 1U;
-    ArrayList_add(list, value);
-    value = 2U;
-    ArrayList_add(list, value);
-    value = 3U;
-    ArrayList_add(list, value);
-    value = 4U;
-    ArrayList_add(list, value);
+    size_t size = 5U;
+    int array[size] = {0, 1, 2, 3, 4};
+    ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_mergeSort(list);
-    ASSERT_EQ(5U, list->size);
+    ASSERT_EQ(size, list->size);
     ArrayListTest_checkContents(list);
+    ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestMergeSortDuplicateValues)
+{
+    size_t size = 9U;
+    int array[size] = {9, 2, 4, 2, 4, 9, 1, 2, 9};
+    ArrayList* list = ArrayList_createFromArray(array, size);
+
+    ArrayList_mergeSort(list);
+    ASSERT_EQ(size, list->size);
+
+    int expected[size] = {1, 2, 2, 2, 4, 4, 9, 9, 9};
+    ArrayListTest_compareToArray(list, expected);
+    ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestMergeSortRandomLists)
+{
+    for (int i = 0; i < NUM_RANDOM_SORT_RUNS; i++)
+    {
+        ArrayList* list = ArrayListTest_generateRandomList(ARRAY_LIST_RANDOM_SIZE);
+        ArrayList_mergeSort(list);
+        ArrayListTest_verifySorted(list);
+
+        ArrayList_destroy(list);
+    }
+}
+
+TEST(ArrayList, TestMergeSortZeroList)
+{
+    ArrayList* list = ArrayListTest_generateZeroList(ARRAY_LIST_RANDOM_SIZE);
+    ArrayList_mergeSort(list);
+    ArrayListTest_verifySorted(list);
+
+    ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestQuickSortEmpty)
+{
+    ArrayList* list = ArrayList_create();
+    ArrayList_quickSort(list);
+    ASSERT_EQ(0U, list->size);
+    ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestQuickSortSingle)
+{
+    size_t size = 1U;
+    int array[size] = {0};
+    ArrayList* list = ArrayList_createFromArray(array, size);
+
+    ArrayList_quickSort(list);
+    ASSERT_EQ(size, list->size);
+    ArrayListTest_checkContents(list);
+    ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestQuickSortEven)
+{
+    size_t size = 4U;
+    int array[size] = {3, 1, 2, 0};
+    ArrayList* list = ArrayList_createFromArray(array, size);
+
+    ArrayList_quickSort(list);
+    ASSERT_EQ(size, list->size);
+    ArrayListTest_checkContents(list);
+    ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestQuickSortEvenAlreadySorted)
+{
+    size_t size = 4U;
+    int array[size] = {0, 1, 2, 3};
+    ArrayList* list = ArrayList_createFromArray(array, size);
+
+    ArrayList_quickSort(list);
+    ASSERT_EQ(size, list->size);
+    ArrayListTest_checkContents(list);
+    ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestQuickSortOdd)
+{
+    size_t size = 5U;
+    int array[size] = {0, 1, 4, 2, 3};
+    ArrayList* list = ArrayList_createFromArray(array, size);
+
+    ArrayList_quickSort(list);
+    ASSERT_EQ(size, list->size);
+    ArrayListTest_checkContents(list);
+    ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestQuickSortOddAlreadySorted)
+{
+    size_t size = 5U;
+    int array[size] = {0, 1, 2, 3, 4};
+    ArrayList* list = ArrayList_createFromArray(array, size);
+
+    ArrayList_quickSort(list);
+    ASSERT_EQ(size, list->size);
+    ArrayListTest_checkContents(list);
+    ArrayList_destroy(list);
+}
+
+TEST(ArrayList, TestQuickSortDuplicateValues)
+{
+    size_t size = 9U;
+    int array[size] = {9, 2, 4, 2, 4, 9, 1, 2, 9};
+    ArrayList* list = ArrayList_createFromArray(array, size);
+
+    ArrayList_quickSort(list);
+    ASSERT_EQ(size, list->size);
+
+    int expected[size] = {1, 2, 2, 2, 4, 4, 9, 9, 9};
+    ArrayListTest_compareToArray(list, expected);
+    ArrayList_destroy(list);
+}
+
+
+TEST(ArrayList, TestQuickSortRandomLists)
+{
+    for (int i = 0; i < NUM_RANDOM_SORT_RUNS; i++)
+    {
+        ArrayList* list = ArrayListTest_generateRandomList(ARRAY_LIST_RANDOM_SIZE);
+        ArrayList_quickSort(list);
+        ArrayListTest_verifySorted(list);
+
+        ArrayList_destroy(list);
+    }
+}
+
+TEST(ArrayList, TestQuickSortZeroList)
+{
+    ArrayList* list = ArrayListTest_generateZeroList(ARRAY_LIST_RANDOM_SIZE);
+    ArrayList_quickSort(list);
+    ArrayListTest_verifySorted(list);
+
     ArrayList_destroy(list);
 }

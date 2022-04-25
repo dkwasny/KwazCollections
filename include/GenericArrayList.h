@@ -5,6 +5,17 @@
 #include "Boolean.h"
 #include "GenericIterator.h"
 
+/*
+    This is from back when I was trying to do "true" generic collections in C.
+
+    While messing with function pointers is fun, the goal of this project is
+    to explore algorithms and data structures.
+
+    I'm keeping this around as a reminder of what I was able to do, but will
+    not be updating it any further.
+    All further collection work will just assume primitive `int` values.
+*/
+
 typedef struct GenericArrayList
 {
     void** values;
@@ -53,7 +64,6 @@ GenericArrayList* GenericArrayList_set(GenericArrayList* pList, const void* valu
 Boolean GenericArrayList_contains(const GenericArrayList* pList, const void* pValue);
 GenericArrayList* GenericArrayList_mergeSort(GenericArrayList* pList);
 GenericIterator* GenericArrayList_iterator(GenericArrayList* pList);
-
 
 /* Close c++ extern */
 #ifdef __cplusplus

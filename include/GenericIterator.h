@@ -3,6 +3,10 @@
 
 #include "Boolean.h"
 
+/*
+    See GenericArrayList.h for more.
+*/
+
 typedef struct GenericIterator GenericIterator;
 
 struct GenericIterator

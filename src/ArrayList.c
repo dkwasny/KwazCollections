@@ -1,5 +1,11 @@
 #include "ArrayList.h"
 #include <string.h>
+#include <stdio.h>
+
+static const size_t DEFAULT_CAPACITY = 10;
+static const unsigned int DEFAULT_ADD_REALLOC_MULT = 2;
+static const unsigned int DEFAULT_REM_REALLOC_THRESH = 4;
+static const unsigned int DEFAULT_REM_REALLOC_DIV = 2;
 
 /* Utility Methods */
 static int* _ArrayList_allocateArray(
@@ -40,14 +46,33 @@ static void _ArrayList_expandArray(ArrayList* pList, const size_t newCapacity)
     pList->capacity = adjustedCapacity;
 }
 
+static void _ArrayList_swapElements(
+    ArrayList* pList,
+    const size_t first,
+    const size_t second)
+{
+    int firstValue = ArrayList_get(pList, first);
+    int secondValue = ArrayList_get(pList, second);
+
+    ArrayList_set(pList, firstValue, second);
+    ArrayList_set(pList, secondValue, first);
+}
+
 /* Public Methods */
 ArrayList* ArrayList_create(void)
 {
+    return ArrayList_createWithCapacity(
+        DEFAULT_CAPACITY
+    );
+}
+
+ArrayList* ArrayList_createWithCapacity(const size_t pCapacity)
+{
     return ArrayList_createFull(
-        10,
-        2,
-        4,
-        2
+        pCapacity,
+        DEFAULT_ADD_REALLOC_MULT,
+        DEFAULT_REM_REALLOC_THRESH,
+        DEFAULT_REM_REALLOC_DIV
     );
 }
 
@@ -81,6 +106,22 @@ ArrayList* ArrayList_createFull(
     retVal->removeReallocationThreshold = removeReallocationThreshold;
     retVal->removeReallocationDivisor = pRemoveReallocationDivisor;
 
+    return retVal;
+}
+
+ArrayList* ArrayList_createFromArray(const int* values, const size_t size)
+{
+    ArrayList* retVal = ArrayList_createFull(
+        size,
+        DEFAULT_ADD_REALLOC_MULT,
+        DEFAULT_REM_REALLOC_THRESH,
+        DEFAULT_REM_REALLOC_DIV
+    );
+    size_t i = 0;
+    for (; i < size; i++)
+    {
+        ArrayList_add(retVal, values[i]);
+    }
     return retVal;
 }
 
@@ -203,7 +244,8 @@ Boolean ArrayList_contains(const ArrayList* pList, const int pValue)
 static void _ArrayList_mergeSortSublist(
     ArrayList* pList,
     const size_t startIndex,
-    const size_t endIndex)
+    const size_t endIndex,
+    ArrayList* workArray)
 {
     const size_t midpoint = (startIndex + endIndex) / 2;
 
@@ -219,32 +261,30 @@ static void _ArrayList_mergeSortSublist(
     Boolean rightHasData = rightIndex <= rightEnd;
     size_t i = 0;
 
-    ArrayList* store = NULL;
-
     /* Terminal condition */
     if (startIndex >= endIndex)
     {
         return;
     }
 
-    _ArrayList_mergeSortSublist(pList, leftStart, leftEnd);
-    _ArrayList_mergeSortSublist(pList, rightStart, rightEnd);
+    _ArrayList_mergeSortSublist(pList, leftStart, leftEnd, workArray);
+    _ArrayList_mergeSortSublist(pList, rightStart, rightEnd, workArray);
 
-    store = ArrayList_createFull((endIndex - startIndex) + 1, 2, 4, 2);
+    workArray->size = 0;
 
     while (leftHasData || rightHasData)
     {
         if (leftHasData && !rightHasData)
         {
             ArrayList_add(
-                store,
+                workArray,
                 ArrayList_get(pList, leftIndex++)
             );
         }
         else if (!leftHasData)
         {
             ArrayList_add(
-                store,
+                workArray,
                 ArrayList_get(pList, rightIndex++)
             );
         }
@@ -254,19 +294,19 @@ static void _ArrayList_mergeSortSublist(
             int secondElement = ArrayList_get(pList, rightIndex);
             if (firstElement < secondElement)
             {
-                ArrayList_add(store, firstElement);
+                ArrayList_add(workArray, firstElement);
                 ++leftIndex;
             }
             else if (firstElement > secondElement)
             {
-                ArrayList_add(store, secondElement);
+                ArrayList_add(workArray, secondElement);
                 ++rightIndex;
             }
             else
             {
-                ArrayList_add(store, firstElement);
+                ArrayList_add(workArray, firstElement);
                 ++leftIndex;
-                ArrayList_add(store, secondElement);
+                ArrayList_add(workArray, secondElement);
                 ++rightIndex;
             }
         }
@@ -275,23 +315,91 @@ static void _ArrayList_mergeSortSublist(
         rightHasData = rightIndex <= rightEnd;
     }
 
-    for (i = 0; i < store->size; ++i)
+    for (i = 0; i < workArray->size; ++i)
     {
         ArrayList_set(
             pList,
-            ArrayList_get(store, i),
+            ArrayList_get(workArray, i),
             i + startIndex
         );
     }
-
-    ArrayList_destroy(store);
 }
 
 ArrayList* ArrayList_mergeSort(ArrayList* pList)
 {
-    if(pList->size > 1U)
+    if (pList->size > 1U)
     {
-        _ArrayList_mergeSortSublist(pList, 0, pList->size - 1);
+        ArrayList* workArray = ArrayList_createWithCapacity(pList->size);
+        _ArrayList_mergeSortSublist(pList, 0, pList->size - 1, workArray);
+        ArrayList_destroy(workArray);
+    }
+    return pList;
+}
+
+static void _ArrayList_quickSortSublist(
+    ArrayList* pList,
+    const size_t start,
+    const size_t end)
+{
+    size_t lo = start;
+    size_t hi = end - 1;
+    size_t pivot = end;
+
+    const size_t leftStart = start;
+    size_t leftEnd = 0;
+
+    size_t rightStart = 0;
+    const size_t rightEnd = end;
+
+    const int pivotValue = ArrayList_get(pList, pivot);
+
+    if (start >= end)
+    {
+        return;
+    }
+
+    while (lo < hi)
+    {
+        while (lo < hi && ArrayList_get(pList, lo) <= pivotValue)
+        {
+            lo++;
+        }
+
+        while (lo < hi && ArrayList_get(pList, hi) >= pivotValue)
+        {
+            hi--;
+        }
+
+        if (lo < hi)
+        {
+            _ArrayList_swapElements(pList, lo, hi);
+        }
+    }
+
+    if (hi < end - 1 || ArrayList_get(pList, lo) > pivotValue)
+    {
+        _ArrayList_swapElements(pList, lo, pivot);
+        pivot = lo;
+    }
+
+    if (lo > leftStart)
+    {
+        leftEnd = pivot - 1;
+        _ArrayList_quickSortSublist(pList, leftStart, leftEnd);
+    }
+
+    if (lo < rightEnd)
+    {
+        rightStart = pivot + 1;
+        _ArrayList_quickSortSublist(pList, rightStart, rightEnd);
+    }
+}
+
+ArrayList* ArrayList_quickSort(ArrayList* pList)
+{
+    if (pList->size > 1U)
+    {
+        _ArrayList_quickSortSublist(pList, 0, pList->size - 1);
     }
     return pList;
 }
