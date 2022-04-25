@@ -376,23 +376,32 @@ static void _ArrayList_quickSortSublist(
         }
     }
 
-    if (hi < end - 1 || ArrayList_get(pList, lo) > pivotValue)
+    /*
+     * If `lo` ends up next to the original `hi` value (end - 1),
+     * then we need to see if we need to swap `lo` and `pivot`.
+     *
+     * If `lo` is in any other position, we can assume a swap
+     * is needed.
+     */
+    if (lo < end - 1 || ArrayList_get(pList, lo) > pivotValue)
     {
         _ArrayList_swapElements(pList, lo, pivot);
         pivot = lo;
     }
 
-    if (lo > leftStart)
+    /*
+     * Prevent `pivot` from underflowing.
+     * I need to work through the recurse constraints a bit more.
+     * I'm missing something here.
+     */
+    if (pivot != 0)
     {
         leftEnd = pivot - 1;
         _ArrayList_quickSortSublist(pList, leftStart, leftEnd);
     }
 
-    if (lo < rightEnd)
-    {
-        rightStart = pivot + 1;
-        _ArrayList_quickSortSublist(pList, rightStart, rightEnd);
-    }
+    rightStart = pivot + 1;
+    _ArrayList_quickSortSublist(pList, rightStart, rightEnd);
 }
 
 ArrayList* ArrayList_quickSort(ArrayList* pList)
