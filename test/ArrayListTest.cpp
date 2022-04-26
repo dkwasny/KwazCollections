@@ -785,7 +785,6 @@ TEST(ArrayList, TestQuickSortDuplicateValues)
     ArrayList_destroy(list);
 }
 
-
 TEST(ArrayList, TestQuickSortRandomLists)
 {
     for (int i = 0; i < NUM_RANDOM_SORT_RUNS; i++)

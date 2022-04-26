@@ -242,10 +242,10 @@ Boolean ArrayList_contains(const ArrayList* pList, const int pValue)
 }
 
 static void _ArrayList_mergeSortSublist(
-    ArrayList* pList,
+    ArrayList* sourceList,
+    ArrayList* destList,
     const size_t startIndex,
-    const size_t endIndex,
-    ArrayList* workArray)
+    const size_t endIndex)
 {
     const size_t midpoint = (startIndex + endIndex) / 2;
 
@@ -257,8 +257,6 @@ static void _ArrayList_mergeSortSublist(
     const size_t rightEnd = endIndex;
     size_t rightIndex = rightStart;
 
-    Boolean leftHasData = leftIndex <= leftEnd;
-    Boolean rightHasData = rightIndex <= rightEnd;
     size_t i = 0;
 
     /* Terminal condition */
@@ -267,61 +265,32 @@ static void _ArrayList_mergeSortSublist(
         return;
     }
 
-    _ArrayList_mergeSortSublist(pList, leftStart, leftEnd, workArray);
-    _ArrayList_mergeSortSublist(pList, rightStart, rightEnd, workArray);
+    /*
+     * Recurse while swapping the role of sourceList and destList.
+     * This allows us to keep the in-progress sorted state without requiring
+     * to copy data from destList back to sourceList at every level of recursion.
+     */
+    _ArrayList_mergeSortSublist(destList, sourceList, leftStart, leftEnd);
+    _ArrayList_mergeSortSublist(destList, sourceList, rightStart, rightEnd);
 
-    workArray->size = 0;
-
-    while (leftHasData || rightHasData)
+    for (i = startIndex; i <= endIndex; i++)
     {
-        if (leftHasData && !rightHasData)
-        {
-            ArrayList_add(
-                workArray,
-                ArrayList_get(pList, leftIndex++)
-            );
-        }
-        else if (!leftHasData)
-        {
-            ArrayList_add(
-                workArray,
-                ArrayList_get(pList, rightIndex++)
-            );
-        }
-        else
-        {
-            int firstElement = ArrayList_get(pList, leftIndex);
-            int secondElement = ArrayList_get(pList, rightIndex);
-            if (firstElement < secondElement)
-            {
-                ArrayList_add(workArray, firstElement);
-                ++leftIndex;
-            }
-            else if (firstElement > secondElement)
-            {
-                ArrayList_add(workArray, secondElement);
-                ++rightIndex;
-            }
-            else
-            {
-                ArrayList_add(workArray, firstElement);
-                ++leftIndex;
-                ArrayList_add(workArray, secondElement);
-                ++rightIndex;
-            }
-        }
+        Boolean leftHasData = leftIndex <= leftEnd;
+        Boolean rightHasData = rightIndex <= rightEnd;
 
-        leftHasData = leftIndex <= leftEnd;
-        rightHasData = rightIndex <= rightEnd;
-    }
+        int leftValue = (leftHasData) ? ArrayList_get(sourceList, leftIndex) : -1;
+        int rightValue = (rightHasData) ? ArrayList_get(sourceList, rightIndex) : -1;
 
-    for (i = 0; i < workArray->size; ++i)
-    {
-        ArrayList_set(
-            pList,
-            ArrayList_get(workArray, i),
-            i + startIndex
-        );
+        if (leftHasData && (!rightHasData || leftValue <= rightValue))
+        {
+            ArrayList_set(destList, leftValue, i);
+            leftIndex++;
+        }
+        else if (rightHasData)
+        {
+            ArrayList_set(destList, rightValue, i);
+            rightIndex++;
+        }
     }
 }
 
@@ -330,7 +299,8 @@ ArrayList* ArrayList_mergeSort(ArrayList* pList)
     if (pList->size > 1U)
     {
         ArrayList* workArray = ArrayList_createWithCapacity(pList->size);
-        _ArrayList_mergeSortSublist(pList, 0, pList->size - 1, workArray);
+        ArrayList_addAll(workArray, pList);
+        _ArrayList_mergeSortSublist(workArray, pList, 0, pList->size - 1);
         ArrayList_destroy(workArray);
     }
     return pList;
@@ -341,67 +311,39 @@ static void _ArrayList_quickSortSublist(
     const size_t start,
     const size_t end)
 {
-    size_t lo = start;
-    size_t hi = end - 1;
-    size_t pivot = end;
-
-    const size_t leftStart = start;
-    size_t leftEnd = 0;
-
-    size_t rightStart = 0;
-    const size_t rightEnd = end;
-
-    const int pivotValue = ArrayList_get(pList, pivot);
+    int pivotVal = ArrayList_get(pList, start);
+    size_t lo = start - 1;
+    size_t hi = end + 1;
 
     if (start >= end)
     {
         return;
     }
 
-    while (lo < hi)
+    while (1)
     {
-        while (lo < hi && ArrayList_get(pList, lo) <= pivotValue)
+        do
         {
             lo++;
         }
+        while (ArrayList_get(pList, lo) < pivotVal);
 
-        while (lo < hi && ArrayList_get(pList, hi) >= pivotValue)
+        do
         {
             hi--;
         }
+        while(ArrayList_get(pList, hi) > pivotVal);
 
-        if (lo < hi)
+        if (lo >= hi)
         {
-            _ArrayList_swapElements(pList, lo, hi);
+            break;
         }
+
+        _ArrayList_swapElements(pList, lo, hi);
     }
 
-    /*
-     * If `lo` ends up next to the original `hi` value (end - 1),
-     * then we need to see if we need to swap `lo` and `pivot`.
-     *
-     * If `lo` is in any other position, we can assume a swap
-     * is needed.
-     */
-    if (lo < end - 1 || ArrayList_get(pList, lo) > pivotValue)
-    {
-        _ArrayList_swapElements(pList, lo, pivot);
-        pivot = lo;
-    }
-
-    /*
-     * Prevent `pivot` from underflowing.
-     * I need to work through the recurse constraints a bit more.
-     * I'm missing something here.
-     */
-    if (pivot != 0)
-    {
-        leftEnd = pivot - 1;
-        _ArrayList_quickSortSublist(pList, leftStart, leftEnd);
-    }
-
-    rightStart = pivot + 1;
-    _ArrayList_quickSortSublist(pList, rightStart, rightEnd);
+    _ArrayList_quickSortSublist(pList, start, hi);
+    _ArrayList_quickSortSublist(pList, hi+1, end);
 }
 
 ArrayList* ArrayList_quickSort(ArrayList* pList)
