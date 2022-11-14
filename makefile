@@ -7,8 +7,8 @@ BUILD_DIR = build
 # Test executable
 TEST_EXEC = $(BUILD_DIR)/tests.run
 
-# KwazCollections C library info
-LIB_FILENAME = libckwazcoll.a
+# KwazCollections library info
+LIB_FILENAME = libkwazcoll.a
 LIB = $(BUILD_DIR)/$(LIB_FILENAME)
 
 # Test source directories and suites
@@ -33,9 +33,8 @@ TEST_COMPILE = $(CXX) $(CXXFLAGS) $(CPPFLAGS)
 
 # Generated variables to assist in rule creation
 SOURCE_FILES = $(wildcard $(SOURCE_DIR)/*.c)
-HEADER_FILES = $(wildcard $(INCLUDE_DIR)/*.h)
+OUTPUT_FILES = $(SOURCE_FILES:$(SOURCE_DIR)/%.c=$(BUILD_DIR)/%.o)
 TEST_FILES = $(wildcard $(TEST_DIR)/*.cpp)
-OUTPUT_FILES = $(foreach object, $(SOURCE_FILES), $(BUILD_DIR)/$(patsubst %.c,%.o,$(notdir $(object))))
 
 # Build Phases
 # 1) Build directory structure creation
@@ -43,10 +42,11 @@ $(BUILD_DIR):
 	mkdir $@;
 
 # 2) Source Compilation
-$(OUTPUT_FILES): $(SOURCE_FILES) $(HEADER_FILES) | $(BUILD_DIR)
-	$(COMPILE) -o $@ $(SOURCE_DIR)/$(patsubst %.o,%.c,$(notdir $@));
+$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c $(INCLUDE_DIR)/%.h | $(BUILD_DIR)
+	$(COMPILE) -o $@ $<;
 
 # 3) Library Generation
+.DEFAULT_GOAL = $(LIB)
 $(LIB): $(OUTPUT_FILES)
 	$(AR) $(ARFLAGS) $@ $(BUILD_DIR)/*.o;
 
@@ -67,7 +67,6 @@ $(TEST_EXEC): $(LIB) $(GTEST_LIB) $(GTEST_MAIN_LIB) $(TEST_FILES)
 	$(TEST_COMPILE) -I $(GTEST_INCLUDE_DIR) -I $(INCLUDE_DIR) -o $@ -pthread $(TEST_SUITE) $< $(word 2, $^) $(word 3, $^);
 
 # 5) Test Execution
-.DEFAULT_GOAL = test
 .PHONY: test
 test: $(TEST_EXEC)
 	$<;
