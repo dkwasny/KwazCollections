@@ -77,7 +77,7 @@ valgrind: $(TEST_EXEC)
 	valgrind --tool=memcheck --leak-check=full --error-exitcode=1 $(TEST_EXEC);
 
 .PHONY: all
-all: valgrind
+all: test valgrind
 
 .PHONY: clean
 clean:
