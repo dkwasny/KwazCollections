@@ -74,7 +74,7 @@ test: $(TEST_EXEC)
 
 # Run unit tests through valgrind
 .PHONY: valgrind
-valgrind: test
+valgrind: $(TEST_EXEC)
 	valgrind --tool=memcheck --leak-check=full --error-exitcode=1 $(TEST_EXEC);
 
 .PHONY: all

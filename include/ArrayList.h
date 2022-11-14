@@ -46,6 +46,7 @@ ArrayList* ArrayList_set(ArrayList* pList, const int pValue, const size_t pIndex
 Boolean ArrayList_contains(const ArrayList* pList, const int pValue);
 ArrayList* ArrayList_mergeSort(ArrayList* pList);
 ArrayList* ArrayList_quickSort(ArrayList* pList);
+/* TODO Maybe add binary search */
 
 /* Close c++ extern */
 #ifdef __cplusplus
