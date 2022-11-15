@@ -35,12 +35,14 @@ TEST(SkipList, IncreasingInsert)
 
     ASSERT_EQ(0U, list->size);
 
-    for (int i = 0; i < 50; i++)
+    for (int i = 0; i < 20; i++)
     {
+        SkipList_add(list, i);
+        SkipList_add(list, i);
         SkipList_add(list, i);
     }
 
-    ASSERT_EQ(50U, list->size);
+    ASSERT_EQ(60U, list->size);
 
     printList(list);
 

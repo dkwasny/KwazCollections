@@ -34,6 +34,8 @@ void SkipList_destroy(SkipList* pList);
 
 SkipList* SkipList_add(SkipList* pList, const int pValue);
 
+SkipList* SkipList_addNewLevel(SkipList* pList);
+
 /* Close c++ extern */
 #ifdef __cplusplus
 }
