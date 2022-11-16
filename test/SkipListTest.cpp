@@ -5,9 +5,11 @@
 static void printList(SkipList* pList)
 {
 
-    for (int i = 0; i < pList->numLevels && pList->size > 0; i++)
+    // for (int i = 0; i < pList->numLevels && pList->size > 0; i++)
+    SkipListNode* currHead = pList->topHead;
+    while (true)
     {
-        SkipListNode* currNode = pList->heads + i;
+        SkipListNode* currNode = currHead;
         while (true)
         {
             int nextVal = (currNode->next != NULL) ? currNode->next->value : -1;
@@ -24,7 +26,15 @@ static void printList(SkipList* pList)
             }
 
         }
-        printf("--\n");
+        if (currHead->down != NULL)
+        {
+            currHead = currHead->down;
+            printf("--\n");
+        }
+        else
+        {
+            break;
+        }
     }
     printf("=====\n");
 }
@@ -66,5 +76,12 @@ TEST(SkipList, DecreasingInsert)
 
     SkipList_add(list, 100);
 
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, AddNewLevelOnEmptyList)
+{
+    SkipList* list = SkipList_create();
+    SkipList_addNewLevel(list);
     SkipList_destroy(list);
 }

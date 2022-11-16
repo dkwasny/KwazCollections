@@ -12,7 +12,7 @@ struct SkipList
     size_t size;
     size_t numLevels;
     size_t maxLevels;
-    SkipListNode* heads;
+    SkipListNode* topHead;
 };
 
 struct SkipListNode

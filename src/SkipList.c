@@ -29,20 +29,14 @@ static size_t rollLevels(size_t numLevels)
     return retVal;
 }
 
-static SkipListNode* _SkipList_getTopHead(SkipList* pList)
-{
-    return pList->heads + (pList->numLevels - 1);
-}
-
 static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBack)
 {
-    size_t i;
+    size_t i = pList->numLevels - 1;
     size_t numNewLevels = rollLevels(pList->numLevels);
-    SkipListNode* currNode = _SkipList_getTopHead(pList);
+    SkipListNode* currNode = pList->topHead;
     SkipListNode* prevNewNode = NULL;
     SkipListNode** closestNodes = malloc(sizeof(SkipListNode*) * pList->numLevels);
-    printf("GREATER!!\n");
-    i = pList->numLevels - 1;
+    printf("KWAS TOPHEAD HAS DOWN? - %d\n", pList->topHead->down != NULL);
     while(1)
     {
         Boolean goRight = currNode->next != NULL
@@ -57,13 +51,13 @@ static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBac
         }
         else if (currNode->down != NULL)
         {
-            printf("DOWN\n");
+            printf("DOWN - %lu\n", i);
             closestNodes[i--] = currNode;
             currNode = currNode->down;
         }
         else
         {
-            printf("BREAK\n");
+            printf("BREAK - %lu\n", i);
             closestNodes[i] = currNode;
             break;
         }
@@ -87,22 +81,37 @@ static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBac
 
 static void _SkipList_addHead(SkipList* pList, int pValue)
 {
-    size_t i;
-    SkipListNode* newHeads = malloc(sizeof(SkipListNode) * pList->numLevels);
-    int oldHeadValue = pList->heads->value;
+    SkipListNode* prevHead = NULL;
+    SkipListNode* currHead = pList->topHead;
+    SkipListNode* prevNewHead = NULL;
+    SkipListNode* newTopHead = NULL;
+    int oldHeadValue = currHead->value;
 
-    printf("LESS!!\n");
-
-    for (i = 0; i < pList->numLevels; i++)
+    while (currHead != NULL)
     {
-        newHeads[i].value = pValue;
-        newHeads[i].next = pList->heads[i].next;
-        newHeads[i].down = (i > 0) ? newHeads + i - 1 : NULL;
+        SkipListNode* newHead = malloc(sizeof(SkipListNode));
+        newHead->value = pValue;
+        newHead->next = currHead->next;
+        newHead->down = NULL;
+        if (newTopHead == NULL)
+        {
+            newTopHead = newHead;
+        }
+
+        if (prevNewHead != NULL)
+        {
+            prevNewHead->down = newHead;
+        }
+        prevNewHead = newHead;
+
+        prevHead = currHead;
+        currHead = currHead->down;
+        free(prevHead);
     }
 
-    free(pList->heads);
-    pList->heads = newHeads;
+    pList->topHead = newTopHead;
 
+    printf("READDING OLD HEAD\n");
     _SkipList_addNonHead(pList, oldHeadValue, FALSE);
 }
 
@@ -113,28 +122,29 @@ SkipList* SkipList_create(void)
     retVal->size = 0U;
     retVal->numLevels = 1U;
     retVal->maxLevels = 5U;
-    retVal->heads = NULL;
+    retVal->topHead = NULL;
 
     return retVal;
 }
 
 void SkipList_destroy(SkipList* pList)
 {
-    size_t i;
-    SkipListNode* currNode;
-    SkipListNode* nextNode;
-    for (i = 0; i < pList->numLevels; i++)
+    SkipListNode* prevHead = NULL;
+    SkipListNode* currHead = pList->topHead;
+    while (currHead != NULL)
     {
-        currNode = pList->heads[i].next;
+        SkipListNode* prevNode = NULL;
+        SkipListNode* currNode = currHead->next;
         while (currNode != NULL)
         {
-            nextNode = currNode->next;
-            free(currNode);
-            currNode = nextNode;
+            prevNode = currNode;
+            currNode = currNode->next;
+            free(prevNode);
         }
-
+        prevHead = currHead;
+        currHead = currHead->down;
+        free(prevHead);
     }
-    free(pList->heads);
     free(pList);
 }
 
@@ -142,25 +152,28 @@ SkipList* SkipList_add(SkipList* pList, const int pValue)
 {
     size_t logSize;
 
-    if (pList->heads == NULL)
+    if (pList->topHead == NULL)
     {
         SkipListNode* newNode = malloc(sizeof(SkipListNode));
+        printf("BRAND NEW!!\n");
         newNode->value = pValue;
         newNode->next = NULL;
         newNode->down = NULL;
-        pList->heads = newNode;
+        pList->topHead = newNode;
     }
     else
     {
-        SkipListNode* topHead = _SkipList_getTopHead(pList);
+        SkipListNode* topHead = pList->topHead;
 
         printf("ADD!!\n");
         if (pValue >= topHead->value)
         {
+            printf("GREATER!!\n");
             _SkipList_addNonHead(pList, pValue, TRUE);
         }
         else if (pValue < topHead->value)
         {
+            printf("LESS!!\n");
             _SkipList_addHead(pList, pValue);
         }
 
@@ -182,46 +195,37 @@ SkipList* SkipList_add(SkipList* pList, const int pValue)
 
 SkipList* SkipList_addNewLevel(SkipList* pList)
 {
-    SkipListNode* currNode;
-    SkipListNode* prevNewNode;
-    size_t i;
-    SkipListNode* topHead = pList->heads + (pList->numLevels - 1);
-
-    SkipListNode* newHeads = malloc(sizeof(SkipListNode) * (pList->numLevels + 1));
-    for (i = 0; i < pList->numLevels; i++)
+    SkipListNode* currTopNode = pList->topHead;
+    if (currTopNode != NULL)
     {
-        newHeads[i].value = pList->heads[i].value;
-        newHeads[i].next = pList->heads[i].next;
-        newHeads[i].down = (i > 0) ? newHeads + i - 1 : NULL;
-    }
+        SkipListNode* prevNewNode;
+        SkipListNode* newTopNode;
+        newTopNode = malloc(sizeof(SkipListNode));
+        newTopNode->value = currTopNode->value;
+        newTopNode->next = NULL;
+        newTopNode->down = currTopNode;
 
-    newHeads[pList->numLevels].value = pList->heads->value;
-    newHeads[pList->numLevels].next = NULL;
-    newHeads[pList->numLevels].down = newHeads + (pList->numLevels - 1);
+        pList->topHead = newTopNode;
 
-    prevNewNode = newHeads + pList->numLevels;
-
-    currNode = topHead->next;
-    printf("LINKING OLD HEADS\n");
-    while (currNode != NULL)
-    {
-        if (randChance())
+        prevNewNode = newTopNode;
+        currTopNode = currTopNode->next;
+        printf("LINKING OLD HEADS\n");
+        while (currTopNode != NULL)
         {
-            SkipListNode* newNode = malloc(sizeof(SkipListNode));
-            newNode->value = currNode->value;
-            newNode->next = NULL;
-            newNode->down = currNode;
-            prevNewNode->next = newNode;
-            prevNewNode = newNode;
+            if (randChance())
+            {
+                SkipListNode* newNode = malloc(sizeof(SkipListNode));
+                newNode->value = currTopNode->value;
+                newNode->next = NULL;
+                newNode->down = currTopNode;
+                prevNewNode->next = newNode;
+                prevNewNode = newNode;
+            }
+            currTopNode = currTopNode->next;
         }
-        currNode = currNode->next;
+
+        pList->numLevels++;
     }
-
-    free(pList->heads);
-    pList->heads = newHeads;
-    pList->numLevels++;
-
-    printf("FINISH INCREASING\n");
 
     return pList;
 }
