@@ -85,3 +85,42 @@ TEST(SkipList, AddNewLevelOnEmptyList)
     SkipList_addNewLevel(list);
     SkipList_destroy(list);
 }
+
+TEST(SkipList, IncreasingInsertPresized)
+{
+    SkipList* list = SkipList_createFull(5U, 10U);
+
+    ASSERT_EQ(0U, list->size);
+
+    for (int i = 0; i < 60; i++)
+    {
+        SkipList_add(list, i);
+    }
+
+    ASSERT_EQ(60U, list->size);
+
+    printList(list);
+
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, Contains)
+{
+    SkipList* list = SkipList_create();
+
+    ASSERT_EQ(0U, list->size);
+
+    for (int i = 0; i < 10; i++)
+    {
+        SkipList_add(list, i * 2);
+    }
+
+    ASSERT_EQ(10U, list->size);
+
+    printList(list);
+
+    ASSERT_TRUE(SkipList_contains(list, 8));
+    ASSERT_FALSE(SkipList_contains(list, 9));
+
+    SkipList_destroy(list);
+}

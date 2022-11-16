@@ -1,6 +1,5 @@
 #include "SkipList.h"
 #include "Util.h"
-#include "Boolean.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -117,11 +116,19 @@ static void _SkipList_addHead(SkipList* pList, int pValue)
 
 SkipList* SkipList_create(void)
 {
+    return SkipList_createFull(1U, 5U);
+}
+
+SkipList* SkipList_createFull(const size_t pNumLevels, const size_t pMaxLevels)
+{
     SkipList* retVal =  malloc(sizeof(SkipList));
 
+    size_t numLevels = (pNumLevels < 1) ? 1U : pNumLevels;
+    size_t maxLevels = (pMaxLevels < numLevels) ? numLevels : pMaxLevels;
+
     retVal->size = 0U;
-    retVal->numLevels = 1U;
-    retVal->maxLevels = 5U;
+    retVal->numLevels = numLevels;
+    retVal->maxLevels = maxLevels;
     retVal->topHead = NULL;
 
     return retVal;
@@ -152,14 +159,22 @@ SkipList* SkipList_add(SkipList* pList, const int pValue)
 {
     size_t logSize;
 
+    printf("BRAND NEW!!\n");
     if (pList->topHead == NULL)
     {
-        SkipListNode* newNode = malloc(sizeof(SkipListNode));
-        printf("BRAND NEW!!\n");
-        newNode->value = pValue;
-        newNode->next = NULL;
-        newNode->down = NULL;
-        pList->topHead = newNode;
+        SkipListNode* lastNode = NULL;
+        size_t i;
+        for (i = 0; i < pList->numLevels; i++)
+        {
+            SkipListNode* newNode = malloc(sizeof(SkipListNode));
+            newNode->value = pValue;
+            newNode->next = NULL;
+            newNode->down = lastNode;
+
+            lastNode = newNode;
+        }
+
+        pList->topHead = lastNode;
     }
     else
     {
@@ -228,4 +243,33 @@ SkipList* SkipList_addNewLevel(SkipList* pList)
     }
 
     return pList;
+}
+
+Boolean SkipList_contains(SkipList* pList, const int pValue)
+{
+    SkipListNode* currNode = pList->topHead;
+    Boolean retVal = FALSE;
+
+    while (1)
+    {
+        if (currNode->value == pValue)
+        {
+            retVal = TRUE;
+            break;
+        }
+        else if (currNode->next != NULL && pValue >= currNode->next->value)
+        {
+            currNode = currNode->next;
+        }
+        else if (currNode->down != NULL)
+        {
+            currNode = currNode->down;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    return retVal;
 }

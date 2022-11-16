@@ -1,6 +1,7 @@
 #ifndef _C_KWAZ_SKIPLIST_
 #define _C_KWAZ_SKIPLIST_
 
+#include "Boolean.h"
 #include <stdlib.h>
 
 typedef struct SkipList SkipList;
@@ -29,12 +30,15 @@ extern "C" {
 #endif
 
 SkipList* SkipList_create(void);
+SkipList* SkipList_createFull(const size_t pNumLevels, const size_t pMaxLevels);
 
 void SkipList_destroy(SkipList* pList);
 
 SkipList* SkipList_add(SkipList* pList, const int pValue);
 
 SkipList* SkipList_addNewLevel(SkipList* pList);
+
+Boolean SkipList_contains(SkipList* pList, const int pValue);
 
 /* Close c++ extern */
 #ifdef __cplusplus
