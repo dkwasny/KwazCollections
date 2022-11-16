@@ -38,13 +38,11 @@ static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBac
 {
     size_t i;
     size_t numNewLevels = rollLevels(pList->numLevels);
-    SkipListNode* prevNewBlah;
     SkipListNode* currNode = _SkipList_getTopHead(pList);
-    SkipListNode* newNode = malloc(sizeof(SkipListNode));
-    newNode->value = pValue;
-    newNode->next = NULL;
-    newNode->down = NULL;
+    SkipListNode* prevNewNode = NULL;
+    SkipListNode** closestNodes = malloc(sizeof(SkipListNode*) * pList->numLevels);
     printf("GREATER!!\n");
+    i = pList->numLevels - 1;
     while(1)
     {
         Boolean goRight = currNode->next != NULL
@@ -60,44 +58,31 @@ static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBac
         else if (currNode->down != NULL)
         {
             printf("DOWN\n");
+            closestNodes[i--] = currNode;
             currNode = currNode->down;
         }
         else
         {
             printf("BREAK\n");
+            closestNodes[i] = currNode;
             break;
         }
     }
 
-    if (currNode->next == NULL)
-    {
-        currNode->next = newNode;
-    }
-    else
-    {
-        newNode->next = currNode->next;
-        currNode->next = newNode;
-    }
-
-    prevNewBlah = newNode;
     printf("ADD - NEW LEVELS (%lu)\n", numNewLevels);
-    for (i = 1; i < numNewLevels; i++)
+    for (i = 0; i < numNewLevels; i++)
     {
-        SkipListNode* currHead = pList->heads + i;
-        SkipListNode* newBlah;
-        while (currHead->next != NULL && currHead->next->value < pValue)
-        {
-            currHead = currHead->next;
-        }
-        newBlah = malloc(sizeof(SkipListNode));
-        newBlah->value = pValue;
-        newBlah->next = currHead->next;
-        newBlah->down = prevNewBlah;
+        SkipListNode* newNode = malloc(sizeof(SkipListNode));
+        newNode->value = pValue;
+        newNode->next = closestNodes[i]->next;
+        newNode->down = prevNewNode;
 
-        currHead->next = newBlah;
+        closestNodes[i]->next = newNode;
 
-        prevNewBlah = newBlah;
+        prevNewNode = newNode;
     }
+
+    free(closestNodes);
 }
 
 static void _SkipList_addHead(SkipList* pList, int pValue)
