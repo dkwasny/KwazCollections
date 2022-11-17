@@ -14,7 +14,7 @@ static void printList(SkipList* pList)
         {
             int nextVal = (currNode->next != NULL) ? currNode->next->value : -1;
             int downVal = (currNode->down != NULL) ? currNode->down->value : -1;
-            printf("%d -> (%d, %d)\n", currNode->value, nextVal, downVal);
+            printf("%d -> (%d, %d, %lu)\n", currNode->value, nextVal, downVal, currNode->distNext);
 
             if (currNode->next != NULL)
             {
@@ -48,11 +48,10 @@ TEST(SkipList, IncreasingInsert)
     for (int i = 0; i < 20; i++)
     {
         SkipList_add(list, i);
-        SkipList_add(list, i);
-        SkipList_add(list, i);
+        printList(list);
     }
 
-    ASSERT_EQ(60U, list->size);
+    ASSERT_EQ(20U, list->size);
 
     printList(list);
 

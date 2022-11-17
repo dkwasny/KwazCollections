@@ -21,8 +21,7 @@ struct SkipListNode
     int value;
     SkipListNode* next;
     SkipListNode* down;
-    /* TODO node distances someday */
-    /*size_t distNext;*/
+    size_t distNext;
 };
 
 #ifdef __cplusplus

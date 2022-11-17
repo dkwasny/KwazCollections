@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
 static int randChance(void)
 {
@@ -32,10 +33,12 @@ static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBac
 {
     size_t i = pList->numLevels - 1;
     size_t numNewLevels = rollLevels(pList->numLevels);
+    size_t* totalDistPerLevel = malloc(sizeof(size_t) * pList->numLevels);
+    size_t totalDist = 0U;
     SkipListNode* currNode = pList->topHead;
     SkipListNode* prevNewNode = NULL;
     SkipListNode** closestNodes = malloc(sizeof(SkipListNode*) * pList->numLevels);
-    printf("KWAS TOPHEAD HAS DOWN? - %d\n", pList->topHead->down != NULL);
+    memset(totalDistPerLevel, 0, sizeof(size_t) * pList->numLevels);
     while(1)
     {
         Boolean goRight = currNode->next != NULL
@@ -43,23 +46,34 @@ static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBac
                 pValue > currNode->next->value
                 || (dupesInBack && pValue == currNode->next->value)
             );
+        printf("TD: %lu - TDPL: %lu\n", totalDist, totalDistPerLevel[i]);
         if (goRight)
         {
             printf("RIGHT\n");
+/*             totalDistPerLevel[i] += currNode->distNext; */
+            totalDist += currNode->distNext;
             currNode = currNode->next;
         }
         else if (currNode->down != NULL)
         {
             printf("DOWN - %lu\n", i);
+            totalDistPerLevel[i] = totalDist;
             closestNodes[i--] = currNode;
             currNode = currNode->down;
         }
         else
         {
             printf("BREAK - %lu\n", i);
+            totalDistPerLevel[i] = totalDist;
             closestNodes[i] = currNode;
             break;
         }
+    }
+
+    printf("CLOSEST NODES\n");
+    for (i = 0; i < pList->numLevels; i++)
+    {
+        printf("%lu -> %lu\n", i, totalDistPerLevel[i]);
     }
 
     printf("ADD - NEW LEVELS (%lu)\n", numNewLevels);
@@ -69,12 +83,26 @@ static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBac
         newNode->value = pValue;
         newNode->next = closestNodes[i]->next;
         newNode->down = prevNewNode;
+        if (closestNodes[i]->next == NULL)
+        {
+            size_t y = (totalDist - totalDistPerLevel[i]) + 1;
+            closestNodes[i]->distNext = y;
+            newNode->distNext = 0U;
+        }
+        else
+        {
+            size_t y = (totalDist - totalDistPerLevel[i]) + 1;
+            size_t z = closestNodes[i]->distNext - (totalDist - totalDistPerLevel[i]);
+            closestNodes[i]->distNext = y;
+            newNode->distNext = z;
+        }
 
         closestNodes[i]->next = newNode;
 
         prevNewNode = newNode;
     }
 
+    free(totalDistPerLevel);
     free(closestNodes);
 }
 
@@ -91,6 +119,7 @@ static void _SkipList_addHead(SkipList* pList, int pValue)
         SkipListNode* newHead = malloc(sizeof(SkipListNode));
         newHead->value = pValue;
         newHead->next = currHead->next;
+        newHead->distNext = currHead->distNext;
         newHead->down = NULL;
         if (newTopHead == NULL)
         {
@@ -159,17 +188,18 @@ SkipList* SkipList_add(SkipList* pList, const int pValue)
 {
     size_t logSize;
 
-    printf("BRAND NEW!!\n");
     if (pList->topHead == NULL)
     {
         SkipListNode* lastNode = NULL;
         size_t i;
+        printf("BRAND NEW!!\n");
         for (i = 0; i < pList->numLevels; i++)
         {
             SkipListNode* newNode = malloc(sizeof(SkipListNode));
             newNode->value = pValue;
             newNode->next = NULL;
             newNode->down = lastNode;
+            newNode->distNext = 0;
 
             lastNode = newNode;
         }
@@ -213,16 +243,19 @@ SkipList* SkipList_addNewLevel(SkipList* pList)
     SkipListNode* currTopNode = pList->topHead;
     if (currTopNode != NULL)
     {
+        size_t currDist = 0;
         SkipListNode* prevNewNode;
         SkipListNode* newTopNode;
         newTopNode = malloc(sizeof(SkipListNode));
         newTopNode->value = currTopNode->value;
         newTopNode->next = NULL;
+        newTopNode->distNext = 0U;
         newTopNode->down = currTopNode;
 
         pList->topHead = newTopNode;
 
         prevNewNode = newTopNode;
+        currDist += currTopNode->distNext;
         currTopNode = currTopNode->next;
         printf("LINKING OLD HEADS\n");
         while (currTopNode != NULL)
@@ -232,10 +265,14 @@ SkipList* SkipList_addNewLevel(SkipList* pList)
                 SkipListNode* newNode = malloc(sizeof(SkipListNode));
                 newNode->value = currTopNode->value;
                 newNode->next = NULL;
+                newNode->distNext = 0U;
                 newNode->down = currTopNode;
                 prevNewNode->next = newNode;
+                prevNewNode->distNext = currDist;
                 prevNewNode = newNode;
+                currDist = 0;
             }
+            currDist += currTopNode->distNext;
             currTopNode = currTopNode->next;
         }
 
