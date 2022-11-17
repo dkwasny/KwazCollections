@@ -77,29 +77,36 @@ static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBac
     }
 
     printf("ADD - NEW LEVELS (%u)\n", numNewLevels);
-    for (i = 0; i < numNewLevels; i++)
+    for (i = 0; i < pList->numLevels; i++)
     {
-        SkipListNode* newNode = malloc(sizeof(SkipListNode));
-        newNode->value = pValue;
-        newNode->next = closestNodes[i]->next;
-        newNode->down = prevNewNode;
-        if (closestNodes[i]->next == NULL)
+        if (i < numNewLevels)
         {
-            unsigned int y = (totalDist - totalDistPerLevel[i]) + 1;
-            closestNodes[i]->distNext = y;
-            newNode->distNext = 0U;
+            SkipListNode* newNode = malloc(sizeof(SkipListNode));
+            newNode->value = pValue;
+            newNode->next = closestNodes[i]->next;
+            newNode->down = prevNewNode;
+            if (closestNodes[i]->next == NULL)
+            {
+                unsigned int y = (totalDist - totalDistPerLevel[i]) + 1;
+                closestNodes[i]->distNext = y;
+                newNode->distNext = 0U;
+            }
+            else
+            {
+                unsigned int y = (totalDist - totalDistPerLevel[i]) + 1;
+                unsigned int z = closestNodes[i]->distNext - (totalDist - totalDistPerLevel[i]);
+                closestNodes[i]->distNext = y;
+                newNode->distNext = z;
+            }
+
+            closestNodes[i]->next = newNode;
+
+            prevNewNode = newNode;
         }
         else
         {
-            unsigned int y = (totalDist - totalDistPerLevel[i]) + 1;
-            unsigned int z = closestNodes[i]->distNext - (totalDist - totalDistPerLevel[i]);
-            closestNodes[i]->distNext = y;
-            newNode->distNext = z;
+            closestNodes[i]->distNext += 1;
         }
-
-        closestNodes[i]->next = newNode;
-
-        prevNewNode = newNode;
     }
 
     free(totalDistPerLevel);
@@ -120,6 +127,7 @@ static void _SkipList_addHead(SkipList* pList, int pValue)
         newHead->value = pValue;
         newHead->next = currHead->next;
         newHead->distNext = currHead->distNext;
+        printf("--- DISTNEXT: %u\n", currHead->distNext);
         newHead->down = NULL;
         if (newTopHead == NULL)
         {

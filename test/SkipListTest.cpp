@@ -39,24 +39,67 @@ static void printList(SkipList* pList)
     printf("=====\n");
 }
 
-TEST(SkipList, IncreasingInsert)
+static void verifyList(SkipList* pList)
 {
-    SkipList* list = SkipList_create();
-
-    ASSERT_EQ(0U, list->size);
-
-    for (int i = 0; i < 20; i++)
+    SkipListNode* currHead = pList->topHead;
+    while (true)
     {
-        SkipList_add(list, i);
-        printList(list);
+        int expectedVal = 0;
+        SkipListNode* currNode = currHead;
+        while (true)
+        {
+            int nextVal = (currNode->next != NULL) ? currNode->next->value : -1;
+            int downVal = (currNode->down != NULL) ? currNode->down->value : -1;
+
+            ASSERT_EQ(expectedVal, currNode->value);
+            if (downVal > 0)
+            {
+                ASSERT_EQ(currNode->value, downVal);
+            }
+
+            if (currNode->next != NULL)
+            {
+                expectedVal += currNode->distNext;
+                currNode = currNode->next;
+            }
+            else
+            {
+                break;
+            }
+
+        }
+
+        if (currHead->down != NULL)
+        {
+            currHead = currHead->down;
+        }
+        else
+        {
+            break;
+        }
     }
-
-    ASSERT_EQ(20U, list->size);
-
-    printList(list);
-
-    SkipList_destroy(list);
 }
+
+// TEST(SkipList, IncreasingInsert)
+// {
+//     SkipList* list = SkipList_create();
+
+//     ASSERT_EQ(0U, list->size);
+
+//     for (int i = 0; i < 60; i++)
+//     {
+//         SkipList_add(list, i);
+//         // printList(list);
+//     }
+
+//     ASSERT_EQ(60U, list->size);
+
+//     verifyList(list);
+
+//     // printList(list);
+
+//     SkipList_destroy(list);
+// }
 
 TEST(SkipList, DecreasingInsert)
 {
@@ -64,16 +107,46 @@ TEST(SkipList, DecreasingInsert)
 
     ASSERT_EQ(0U, list->size);
 
-    for (int i = 49; i >= 0; i--)
+    for (int i = 59; i >= 0; i--)
     {
         SkipList_add(list, i);
+        // printList(list);
     }
 
-    ASSERT_EQ(50U, list->size);
+    ASSERT_EQ(60U, list->size);
+
+    verifyList(list);
 
     printList(list);
 
-    SkipList_add(list, 100);
+    // SkipList_add(list, 100);
+
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, ZipperInsert)
+{
+    SkipList* list = SkipList_create();
+
+    ASSERT_EQ(0U, list->size);
+
+    for (int i = 0; i < 60; i+=2)
+    {
+        SkipList_add(list, i);
+        // printList(list);
+    }
+
+    for (int i = 1; i < 60; i+=2)
+    {
+        SkipList_add(list, i);
+        // printList(list);
+    }
+
+    ASSERT_EQ(60U, list->size);
+
+    verifyList(list);
+
+    // printList(list);
 
     SkipList_destroy(list);
 }
@@ -98,7 +171,9 @@ TEST(SkipList, IncreasingInsertPresized)
 
     ASSERT_EQ(60U, list->size);
 
-    printList(list);
+    verifyList(list);
+
+    // printList(list);
 
     SkipList_destroy(list);
 }
@@ -106,17 +181,12 @@ TEST(SkipList, IncreasingInsertPresized)
 TEST(SkipList, Contains)
 {
     SkipList* list = SkipList_create();
-
-    ASSERT_EQ(0U, list->size);
-
     for (int i = 0; i < 10; i++)
     {
         SkipList_add(list, i * 2);
     }
 
-    ASSERT_EQ(10U, list->size);
-
-    printList(list);
+    // printList(list);
 
     ASSERT_TRUE(SkipList_contains(list, 8));
     ASSERT_FALSE(SkipList_contains(list, 9));
