@@ -6,7 +6,6 @@
 
 typedef struct SkipList SkipList;
 typedef struct SkipListNode SkipListNode;
-typedef struct SkipListEdge SkipListEdge;
 
 struct SkipList
 {
@@ -37,12 +36,10 @@ SkipList* SkipList_createFull(
 );
 
 void SkipList_destroy(SkipList* pList);
-
 SkipList* SkipList_add(SkipList* pList, const int pValue);
-
 SkipList* SkipList_addNewLevel(SkipList* pList);
-
 Boolean SkipList_contains(SkipList* pList, const int pValue);
+int SkipList_get(SkipList* pList, const unsigned int index);
 
 /* Close c++ extern */
 #ifdef __cplusplus

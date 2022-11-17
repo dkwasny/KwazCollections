@@ -299,3 +299,46 @@ Boolean SkipList_contains(SkipList* pList, const int pValue)
 
     return retVal;
 }
+
+int SkipList_get(SkipList* pList, const unsigned int index)
+{
+    SkipListNode* currNode = pList->topHead;
+
+    /*
+        TODO Using -1 as error value because I'm lazy.
+        Might add proper error handling if I'm bored in the future.
+    */
+    int retVal = -1;
+    unsigned int currDist = 0;
+    int i = 0;
+
+    if (index >= pList->size)
+    {
+        return retVal;
+    }
+
+    while (currNode != NULL)
+    {
+        i++;
+        if (currDist == index)
+        {
+            retVal = currNode->value;
+            break;
+        }
+        else if (currNode->next != NULL && currDist + currNode->distNext <= index)
+        {
+            currDist += currNode->distNext;
+            currNode = currNode->next;
+        }
+        else if (currNode->down != NULL)
+        {
+            currNode = currNode->down;
+        }
+        else
+        {
+            currNode = NULL;
+        }
+    }
+
+    return retVal;
+}

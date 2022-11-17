@@ -160,6 +160,23 @@ TEST(SkipList, IncreasingInsertSmall)
     SkipList_destroy(list);
 }
 
+TEST(SkipList, IncreasingInsert)
+{
+    SkipList* list = SkipList_create();
+    for (int i = 0; i < 1000; i++)
+    {
+        SkipList_add(list, i);
+    }
+
+    ASSERT_EQ(1000U, list->size);
+    ASSERT_EQ(9U, list->numLevels);
+    ASSERT_EQ(40U, list->maxLevels);
+    ASSERT_EQ(50U, list->nextLevelChance);
+    verifyList(list);
+
+    SkipList_destroy(list);
+}
+
 TEST(SkipList, DecreasingInsert)
 {
     SkipList* list = SkipList_create();
@@ -395,6 +412,20 @@ TEST(SkipList, AddNewLevelOnEmptyList)
     ASSERT_EQ(11U, list->numLevels);
     ASSERT_EQ(40U, list->maxLevels);
     ASSERT_EQ(50U, list->nextLevelChance);
+
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, Get)
+{
+    SkipList* list = SkipList_create();
+    mixedInsert(list, 1000U);
+
+    for (int i = 0; i < 1000; i++)
+    {
+        int actual = SkipList_get(list, i);
+        ASSERT_EQ(i, actual);
+    }
 
     SkipList_destroy(list);
 }
