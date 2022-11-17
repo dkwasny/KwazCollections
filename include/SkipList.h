@@ -10,9 +10,9 @@ typedef struct SkipListEdge SkipListEdge;
 
 struct SkipList
 {
-    size_t size;
-    size_t numLevels;
-    size_t maxLevels;
+    unsigned int size;
+    unsigned int numLevels;
+    unsigned int maxLevels;
     SkipListNode* topHead;
 };
 
@@ -21,7 +21,7 @@ struct SkipListNode
     int value;
     SkipListNode* next;
     SkipListNode* down;
-    size_t distNext;
+    unsigned int distNext;
 };
 
 #ifdef __cplusplus
@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 SkipList* SkipList_create(void);
-SkipList* SkipList_createFull(const size_t pNumLevels, const size_t pMaxLevels);
+SkipList* SkipList_createFull(const unsigned int pNumLevels, const unsigned int pMaxLevels);
 
 void SkipList_destroy(SkipList* pList);
 

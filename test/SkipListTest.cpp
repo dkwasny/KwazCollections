@@ -14,7 +14,7 @@ static void printList(SkipList* pList)
         {
             int nextVal = (currNode->next != NULL) ? currNode->next->value : -1;
             int downVal = (currNode->down != NULL) ? currNode->down->value : -1;
-            printf("%d -> (%d, %d, %lu)\n", currNode->value, nextVal, downVal, currNode->distNext);
+            printf("%d -> (%d, %d, %u)\n", currNode->value, nextVal, downVal, currNode->distNext);
 
             if (currNode->next != NULL)
             {

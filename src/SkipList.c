@@ -10,10 +10,10 @@ static int randChance(void)
     return rand() % 100 < 50;
 }
 
-static size_t rollLevels(size_t numLevels)
+static unsigned int rollLevels(unsigned int numLevels)
 {
-    size_t retVal = 1;
-    size_t i;
+    unsigned int retVal = 1;
+    unsigned int i;
     Boolean passing = TRUE;
     for (i = 1; i < numLevels && passing; i++) {
         if (randChance())
@@ -31,14 +31,14 @@ static size_t rollLevels(size_t numLevels)
 
 static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBack)
 {
-    size_t i = pList->numLevels - 1;
-    size_t numNewLevels = rollLevels(pList->numLevels);
-    size_t* totalDistPerLevel = malloc(sizeof(size_t) * pList->numLevels);
-    size_t totalDist = 0U;
+    unsigned int i = pList->numLevels - 1;
+    unsigned int numNewLevels = rollLevels(pList->numLevels);
+    unsigned int* totalDistPerLevel = malloc(sizeof(unsigned int) * pList->numLevels);
+    unsigned int totalDist = 0U;
     SkipListNode* currNode = pList->topHead;
     SkipListNode* prevNewNode = NULL;
     SkipListNode** closestNodes = malloc(sizeof(SkipListNode*) * pList->numLevels);
-    memset(totalDistPerLevel, 0, sizeof(size_t) * pList->numLevels);
+    memset(totalDistPerLevel, 0, sizeof(unsigned int) * pList->numLevels);
     while(1)
     {
         Boolean goRight = currNode->next != NULL
@@ -46,7 +46,7 @@ static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBac
                 pValue > currNode->next->value
                 || (dupesInBack && pValue == currNode->next->value)
             );
-        printf("TD: %lu - TDPL: %lu\n", totalDist, totalDistPerLevel[i]);
+        printf("TD: %u - TDPL: %u\n", totalDist, totalDistPerLevel[i]);
         if (goRight)
         {
             printf("RIGHT\n");
@@ -56,14 +56,14 @@ static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBac
         }
         else if (currNode->down != NULL)
         {
-            printf("DOWN - %lu\n", i);
+            printf("DOWN - %u\n", i);
             totalDistPerLevel[i] = totalDist;
             closestNodes[i--] = currNode;
             currNode = currNode->down;
         }
         else
         {
-            printf("BREAK - %lu\n", i);
+            printf("BREAK - %u\n", i);
             totalDistPerLevel[i] = totalDist;
             closestNodes[i] = currNode;
             break;
@@ -73,10 +73,10 @@ static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBac
     printf("CLOSEST NODES\n");
     for (i = 0; i < pList->numLevels; i++)
     {
-        printf("%lu -> %lu\n", i, totalDistPerLevel[i]);
+        printf("%u -> %u\n", i, totalDistPerLevel[i]);
     }
 
-    printf("ADD - NEW LEVELS (%lu)\n", numNewLevels);
+    printf("ADD - NEW LEVELS (%u)\n", numNewLevels);
     for (i = 0; i < numNewLevels; i++)
     {
         SkipListNode* newNode = malloc(sizeof(SkipListNode));
@@ -85,14 +85,14 @@ static void _SkipList_addNonHead(SkipList* pList, int pValue, Boolean dupesInBac
         newNode->down = prevNewNode;
         if (closestNodes[i]->next == NULL)
         {
-            size_t y = (totalDist - totalDistPerLevel[i]) + 1;
+            unsigned int y = (totalDist - totalDistPerLevel[i]) + 1;
             closestNodes[i]->distNext = y;
             newNode->distNext = 0U;
         }
         else
         {
-            size_t y = (totalDist - totalDistPerLevel[i]) + 1;
-            size_t z = closestNodes[i]->distNext - (totalDist - totalDistPerLevel[i]);
+            unsigned int y = (totalDist - totalDistPerLevel[i]) + 1;
+            unsigned int z = closestNodes[i]->distNext - (totalDist - totalDistPerLevel[i]);
             closestNodes[i]->distNext = y;
             newNode->distNext = z;
         }
@@ -148,12 +148,12 @@ SkipList* SkipList_create(void)
     return SkipList_createFull(1U, 5U);
 }
 
-SkipList* SkipList_createFull(const size_t pNumLevels, const size_t pMaxLevels)
+SkipList* SkipList_createFull(const unsigned int pNumLevels, const unsigned int pMaxLevels)
 {
     SkipList* retVal =  malloc(sizeof(SkipList));
 
-    size_t numLevels = (pNumLevels < 1) ? 1U : pNumLevels;
-    size_t maxLevels = (pMaxLevels < numLevels) ? numLevels : pMaxLevels;
+    unsigned int numLevels = (pNumLevels < 1) ? 1U : pNumLevels;
+    unsigned int maxLevels = (pMaxLevels < numLevels) ? numLevels : pMaxLevels;
 
     retVal->size = 0U;
     retVal->numLevels = numLevels;
@@ -186,12 +186,12 @@ void SkipList_destroy(SkipList* pList)
 
 SkipList* SkipList_add(SkipList* pList, const int pValue)
 {
-    size_t logSize;
+    unsigned int logSize;
 
     if (pList->topHead == NULL)
     {
         SkipListNode* lastNode = NULL;
-        size_t i;
+        unsigned int i;
         printf("BRAND NEW!!\n");
         for (i = 0; i < pList->numLevels; i++)
         {
@@ -231,7 +231,7 @@ SkipList* SkipList_add(SkipList* pList, const int pValue)
     logSize = (pList->size == 0) ? 0 : Util_log2((double)pList->size);
     if (logSize > pList->numLevels && pList->numLevels < pList->maxLevels)
     {
-        printf("INCREASING (%lu vs %lu)\n", logSize, pList->numLevels);
+        printf("INCREASING (%u vs %u)\n", logSize, pList->numLevels);
         SkipList_addNewLevel(pList);
     }
 
@@ -242,8 +242,8 @@ SkipList* SkipList_addNewLevel(SkipList* pList)
 {
     SkipListNode* currTopNode = pList->topHead;
     SkipListNode* prevNewNode;
-    size_t i = 0;
-    size_t currDist = 0U;
+    unsigned int i = 0;
+    unsigned int currDist = 0U;
     printf("LINKING OLD HEADS\n");
     while (currTopNode != NULL)
     {
