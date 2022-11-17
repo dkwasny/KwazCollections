@@ -13,6 +13,7 @@ struct SkipList
     unsigned int size;
     unsigned int numLevels;
     unsigned int maxLevels;
+    unsigned int nextLevelChance;
     SkipListNode* topHead;
 };
 
@@ -29,7 +30,11 @@ extern "C" {
 #endif
 
 SkipList* SkipList_create(void);
-SkipList* SkipList_createFull(const unsigned int pNumLevels, const unsigned int pMaxLevels);
+SkipList* SkipList_createFull(
+    const unsigned int pNumLevels,
+    const unsigned int pMaxLevels,
+    const unsigned int pNextLevelChance
+);
 
 void SkipList_destroy(SkipList* pList);
 
