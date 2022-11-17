@@ -241,43 +241,38 @@ SkipList* SkipList_add(SkipList* pList, const int pValue)
 SkipList* SkipList_addNewLevel(SkipList* pList)
 {
     SkipListNode* currTopNode = pList->topHead;
-    if (currTopNode != NULL)
+    SkipListNode* prevNewNode;
+    size_t i = 0;
+    size_t currDist = 0U;
+    printf("LINKING OLD HEADS\n");
+    while (currTopNode != NULL)
     {
-        size_t currDist = 0;
-        SkipListNode* prevNewNode;
-        SkipListNode* newTopNode;
-        newTopNode = malloc(sizeof(SkipListNode));
-        newTopNode->value = currTopNode->value;
-        newTopNode->next = NULL;
-        newTopNode->distNext = 0U;
-        newTopNode->down = currTopNode;
-
-        pList->topHead = newTopNode;
-
-        prevNewNode = newTopNode;
-        currDist += currTopNode->distNext;
-        currTopNode = currTopNode->next;
-        printf("LINKING OLD HEADS\n");
-        while (currTopNode != NULL)
+        if (i == 0 || randChance())
         {
-            if (randChance())
+            SkipListNode* newNode = malloc(sizeof(SkipListNode));
+            newNode->value = currTopNode->value;
+            newNode->next = NULL;
+            newNode->distNext = 0U;
+            newNode->down = currTopNode;
+            if (i == 0)
             {
-                SkipListNode* newNode = malloc(sizeof(SkipListNode));
-                newNode->value = currTopNode->value;
-                newNode->next = NULL;
-                newNode->distNext = 0U;
-                newNode->down = currTopNode;
+                pList->topHead = newNode;
+            }
+            else
+            {
                 prevNewNode->next = newNode;
                 prevNewNode->distNext = currDist;
-                prevNewNode = newNode;
-                currDist = 0;
             }
-            currDist += currTopNode->distNext;
-            currTopNode = currTopNode->next;
+            prevNewNode = newNode;
+            currDist = 0U;
         }
 
-        pList->numLevels++;
+        currDist += currTopNode->distNext;
+        currTopNode = currTopNode->next;
+        i++;
     }
+
+    pList->numLevels++;
 
     return pList;
 }
