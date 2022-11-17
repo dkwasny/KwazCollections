@@ -342,3 +342,48 @@ int SkipList_get(SkipList* pList, const unsigned int index)
 
     return retVal;
 }
+
+/* TODO handle removing the head */
+Boolean SkipList_remove(SkipList* pList, const int pValue)
+{
+    SkipListNode* currNode = pList->topHead;
+    Boolean retVal = FALSE;
+    Boolean headDown = FALSE;
+
+    while (currNode != NULL)
+    {
+        if (currNode->next != NULL && !headDown)
+        {
+            if (pValue > currNode->next->value)
+            {
+                currNode = currNode->next;
+            }
+            else if (pValue == currNode->next->value)
+            {
+                SkipListNode* tmpNode = currNode->next;
+                currNode->distNext = (currNode->distNext + tmpNode->distNext) - 1;
+                currNode->next = tmpNode->next;
+                free(tmpNode);
+                headDown = TRUE;
+            }
+            else
+            {
+                currNode->distNext--;
+                headDown = TRUE;
+            }
+        }
+        else if (currNode->down != NULL)
+        {
+            currNode = currNode->down;
+            headDown = FALSE;
+        }
+        else
+        {
+            currNode = NULL;
+        }
+    }
+
+    pList->size--;
+
+    return retVal;
+}
