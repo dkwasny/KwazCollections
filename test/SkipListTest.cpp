@@ -5,7 +5,7 @@
 static void printList(SkipList* pList)
 {
     SkipListNode* currHead = pList->topHead;
-    while (true)
+    while (currHead != NULL)
     {
         SkipListNode* currNode = currHead;
         while (currNode != NULL)
@@ -16,15 +16,8 @@ static void printList(SkipList* pList)
 
             currNode = currNode->next;
         }
-        if (currHead->down != NULL)
-        {
-            currHead = currHead->down;
-            printf("--\n");
-        }
-        else
-        {
-            break;
-        }
+        printf("--\n");
+        currHead = currHead->down;
     }
     printf("=====\n");
 }
@@ -95,7 +88,7 @@ TEST(SkipList, Create)
     ASSERT_EQ(1U, list->numLevels);
     ASSERT_EQ(40U, list->maxLevels);
     ASSERT_EQ(50U, list->nextLevelChance);
-    ASSERT_TRUE(list->topHead == NULL);
+    ASSERT_EQ(NULL, list->topHead);
     SkipList_destroy(list);
 }
 
@@ -106,7 +99,7 @@ TEST(SkipList, CreateFull)
     ASSERT_EQ(20U, list->numLevels);
     ASSERT_EQ(30U, list->maxLevels);
     ASSERT_EQ(60U, list->nextLevelChance);
-    ASSERT_TRUE(list->topHead == NULL);
+    ASSERT_EQ(NULL, list->topHead);
     SkipList_destroy(list);
 }
 
@@ -117,7 +110,7 @@ TEST(SkipList, CreateFullInvalidNumLevels)
     ASSERT_EQ(1U, list->numLevels);
     ASSERT_EQ(30U, list->maxLevels);
     ASSERT_EQ(50U, list->nextLevelChance);
-    ASSERT_TRUE(list->topHead == NULL);
+    ASSERT_EQ(NULL, list->topHead);
     SkipList_destroy(list);
 }
 
@@ -128,7 +121,7 @@ TEST(SkipList, CreateFullInvalidMaxLevels)
     ASSERT_EQ(10U, list->numLevels);
     ASSERT_EQ(10U, list->maxLevels);
     ASSERT_EQ(60U, list->nextLevelChance);
-    ASSERT_TRUE(list->topHead == NULL);
+    ASSERT_EQ(NULL, list->topHead);
     SkipList_destroy(list);
 }
 
@@ -139,7 +132,7 @@ TEST(SkipList, CreateFullInvalidNextLevelChance)
     ASSERT_EQ(10U, list->numLevels);
     ASSERT_EQ(20U, list->maxLevels);
     ASSERT_EQ(50U, list->nextLevelChance);
-    ASSERT_TRUE(list->topHead == NULL);
+    ASSERT_EQ(NULL, list->topHead);
     SkipList_destroy(list);
 }
 
@@ -233,10 +226,10 @@ TEST(SkipList, MixedInsertDefaultChance)
 TEST(SkipList, MixedInsertDefaultChanceLarge)
 {
     SkipList* list = SkipList_create();
-    mixedInsert(list, 500000U);
+    mixedInsert(list, 100000U);
 
-    ASSERT_EQ(500000U, list->size);
-    ASSERT_EQ(18U, list->numLevels);
+    ASSERT_EQ(100000U, list->size);
+    ASSERT_EQ(16U, list->numLevels);
     ASSERT_EQ(40U, list->maxLevels);
     ASSERT_EQ(50U, list->nextLevelChance);
     verifyList(list);
@@ -351,7 +344,7 @@ TEST(SkipList, MixedInsertWithDuplicates)
         currHead = currHead->down;
     }
 
-    ASSERT_TRUE(currHead->down == NULL);
+    ASSERT_EQ(NULL, currHead->down);
 
    for (int i = 0; i < 100; i++)
     {
@@ -362,7 +355,7 @@ TEST(SkipList, MixedInsertWithDuplicates)
         }
     }
 
-    ASSERT_TRUE(currHead == NULL);
+    ASSERT_EQ(NULL, currHead);
 
     SkipList_destroy(list);
 }
@@ -383,6 +376,11 @@ TEST(SkipList, Contains)
     {
         ASSERT_FALSE(SkipList_contains(list, i));
     }
+
+    ASSERT_EQ(500U, list->size);
+    ASSERT_EQ(8U, list->numLevels);
+    ASSERT_EQ(40U, list->maxLevels);
+    ASSERT_EQ(50U, list->nextLevelChance);
 
     SkipList_destroy(list);
 }
@@ -427,16 +425,129 @@ TEST(SkipList, Get)
         ASSERT_EQ(i, actual);
     }
 
+    ASSERT_EQ(1000U, list->size);
+    ASSERT_EQ(9U, list->numLevels);
+    ASSERT_EQ(40U, list->maxLevels);
+    ASSERT_EQ(50U, list->nextLevelChance);
+
     SkipList_destroy(list);
 }
 
-TEST(SkipList, Remove)
+TEST(SkipList, RemoveFromEmptyList)
+{
+    SkipList* list = SkipList_create();
+    ASSERT_FALSE(SkipList_remove(list, 5));
+
+    ASSERT_EQ(0U, list->size);
+    ASSERT_EQ(1U, list->numLevels);
+    ASSERT_EQ(40U, list->maxLevels);
+    ASSERT_EQ(50U, list->nextLevelChance);
+    ASSERT_EQ(NULL, list->topHead);
+
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, RemoveFromSingleElementList)
+{
+    SkipList* list = SkipList_create();
+    SkipList_add(list, 5);
+    ASSERT_TRUE(SkipList_remove(list, 5));
+
+    ASSERT_EQ(0U, list->size);
+    ASSERT_EQ(1U, list->numLevels);
+    ASSERT_EQ(40U, list->maxLevels);
+    ASSERT_EQ(50U, list->nextLevelChance);
+    ASSERT_EQ(NULL, list->topHead);
+
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, RemoveFromMiddleOfList)
 {
     SkipList* list = SkipList_create();
     mixedInsert(list, 10U);
-    SkipList_remove(list, 5);
+    ASSERT_TRUE(SkipList_remove(list, 5));
 
-    SkipList_add(list, 5);
+    ASSERT_EQ(9U, list->size);
+    ASSERT_EQ(3U, list->numLevels);
+    ASSERT_EQ(40U, list->maxLevels);
+    ASSERT_EQ(50U, list->nextLevelChance);
+
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_TRUE(SkipList_contains(list, i));
+    }
+    for (int i = 6; i < 10; i++)
+    {
+        ASSERT_TRUE(SkipList_contains(list, i));
+    }
+
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, RemoveFromEndOfList)
+{
+    SkipList* list = SkipList_create();
+    mixedInsert(list, 10U);
+    ASSERT_TRUE(SkipList_remove(list, 9));
+
+    ASSERT_EQ(9U, list->size);
+    ASSERT_EQ(3U, list->numLevels);
+    ASSERT_EQ(40U, list->maxLevels);
+    ASSERT_EQ(50U, list->nextLevelChance);
+
+    verifyList(list);
+
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, RemoveNonExisting)
+{
+    SkipList* list = SkipList_create();
+    mixedInsert(list, 10U);
+    SkipList_add(list, 12);
+
+    ASSERT_FALSE(SkipList_remove(list, 11));
+
+
+    ASSERT_EQ(11U, list->size);
+    ASSERT_EQ(3U, list->numLevels);
+    ASSERT_EQ(40U, list->maxLevels);
+    ASSERT_EQ(50U, list->nextLevelChance);
+
+    for (int i = 0; i < 10; i++)
+    {
+        ASSERT_TRUE(SkipList_contains(list, i));
+    }
+    ASSERT_TRUE(SkipList_contains(list, 12));
+
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, RemoveHead)
+{
+    SkipList* list = SkipList_create();
+    mixedInsert(list, 10U);
+    ASSERT_TRUE(SkipList_remove(list, 0));
+
+    ASSERT_EQ(9U, list->size);
+    ASSERT_EQ(3U, list->numLevels);
+    ASSERT_EQ(40U, list->maxLevels);
+    ASSERT_EQ(50U, list->nextLevelChance);
+
+    for (int i = 1; i < 10; i++)
+    {
+        ASSERT_TRUE(SkipList_contains(list, i));
+    }
+
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, RemoveAfterEnd)
+{
+    SkipList* list = SkipList_create();
+    mixedInsert(list, 10U);
+    ASSERT_FALSE(SkipList_remove(list, 100));
 
     ASSERT_EQ(10U, list->size);
     ASSERT_EQ(3U, list->numLevels);
@@ -444,6 +555,72 @@ TEST(SkipList, Remove)
     ASSERT_EQ(50U, list->nextLevelChance);
 
     verifyList(list);
+
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, MixedRemove)
+{
+    SkipList* list = SkipList_create();
+    mixedInsert(list, 100000U);
+
+    for (int i = 0; i < 100000; i += 2)
+    {
+        SkipList_remove(list, i);
+    }
+
+    for (int i = 0; i < 100000; i++)
+    {
+        if (i % 2)
+        {
+            ASSERT_TRUE(SkipList_contains(list, i));
+        }
+        else
+        {
+            ASSERT_FALSE(SkipList_contains(list, i));
+        }
+    }
+
+    ASSERT_EQ(50000U, list->size);
+    ASSERT_EQ(16U, list->numLevels);
+    ASSERT_EQ(40U, list->maxLevels);
+    ASSERT_EQ(50U, list->nextLevelChance);
+
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, RemoveAllFromFront)
+{
+    SkipList* list = SkipList_create();
+    mixedInsert(list, 1000U);
+    for (int i = 0; i < 1000; i++)
+    {
+        ASSERT_TRUE(SkipList_remove(list, i));
+    }
+
+    ASSERT_EQ(0U, list->size);
+    ASSERT_EQ(9U, list->numLevels);
+    ASSERT_EQ(40U, list->maxLevels);
+    ASSERT_EQ(50U, list->nextLevelChance);
+    ASSERT_EQ(NULL, list->topHead);
+
+    SkipList_destroy(list);
+}
+
+TEST(SkipList, RemoveAllFromBack)
+{
+    SkipList* list = SkipList_create();
+    mixedInsert(list, 1000U);
+    for (int i = 999; i >= 0; i--)
+    {
+        ASSERT_TRUE(SkipList_remove(list, i));
+    }
+
+    ASSERT_EQ(0U, list->size);
+    ASSERT_EQ(9U, list->numLevels);
+    ASSERT_EQ(40U, list->maxLevels);
+    ASSERT_EQ(50U, list->nextLevelChance);
+    ASSERT_EQ(NULL, list->topHead);
 
     SkipList_destroy(list);
 }

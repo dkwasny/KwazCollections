@@ -38,6 +38,7 @@ SkipList* SkipList_createFull(
 void SkipList_destroy(SkipList* pList);
 SkipList* SkipList_add(SkipList* pList, const int pValue);
 SkipList* SkipList_addNewLevel(SkipList* pList);
+/* TODO Remove top level??  Maybe automatically like add does?? */
 Boolean SkipList_contains(SkipList* pList, const int pValue);
 int SkipList_get(SkipList* pList, const unsigned int index);
 Boolean SkipList_remove(SkipList* pList, const int pValue);
