@@ -116,6 +116,104 @@ static void _SkipList_addHead(SkipList* pList, int pValue)
     _SkipList_addNonHead(pList, oldHeadValue, FALSE);
 }
 
+static Boolean _SkipList_removeHead(SkipList* pList)
+{
+    Boolean retVal = FALSE;
+    SkipListNode* currNode = pList->topHead;
+    if (pList->size == 1)
+    {
+        while (currNode != NULL)
+        {
+            SkipListNode* tmpNode = currNode->down;
+            free(currNode);
+            currNode = tmpNode;
+        }
+        pList->topHead = NULL;
+        pList->size--;
+        retVal = TRUE;
+    }
+    else
+    {
+        int bottomNextValue;
+        while (currNode->down != NULL)
+        {
+            currNode = currNode->down;
+        }
+        bottomNextValue = currNode->next->value;
+
+        currNode = pList->topHead;
+        while (currNode != NULL)
+        {
+            if (currNode->next != NULL && currNode->next->value == bottomNextValue)
+            {
+                SkipListNode* nextNode = currNode->next;
+                currNode->next = nextNode->next;
+                currNode->distNext = (currNode->distNext + nextNode->distNext) - 1;
+                free(nextNode);
+            }
+            else if (currNode->next != NULL)
+            {
+                currNode->distNext--;
+            }
+            currNode->value = bottomNextValue;
+
+            currNode = currNode->down;
+        }
+        pList->size--;
+        retVal = TRUE;
+    }
+    return retVal;
+}
+
+static Boolean _SkipList_removeNonHead(SkipList* pList, const int pValue)
+{
+    Boolean retVal = FALSE;
+    SkipListNode* currNode = pList->topHead;
+    unsigned int i = pList->numLevels - 1;
+    SkipListNode** closestNodes = malloc(sizeof(SkipListNode*) * pList->numLevels);
+    while (currNode != NULL)
+    {
+        if (currNode->next != NULL && pValue > currNode->next->value)
+        {
+            currNode = currNode->next;
+        }
+        else if (currNode->down != NULL)
+        {
+            closestNodes[i--] = currNode;
+            currNode = currNode->down;
+        }
+        else
+        {
+            closestNodes[i] = currNode;
+            currNode = NULL;
+        }
+    }
+
+    if (closestNodes[0]->next != NULL && closestNodes[0]->next->value == pValue)
+    {
+        for (i = 0; i < pList->numLevels; i++)
+        {
+            SkipListNode* thisNode = closestNodes[i];
+            SkipListNode* nextNode = thisNode->next;
+            if (nextNode != NULL && nextNode->value == pValue)
+            {
+                thisNode->next = nextNode->next;
+                thisNode->distNext = (thisNode->distNext + nextNode->distNext) - 1;
+                free(nextNode);
+            }
+            else if (nextNode != NULL)
+            {
+                thisNode->distNext--;
+            }
+        }
+        pList->size--;
+        retVal = TRUE;
+    }
+
+    free(closestNodes);
+    return retVal;
+}
+
 SkipList* SkipList_create(void)
 {
     return SkipList_createFull(1U, DEFAULT_MAX_LEVELS, DEFAULT_NEXT_LEVEL_CHANCE);
@@ -321,105 +419,20 @@ int SkipList_get(SkipList* pList, const unsigned int index)
     return retVal;
 }
 
-/* TODO CLEAN UP */
 Boolean SkipList_remove(SkipList* pList, const int pValue)
 {
-    SkipListNode* currNode = pList->topHead;
     Boolean retVal = FALSE;
 
-    if (pList->size == 0)
+    if (pList->size > 0)
     {
-        /* DO NOTHING */
-    }
-    else if (currNode->value == pValue)
-    {
-        if (pList->size == 1)
+        if (pList->topHead->value == pValue)
         {
-            while (currNode != NULL)
-            {
-                SkipListNode* tmpNode = currNode->down;
-                free(currNode);
-                currNode = tmpNode;
-            }
-            pList->topHead = NULL;
-            pList->size--;
-            retVal = TRUE;
+            retVal = _SkipList_removeHead(pList);
         }
         else
         {
-            int bottomNextValue;
-            while (currNode->down != NULL)
-            {
-                currNode = currNode->down;
-            }
-            bottomNextValue = currNode->next->value;
-
-            currNode = pList->topHead;
-            while (currNode != NULL)
-            {
-                if (currNode->next != NULL && currNode->next->value == bottomNextValue)
-                {
-                    SkipListNode* nextNode = currNode->next;
-                    currNode->next = nextNode->next;
-                    currNode->distNext = (currNode->distNext + nextNode->distNext) - 1;
-                    free(nextNode);
-                }
-                else if (currNode->next != NULL)
-                {
-                    currNode->distNext--;
-                }
-                currNode->value = bottomNextValue;
-
-                currNode = currNode->down;
-            }
-            pList->size--;
-            retVal = TRUE;
+            retVal = _SkipList_removeNonHead(pList, pValue);
         }
-    }
-    else
-    {
-        unsigned int i = pList->numLevels - 1;
-        SkipListNode** closestNodes = malloc(sizeof(SkipListNode*) * pList->numLevels);
-        while (currNode != NULL)
-        {
-            if (currNode->next != NULL && pValue > currNode->next->value)
-            {
-                currNode = currNode->next;
-            }
-            else if (currNode->down != NULL)
-            {
-                closestNodes[i--] = currNode;
-                currNode = currNode->down;
-            }
-            else
-            {
-                closestNodes[i] = currNode;
-                currNode = NULL;
-            }
-        }
-
-        if (closestNodes[0]->next != NULL && closestNodes[0]->next->value == pValue)
-        {
-            for (i = 0; i < pList->numLevels; i++)
-            {
-                SkipListNode* thisNode = closestNodes[i];
-                SkipListNode* nextNode = thisNode->next;
-                if (nextNode != NULL && nextNode->value == pValue)
-                {
-                    thisNode->next = nextNode->next;
-                    thisNode->distNext = (thisNode->distNext + nextNode->distNext) - 1;
-                    free(nextNode);
-                }
-                else if (nextNode != NULL)
-                {
-                    thisNode->distNext--;
-                }
-            }
-            pList->size--;
-            retVal = TRUE;
-        }
-
-        free(closestNodes);
     }
 
     return retVal;
