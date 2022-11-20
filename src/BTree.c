@@ -154,7 +154,7 @@ static BTreeNode* _BTreeNode_split(BTreeNode* pNode, int valueToAdd, BTreeNode* 
         Create the dummy node.
         This node isn't a "real" node, but instead a reuse of the
         BTreeNode struct to contain the split median value alongside
-        the left and right nodes, all of which are needed for
+        the left and right child nodes, all of which are needed for
         the upstream merge.
     */
     retVal = malloc(sizeof(BTreeNode));
@@ -227,7 +227,7 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
 
     /*
         If there are children nodes, send the input value to the one
-        corresponding to the index found above.
+        corresponding to valueIdx.
     */
     if (!leafNode)
     {
@@ -257,9 +257,6 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
     {
         if (fullNode)
         {
-            /*
-                We have no more room in the node.  Time to split!
-            */
             retVal = _BTreeNode_split(pNode, valueToAdd, dummyNode, pTree);
         }
         else
