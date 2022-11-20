@@ -1,4 +1,5 @@
 #include "InitTests.cpp"
-#include "GenericArrayListTest.cpp"
+/* #include "GenericArrayListTest.cpp"
 #include "ArrayListTest.cpp"
-#include "SkipListTest.cpp"
+#include "SkipListTest.cpp" */
+#include "BTreeTest.cpp"

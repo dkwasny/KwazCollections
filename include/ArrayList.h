@@ -48,7 +48,6 @@ ArrayList* ArrayList_mergeSort(ArrayList* pList);
 ArrayList* ArrayList_quickSort(ArrayList* pList);
 /* TODO Maybe add binary search */
 
-/* Close c++ extern */
 #ifdef __cplusplus
 }
 #endif

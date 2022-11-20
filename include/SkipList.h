@@ -43,7 +43,6 @@ Boolean SkipList_contains(SkipList* pList, const int pValue);
 int SkipList_get(SkipList* pList, const unsigned int index);
 Boolean SkipList_remove(SkipList* pList, const int pValue);
 
-/* Close c++ extern */
 #ifdef __cplusplus
 }
 #endif
