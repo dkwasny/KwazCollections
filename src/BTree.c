@@ -205,11 +205,23 @@ static void _BTreeNode_merge(BTreeNode* pNode, int valueToAdd, BTreeNode* dummyN
     pNode->numValues++;
 }
 
+static unsigned int _BTreeNode_findIndex(BTreeNode* pNode, const int pValue)
+{
+    unsigned int retVal;
+    for (retVal = 0; retVal < pNode->numValues; retVal++)
+    {
+        if (pNode->values[retVal] >= pValue)
+        {
+            break;
+        }
+    }
+    return retVal;
+}
+
 static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int pValue)
 {
     BTreeNode* retVal = NULL;
     BTreeNode* dummyNode = NULL;
-    unsigned int valueIdx;
     int valueToAdd = pValue;
     const Boolean fullNode = pNode->numValues >= pTree->order - 1;
     const Boolean leafNode = pNode->pointers == NULL;
@@ -217,13 +229,7 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
     /*
         Find the index where the input value would fit if necessary.
     */
-    for (valueIdx = 0; valueIdx < pNode->numValues; valueIdx++)
-    {
-        if (pNode->values[valueIdx] >= valueToAdd)
-        {
-            break;
-        }
-    }
+    unsigned int valueIdx = _BTreeNode_findIndex(pNode, pValue);
 
     /*
         If there are children nodes, send the input value to the one
@@ -263,7 +269,6 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
         {
             _BTreeNode_merge(pNode, valueToAdd, dummyNode, valueIdx);
         }
-
     }
 
     /*
