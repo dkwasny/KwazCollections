@@ -3,6 +3,29 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+static void _BTreeNode_shallowDestroy(BTreeNode* pNode)
+{
+    if (pNode->pointers != NULL)
+    {
+        free(pNode->pointers);
+    }
+    free(pNode->values);
+    free(pNode);
+}
+
+static void _BTreeNode_destroy(BTreeNode* pNode)
+{
+    if (pNode->pointers != NULL)
+    {
+        unsigned int i = 0;
+        for (; i <= pNode->numValues; i++)
+        {
+            _BTreeNode_destroy(pNode->pointers[i]);
+        }
+    }
+    _BTreeNode_shallowDestroy(pNode);
+}
+
 static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int pValue)
 {
     BTreeNode* retVal = NULL;
@@ -11,7 +34,6 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
     int valueToAdd = pValue;
     Boolean fullNode = pNode->numValues >= pTree->order - 1;
     Boolean leafNode = pNode->pointers == NULL;
-    printf("----- START ADD - %d\n", valueToAdd);
     for (i = 0; i < pNode->numValues; i++)
     {
         if (pNode->values[i] >= valueToAdd)
@@ -19,13 +41,9 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
             break;
         }
     }
-    printf("I = %d\n", i);
 
-    /* recurse down to bottom */
-    /* TODO I think we can always assume at least one value*/
     if (!leafNode)
     {
-        printf("RECURSING\n");
         newNode = _BTreeNode_addValue(pNode->pointers[i], pTree, valueToAdd);
         if (newNode != NULL)
         {
@@ -38,7 +56,6 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
         if (!fullNode)
         {
             unsigned int j;
-            printf("EASY ADD\n");
             for (j = pNode->numValues; j > i; j--)
             {
                 pNode->values[j] = pNode->values[j - 1];
@@ -51,11 +68,11 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
                 {
                     pNode->pointers[j] = pNode->pointers[j - 1];
                 }
+                _BTreeNode_shallowDestroy(pNode->pointers[i]);
                 pNode->pointers[i] = newNode->pointers[0];
                 pNode->pointers[i + 1] = newNode->pointers[1];
             }
 
-            /* TODO WHAT ABOUT pointer[i] ?!?!?*/
             pNode->numValues++;
         }
         else
@@ -70,20 +87,18 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
             const unsigned int tmpPtrArraySize = tmpArraySize + 1;
             int* tmpArray = malloc(sizeof(int) * tmpArraySize);
             BTreeNode** tmpPtrArray = malloc(sizeof(BTreeNode*) * tmpPtrArraySize);
-            printf("SPLITTING\n");
             i = 0;
             while (i < pNode->numValues)
             {
                 int newVal = pNode->values[i];
                 if (i == j && valueToAdd < newVal)
                 {
-                    printf("SPECIAL SAUCE\n");
                     newVal = valueToAdd;
                     if (!leafNode)
                     {
-                        printf("SPECIAL SAUCE NON LEAF\n");
                         tmpPtrArray[k++] = newNode->pointers[0];
                         tmpPtrArray[k++] = newNode->pointers[1];
+                        _BTreeNode_shallowDestroy(pNode->pointers[l]);
                         l++;
                     }
                 }
@@ -91,14 +106,11 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
                 {
                     if (!leafNode)
                     {
-                        printf("KWAS I = %d\n", i);
-                        printf("P->P[%d] is %d\n", i, (pNode->pointers[i] == NULL) ? 1 : 0);
                         tmpPtrArray[k++] = pNode->pointers[l++];
                     }
                     i++;
                 }
                 tmpArray[j++] = newVal;
-                printf("TMPARRAY I=%u J=%u\n", i, j);
             }
 
             if (i == j)
@@ -106,17 +118,14 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
                 tmpArray[j] = valueToAdd;
                 if (!leafNode)
                 {
-                    printf("ADDING PTR FOR NEW NODE ON END FOR %d and %d\n", k, k+1);
+                    _BTreeNode_shallowDestroy(pNode->pointers[l]);
                     tmpPtrArray[k++] = newNode->pointers[0];
                     tmpPtrArray[k] = newNode->pointers[1];
                 }
             }
 
-            printf("J = %d - K = %d\n", j, k);
-
             medianIndex = tmpArraySize / 2;
 
-            printf("CREATING LEFT\n");
             /* Create left node */
             newLeft = malloc(sizeof(BTreeNode));
             newLeft->values = malloc(sizeof(int) * (pTree->order - 1));
@@ -132,7 +141,6 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
                 newLeft->numValues++;
             }
 
-            printf("CREATING RIGHT\n");
             /* Create right node */
             newRight = malloc(sizeof(BTreeNode));
             newRight->values = malloc(sizeof(int) * (pTree->order - 1));
@@ -143,16 +151,13 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
             }
             newRight->numValues = 0U;
             j = 0;
-            printf("I IS %u AND SIZE IS %u\n", medianIndex + 1, tmpArraySize);
             for (i = medianIndex + 1; i < tmpArraySize; i++)
             {
-                printf("COPYING TO RIGHT - %d\n", tmpArray[i]);
                 newRight->values[j] = tmpArray[i];
                 newRight->numValues++;
                 j++;
             }
 
-            printf("CREATING RETVAL\n");
             /* create dummy node TODO keep this dummy??? */
             retVal = malloc(sizeof(BTreeNode));
             retVal->values = malloc(sizeof(int) * (pTree->order - 1));
@@ -166,35 +171,34 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
             {
                 unsigned int myI = 0;
 
-                printf("MEDIAN INDEX = %d\n", medianIndex);
                 for (i = 0; i < tmpPtrArraySize; i++)
                 {
                     if (i < medianIndex)
                     {
-                        printf("LEFT %d == TMP %d\n", myI, i);
                         newLeft->pointers[myI++] = tmpPtrArray[i];
                     }
                     else if (i == medianIndex)
                     {
-                        printf("LEFT %d == TMP %d\n", myI, i);
                         newLeft->pointers[myI] = tmpPtrArray[i++];
                         myI = 0;
-                        printf("RIGHT %d == TMP %d\n", myI, i);
                         newRight->pointers[myI++] = tmpPtrArray[i];
                     }
                     else
                     {
-                        printf("RIGHT %d == TMP %d\n", myI, i);
                         newRight->pointers[myI++] = tmpPtrArray[i];
                     }
                 }
             }
 
             free(tmpArray);
+            free(tmpPtrArray);
         }
     }
 
-    printf("END ADD\n");
+    if (newNode != NULL)
+    {
+        _BTreeNode_shallowDestroy(newNode);
+    }
 
     return retVal;
 }
@@ -204,7 +208,7 @@ BTree* BTree_create()
     BTree* retVal = malloc(sizeof(BTree));
 
     retVal->size = 0U;
-    retVal->order = 1U;
+    retVal->order = 3U;
     retVal->root = NULL;
 
     return retVal;
@@ -228,6 +232,7 @@ BTree* BTree_add(BTree* pTree, const int pValue)
         BTreeNode* newRoot = _BTreeNode_addValue(pTree->root, pTree, pValue);
         if (newRoot != NULL)
         {
+            _BTreeNode_shallowDestroy(pTree->root);
             pTree->root = newRoot;
         }
     }
@@ -239,6 +244,9 @@ BTree* BTree_add(BTree* pTree, const int pValue)
 
 void BTree_destroy(BTree* pTree)
 {
-    /* TODO Traverse and free the world */
-    free(pTree);
+    if (pTree != NULL)
+    {
+        _BTreeNode_destroy(pTree->root);
+        free(pTree);
+    }
 }
