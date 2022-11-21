@@ -66,73 +66,87 @@ static void validateTree(BTree* pTree, unsigned int expectedSize)
     ArrayList_destroy(visited);
 }
 
-TEST(BTree, BackEndInsert)
+TEST(BTree, TMP)
 {
     BTree* tree = BTree_create();
 
-    for (int i = 1; i <= 10000; i++)
+    for (int i = 1; i <= 6; i++)
     {
         BTree_add(tree, i);
     }
 
-    validateTree(tree, 10000);
+    printTree(tree);
 
     BTree_destroy(tree);
 }
 
-TEST(BTree, FrontEndInsert)
-{
-    BTree* tree = BTree_create();
+// TEST(BTree, BackEndInsert)
+// {
+//     BTree* tree = BTree_create();
 
-    for (int i = 10000; i > 0; i--)
-    {
-        BTree_add(tree, i);
-    }
+//     for (int i = 1; i <= 10000; i++)
+//     {
+//         BTree_add(tree, i);
+//     }
 
-    validateTree(tree, 10000);
+//     validateTree(tree, 10000);
 
-    BTree_destroy(tree);
-}
+//     BTree_destroy(tree);
+// }
 
-TEST(BTree, MiddleInsert)
-{
-    BTree* tree = BTree_create();
+// TEST(BTree, FrontEndInsert)
+// {
+//     BTree* tree = BTree_create();
 
-    int x = 3000;
-    int y = 6000;
+//     for (int i = 10000; i > 0; i--)
+//     {
+//         BTree_add(tree, i);
+//     }
 
-    for (int i = 1; i < x; i++)
-    {
-        BTree_add(tree, i);
-    }
-    for (int i = y; i <= 10000; i++)
-    {
-        BTree_add(tree, i);
-    }
-    for (int i = x; i < y; i++)
-    {
-        BTree_add(tree, i);
-    }
+//     validateTree(tree, 10000);
 
-    validateTree(tree, 10000);
+//     BTree_destroy(tree);
+// }
 
-    BTree_destroy(tree);
-}
+// TEST(BTree, MiddleInsert)
+// {
+//     BTree* tree = BTree_create();
 
-TEST(BTree, ZipperInsert)
-{
-    BTree* tree = BTree_create();
+//     int x = 3000;
+//     int y = 6000;
 
-    for (int i = 1; i <= 10000; i+=2)
-    {
-        BTree_add(tree, i);
-    }
-    for (int i = 2; i <= 10000; i+=2)
-    {
-        BTree_add(tree, i);
-    }
+//     for (int i = 1; i < x; i++)
+//     {
+//         BTree_add(tree, i);
+//     }
+//     for (int i = y; i <= 10000; i++)
+//     {
+//         BTree_add(tree, i);
+//     }
+//     for (int i = x; i < y; i++)
+//     {
+//         BTree_add(tree, i);
+//     }
 
-    validateTree(tree, 10000);
+//     validateTree(tree, 10000);
 
-    BTree_destroy(tree);
-}
+//     BTree_destroy(tree);
+// }
+
+// TEST(BTree, ZipperInsert)
+// {
+//     BTree* tree = BTree_create();
+
+//     for (int i = 1; i <= 10000; i+=2)
+//     {
+//         BTree_add(tree, i);
+//     }
+//     for (int i = 2; i <= 10000; i+=2)
+//     {
+//         BTree_add(tree, i);
+//     }
+
+//     validateTree(tree, 10000);
+
+//     BTree_destroy(tree);
+// }

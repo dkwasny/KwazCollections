@@ -28,7 +28,7 @@ BTree* BTree_add(BTree* pTree, const int pValue);
 
 void BTree_destroy(BTree* pTree);
 
-/* TODO: Invert function */
+/* TODO Delete one day when I'm feeling saucy */
 
 #ifdef __cplusplus
 }

@@ -53,10 +53,10 @@ static BTreeNode* _BTreeNode_split(BTreeNode* pNode, int valueToAdd, BTreeNode* 
     {
         int newVal = pNode->values[valueIdx];
         /*
-            `tmpValueIdx` will diverge from `valueIdx` once I handle
+            `tmpValueIdx` will diverge from `valueIdx` once we handle
             gathering the pointers and values from the new dummy
             node.
-            I use this equality check to ensure we don't add the
+            We use this equality check to ensure we don't add the
             dummy node data multiple times.
         */
         if (valueIdx == tmpValueIdx && valueToAdd < newVal)
@@ -246,9 +246,9 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
         if (dummyNode != NULL)
         {
             /*
-                If a child addition resulted in a new value, we no longer
+                If a child addition resulted in a split, we no longer
                 care about pValue value since it has been added downstream.
-                I now need to take care of the value returned from the
+                we now need to take care of the value returned from the
                 downstream split.
             */
             valueToAdd = dummyNode->values[0];
