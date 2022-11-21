@@ -232,6 +232,14 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
     unsigned int valueIdx = _BTreeNode_findIndex(pNode, pValue);
 
     /*
+        Value already present.  Ignore.
+    */
+    if (valueIdx < pNode->numValues && pNode->values[valueIdx] == valueToAdd)
+    {
+        return NULL;
+    }
+
+    /*
         If there are children nodes, send the input value to the one
         corresponding to valueIdx.
     */
@@ -282,12 +290,34 @@ static BTreeNode* _BTreeNode_addValue(BTreeNode* pNode, BTree* pTree, const int 
     return retVal;
 }
 
+static Boolean _BTreeNode_contains(BTreeNode* pNode, const int pValue)
+{
+    Boolean retVal = FALSE;
+    unsigned int valueIdx = _BTreeNode_findIndex(pNode, pValue);
+
+    if (valueIdx < pNode->numValues && pNode->values[valueIdx] == pValue)
+    {
+        retVal = TRUE;
+    }
+    else if (pNode->pointers != NULL)
+    {
+        retVal = _BTreeNode_contains(pNode->pointers[valueIdx], pValue);
+    }
+
+    return retVal;
+}
+
 BTree* BTree_create()
+{
+    return BTree_createFull(5U);
+}
+
+BTree* BTree_createFull(const unsigned int pOrder)
 {
     BTree* retVal = malloc(sizeof(BTree));
 
     retVal->size = 0U;
-    retVal->order = 3U;
+    retVal->order = pOrder > 3U ? pOrder : 3U;
     retVal->root = NULL;
 
     return retVal;
@@ -295,6 +325,14 @@ BTree* BTree_create()
 
 BTree* BTree_add(BTree* pTree, const int pValue)
 {
+    /*
+        Lazy but passable way to ensure dupes are never added.
+    */
+    if (BTree_contains(pTree, pValue))
+    {
+        return pTree;
+    }
+
     if (pTree->size == 0)
     {
         BTreeNode* newRoot = malloc(sizeof(BTreeNode));
@@ -308,6 +346,7 @@ BTree* BTree_add(BTree* pTree, const int pValue)
     }
     else
     {
+
         BTreeNode* newRoot = _BTreeNode_addValue(pTree->root, pTree, pValue);
         if (newRoot != NULL)
         {
@@ -319,6 +358,13 @@ BTree* BTree_add(BTree* pTree, const int pValue)
     pTree->size++;
 
     return pTree;
+}
+
+Boolean BTree_contains(BTree* pTree, const int pValue)
+{
+    return pTree->size > 0
+        ? _BTreeNode_contains(pTree->root, pValue)
+        : FALSE;
 }
 
 void BTree_destroy(BTree* pTree)
