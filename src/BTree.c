@@ -307,7 +307,7 @@ static Boolean _BTreeNode_contains(BTreeNode* pNode, const int pValue)
     return retVal;
 }
 
-BTree* BTree_create()
+BTree* BTree_create(void)
 {
     return BTree_createFull(5U);
 }

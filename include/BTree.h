@@ -24,7 +24,7 @@ struct BTreeNode
 extern "C" {
 #endif
 
-BTree* BTree_create();
+BTree* BTree_create(void);
 BTree* BTree_createFull(const unsigned int pOrder);
 
 BTree* BTree_add(BTree* pTree, const int pValue);

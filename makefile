@@ -29,7 +29,7 @@ GTEST_INCLUDE_DIR = $(GTEST_DIR)/googletest/include
 CFLAGS += -Wall -Wextra -Werror -pedantic-errors -ansi
 COMPILE = $(CC) $(CFLAGS) $(CPPFLAGS) -I $(INCLUDE_DIR) -c
 CXX_FLAGS += -Wall -Wextra -Werror
-TEST_COMPILE = $(CXX) $(CXXFLAGS) $(CPPFLAGS)
+TEST_COMPILE = $(CXX) $(CXXFLAGS) $(CPPFLAGS) -std=c++11
 
 # Generated variables to assist in rule creation
 SOURCE_FILES = $(wildcard $(SOURCE_DIR)/*.c)

@@ -611,7 +611,7 @@ TEST(ArrayList, TestMergeSortEmpty)
 TEST(ArrayList, TestMergeSortSingle)
 {
     size_t size = 1U;
-    int array[size] = {0};
+    int array[] = {0};
     ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_mergeSort(list);
@@ -623,7 +623,7 @@ TEST(ArrayList, TestMergeSortSingle)
 TEST(ArrayList, TestMergeSortEven)
 {
     size_t size = 4U;
-    int array[size] = {3, 1, 2, 0};
+    int array[] = {3, 1, 2, 0};
     ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_mergeSort(list);
@@ -635,7 +635,7 @@ TEST(ArrayList, TestMergeSortEven)
 TEST(ArrayList, TestMergeSortEvenAlreadySorted)
 {
     size_t size = 4U;
-    int array[size] = {0, 1, 2, 3};
+    int array[] = {0, 1, 2, 3};
     ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_mergeSort(list);
@@ -647,7 +647,7 @@ TEST(ArrayList, TestMergeSortEvenAlreadySorted)
 TEST(ArrayList, TestMergeSortOdd)
 {
     size_t size = 5U;
-    int array[size] = {0, 1, 4, 2, 3};
+    int array[] = {0, 1, 4, 2, 3};
     ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_mergeSort(list);
@@ -659,7 +659,7 @@ TEST(ArrayList, TestMergeSortOdd)
 TEST(ArrayList, TestMergeSortOddAlreadySorted)
 {
     size_t size = 5U;
-    int array[size] = {0, 1, 2, 3, 4};
+    int array[] = {0, 1, 2, 3, 4};
     ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_mergeSort(list);
@@ -671,13 +671,13 @@ TEST(ArrayList, TestMergeSortOddAlreadySorted)
 TEST(ArrayList, TestMergeSortDuplicateValues)
 {
     size_t size = 9U;
-    int array[size] = {9, 2, 4, 2, 4, 9, 1, 2, 9};
+    int array[] = {9, 2, 4, 2, 4, 9, 1, 2, 9};
     ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_mergeSort(list);
     ASSERT_EQ(size, list->size);
 
-    int expected[size] = {1, 2, 2, 2, 4, 4, 9, 9, 9};
+    int expected[] = {1, 2, 2, 2, 4, 4, 9, 9, 9};
     ArrayListTest_compareToArray(list, expected);
     ArrayList_destroy(list);
 }
@@ -714,7 +714,7 @@ TEST(ArrayList, TestQuickSortEmpty)
 TEST(ArrayList, TestQuickSortSingle)
 {
     size_t size = 1U;
-    int array[size] = {0};
+    int array[] = {0};
     ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_quickSort(list);
@@ -726,7 +726,7 @@ TEST(ArrayList, TestQuickSortSingle)
 TEST(ArrayList, TestQuickSortEven)
 {
     size_t size = 4U;
-    int array[size] = {3, 1, 2, 0};
+    int array[] = {3, 1, 2, 0};
     ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_quickSort(list);
@@ -738,7 +738,7 @@ TEST(ArrayList, TestQuickSortEven)
 TEST(ArrayList, TestQuickSortEvenAlreadySorted)
 {
     size_t size = 4U;
-    int array[size] = {0, 1, 2, 3};
+    int array[] = {0, 1, 2, 3};
     ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_quickSort(list);
@@ -750,7 +750,7 @@ TEST(ArrayList, TestQuickSortEvenAlreadySorted)
 TEST(ArrayList, TestQuickSortOdd)
 {
     size_t size = 5U;
-    int array[size] = {0, 1, 4, 2, 3};
+    int array[] = {0, 1, 4, 2, 3};
     ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_quickSort(list);
@@ -762,7 +762,7 @@ TEST(ArrayList, TestQuickSortOdd)
 TEST(ArrayList, TestQuickSortOddAlreadySorted)
 {
     size_t size = 5U;
-    int array[size] = {0, 1, 2, 3, 4};
+    int array[] = {0, 1, 2, 3, 4};
     ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_quickSort(list);
@@ -774,13 +774,13 @@ TEST(ArrayList, TestQuickSortOddAlreadySorted)
 TEST(ArrayList, TestQuickSortDuplicateValues)
 {
     size_t size = 9U;
-    int array[size] = {9, 2, 4, 2, 4, 9, 1, 2, 9};
+    int array[] = {9, 2, 4, 2, 4, 9, 1, 2, 9};
     ArrayList* list = ArrayList_createFromArray(array, size);
 
     ArrayList_quickSort(list);
     ASSERT_EQ(size, list->size);
 
-    int expected[size] = {1, 2, 2, 2, 4, 4, 9, 9, 9};
+    int expected[] = {1, 2, 2, 2, 4, 4, 9, 9, 9};
     ArrayListTest_compareToArray(list, expected);
     ArrayList_destroy(list);
 }

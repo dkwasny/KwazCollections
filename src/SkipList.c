@@ -386,7 +386,6 @@ int SkipList_get(SkipList* pList, const unsigned int index)
     */
     int retVal = -1;
     unsigned int currDist = 0;
-    int i = 0;
 
     if (index >= pList->size)
     {
@@ -395,7 +394,6 @@ int SkipList_get(SkipList* pList, const unsigned int index)
 
     while (currNode != NULL)
     {
-        i++;
         if (currDist == index)
         {
             retVal = currNode->value;
