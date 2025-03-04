@@ -36,6 +36,14 @@ SOURCE_FILES = $(wildcard $(SOURCE_DIR)/*.c)
 OUTPUT_FILES = $(SOURCE_FILES:$(SOURCE_DIR)/%.c=$(BUILD_DIR)/%.o)
 TEST_FILES = $(wildcard $(TEST_DIR)/*.cpp)
 
+# Leak checker command.  Supports OSX and Linux.
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+	CHECK_LEAKS = leaks --atExit --
+else
+	CHECK_LEAKS = valgrind --tool=memcheck --leak-check=full --error-exitcode=1
+endif
+
 # Build Phases
 # 1) Build directory structure creation
 $(BUILD_DIR):
@@ -72,12 +80,12 @@ test: $(TEST_EXEC)
 	$<;
 
 # Run unit tests through valgrind
-.PHONY: valgrind
-valgrind: $(TEST_EXEC)
-	valgrind --tool=memcheck --leak-check=full --error-exitcode=1 $(TEST_EXEC);
+.PHONY: check_leaks
+check_leaks: $(TEST_EXEC)
+	$(CHECK_LEAKS) $(TEST_EXEC);
 
 .PHONY: all
-all: test valgrind
+all: test check_leaks
 
 .PHONY: clean
 clean:
