@@ -80,12 +80,12 @@ test: $(TEST_EXEC)
 	$<;
 
 # Check for memory leaks
-.PHONY: check_leaks
-check_leaks: $(TEST_EXEC)
+.PHONY: check-leaks
+check-leaks: $(TEST_EXEC)
 	$(CHECK_LEAKS) $(TEST_EXEC);
 
 .PHONY: all
-all: test check_leaks
+all: test check-leaks
 
 .PHONY: clean
 clean:

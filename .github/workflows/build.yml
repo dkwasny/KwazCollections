@@ -19,5 +19,5 @@ jobs:
       run: make
     - name: Run Tests
       run: make test
-    - name: Run Valgrind
-      run: make valgrind
+    - name: Check for memory leaks
+      run: make check-leaks
