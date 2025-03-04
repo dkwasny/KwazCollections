@@ -79,7 +79,7 @@ $(TEST_EXEC): $(LIB) $(GTEST_LIB) $(GTEST_MAIN_LIB) $(TEST_FILES)
 test: $(TEST_EXEC)
 	$<;
 
-# Run unit tests through valgrind
+# Check for memory leaks
 .PHONY: check_leaks
 check_leaks: $(TEST_EXEC)
 	$(CHECK_LEAKS) $(TEST_EXEC);
